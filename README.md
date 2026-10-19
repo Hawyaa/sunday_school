@@ -1,4 +1,4 @@
-# Hawyaa Sunday School — Backend API
+#  Sunday School — Backend API
 
 Modern, secure, and type-safe REST API backend for the **Hawyaa Sunday School** platform, built with **Node.js**, **Express.js**, **TypeScript**, **MySQL**, and **Prisma ORM**.
 
