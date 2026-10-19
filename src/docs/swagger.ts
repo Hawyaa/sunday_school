@@ -4,7 +4,7 @@ import { env } from '../config/env';
 const swaggerDefinition = {
   openapi: '3.0.3',
   info: {
-    title: 'Hawyaa Sunday School REST API',
+    title: 'Sunday School',
     version: '1.0.0',
     description: `Official backend REST API for Hawyaa Sunday School.
 Provides public content consumption endpoints and protected administrative management endpoints.

@@ -7,7 +7,7 @@ describe('Swagger API Documentation (OpenAPI 3.0+)', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.openapi).toMatch(/^3\./);
-    expect(res.body.info.title).toContain('Hawyaa Sunday School');
+    expect(res.body.info.title).toBe('Sunday School');
     expect(res.body.components.securitySchemes.bearerAuth).toBeDefined();
     expect(res.body.components.securitySchemes.bearerAuth.type).toBe('http');
     expect(res.body.components.securitySchemes.bearerAuth.scheme).toBe('bearer');

@@ -76,7 +76,7 @@ export function createApp(): Application {
     '/api/docs',
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
-      customSiteTitle: 'Hawyaa Sunday School API Documentation',
+      customSiteTitle: 'Sunday School',
       swaggerOptions: {
         persistAuthorization: true,
       },
