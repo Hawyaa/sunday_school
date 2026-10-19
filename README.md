@@ -1,6 +1,6 @@
-# Hawyaa Sunday School
+#  Sunday School
 
-Official repository for the **Hawyaa Sunday School** platform.
+Official repository for the **Sunday School** platform.
 
 ---
 
