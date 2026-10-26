@@ -22,6 +22,8 @@ describe('Swagger API Documentation (OpenAPI 3.0+)', () => {
     expect(res.body.paths['/api/gallery/albums']).toBeDefined();
     expect(res.body.paths['/api/schedule']).toBeDefined();
     expect(res.body.paths['/api/upload']).toBeDefined();
+    expect(res.body.paths['/api/registration']).toBeDefined();
+    expect(res.body.paths['/api/admin/members']).toBeDefined();
   });
 
   test('GET /api/docs/ loads Swagger UI HTML successfully', async () => {

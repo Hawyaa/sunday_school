@@ -39,6 +39,10 @@ import {
   adminScheduleRouter,
 } from './modules/schedule/schedule.routes';
 import uploadRoutes from './modules/upload/upload.routes';
+import {
+  publicRegistrationRouter,
+  adminMembersRouter,
+} from './modules/members/members.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -106,6 +110,8 @@ export function createApp(): Application {
   app.use('/api/schedule', publicScheduleRouter);
   app.use('/api/admin/schedule', adminScheduleRouter);
   app.use('/api/upload', uploadRoutes);
+  app.use('/api/registration', publicRegistrationRouter);
+  app.use('/api/admin/members', adminMembersRouter);
 
   // 404 handler for unknown routes
   app.use((_req: Request, res: Response) => {

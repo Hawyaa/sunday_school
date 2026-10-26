@@ -207,6 +207,18 @@ Use Swagger UI's **Authorize** button with the Bearer access token received from
 |---|---|---|---|
 | `POST` | `/api/upload` | Upload images, documents, or audio files | Admin |
 
+### 11. Member Registration (`/api/registration` & `/api/admin/members`)
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| `POST` | `/api/registration` | Submit member registration form (Children, Intermediate, Youth) | Public |
+| `GET` | `/api/admin/members` | List registrations with pagination, filtering & search | Admin |
+| `GET` | `/api/admin/members/stats` | Registration analytics (by division, status, type, gender) | Admin |
+| `GET` | `/api/admin/members/export` | Export members to CSV (UTF-8 BOM for Excel Amharic) | Admin |
+| `GET` | `/api/admin/members/:id` | View full registration details | Admin |
+| `PUT` | `/api/admin/members/:id` | Update member registration record | Admin |
+| `PATCH` | `/api/admin/members/:id/status` | Approve, reject, or update approval status | Admin |
+| `DELETE` | `/api/admin/members/:id` | Delete registration record | Admin |
+
 ---
 
 ## 🧪 Testing

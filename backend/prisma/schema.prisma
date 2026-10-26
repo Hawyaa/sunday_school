@@ -176,3 +176,88 @@ model Schedule {
   @@index([isPublished])
   @@map("schedules")
 }
+
+enum RegistrationType {
+  SHORT_TERM
+  LONG_TERM
+}
+
+enum AgeDivision {
+  CHILDREN
+  INTERMEDIATE
+  YOUTH
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model MemberRegistration {
+  id                    String           @id @default(uuid())
+  registrationNumber    String           @unique
+  registrationType      RegistrationType @default(LONG_TERM)
+  division              AgeDivision
+  status                MemberStatus     @default(PENDING)
+
+  // መሰረታዊ የአባሉ መረጃ (Member Personal Info)
+  fullName              String
+  christianName         String
+  gender                Gender
+  age                   Int
+  dateOfBirth           DateTime?
+  motherName            String?
+  phoneNumber           String?
+  photoUrl              String?
+  schoolOrOccupation    String?
+
+  // የንስሐ አባት መረጃ (Confession Father Info)
+  confessionFather      String
+  confessionChurch      String?
+  confessionAddress     String?
+
+  // አድራሻ (Residential Address)
+  address               String
+  kebele                String?
+  houseNumber           String?
+
+  // የአገልግሎት እና የሰንበት ት/ቤት መረጃ (Service & Church Info)
+  admissionDate         DateTime?
+  formFilledDate        DateTime         @default(now())
+  preferredDepartment   String?
+  talentSkills          String?          @db.Text
+
+  // የቅርብ ተጠሪ መረጃ (Emergency Contact / Guardian)
+  emergencyContactName  String
+  emergencyRelationship String?
+  emergencyContactPhone String
+
+  // የፈቃደኝነት እና ማረጋገጫ (Consent & Declarations)
+  parentName            String?
+  parentConsent         Boolean          @default(false)
+  parentSignatureDate   DateTime?
+
+  youthCovenantAccepted Boolean          @default(false)
+  youthSignatureDate    DateTime?
+
+  // የአስተዳደር ማጽደቂያ (Official Approval Section)
+  approvedByName        String?
+  approverRole          String?
+  approvalDate          DateTime?
+  chairmanName          String?
+  chairmanApprovalDate  DateTime?
+  adminNotes            String?          @db.Text
+
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([status, division, registrationType])
+  @@index([registrationNumber])
+  @@map("member_registrations")
+}
