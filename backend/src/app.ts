@@ -111,6 +111,7 @@ export function createApp(): Application {
   app.use('/api/admin/schedule', adminScheduleRouter);
   app.use('/api/upload', uploadRoutes);
   app.use('/api/registration', publicRegistrationRouter);
+  app.use('/api/members', publicRegistrationRouter);
   app.use('/api/admin/members', adminMembersRouter);
 
   // 404 handler for unknown routes

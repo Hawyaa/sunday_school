@@ -10,14 +10,20 @@ import {
 import { sendSuccess, sendError } from '../../utils/response';
 
 export async function login(req: Request, res: Response): Promise<void> {
-  const { email, password } = req.body;
+  const { email, name, identifier, password } = req.body;
+  const loginIdentifier = (identifier || name || email || '').trim();
 
-  const admin = await prisma.admin.findUnique({
-    where: { email: email.toLowerCase().trim() },
+  const admin = await prisma.admin.findFirst({
+    where: {
+      OR: [
+        { email: loginIdentifier.toLowerCase() },
+        { name: loginIdentifier },
+      ],
+    },
   });
 
   if (!admin) {
-    sendError(res, 'Invalid email or password', 401);
+    sendError(res, 'Invalid name, email, or password', 401);
     return;
   }
 

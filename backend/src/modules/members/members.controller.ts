@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
 import { sendSuccess, sendError } from '../../utils/response';
 import { Prisma, MemberStatus, AgeDivision, RegistrationType, Gender } from '@prisma/client';
+import { hashPassword, comparePassword } from '../../utils/bcrypt';
+import { generateAccessToken } from '../../utils/jwt';
 
 /**
  * Generates an automated unique registration number:
@@ -58,6 +60,8 @@ export async function registerMember(req: Request, res: Response): Promise<void>
     });
   }
 
+  const passwordHash = data.password ? await hashPassword(data.password) : null;
+
   const newMember = await prisma.memberRegistration.create({
     data: {
       registrationNumber,
@@ -72,6 +76,7 @@ export async function registerMember(req: Request, res: Response): Promise<void>
       phoneNumber: data.phoneNumber || null,
       photoUrl: data.photoUrl || null,
       schoolOrOccupation: data.schoolOrOccupation || null,
+      passwordHash,
 
       confessionFather: data.confessionFather,
       confessionChurch: data.confessionChurch || null,
@@ -98,11 +103,60 @@ export async function registerMember(req: Request, res: Response): Promise<void>
     },
   });
 
+  const { passwordHash: _, ...safeMember } = newMember;
+
   sendSuccess(
     res,
-    newMember,
+    safeMember,
     'የምዝገባ ማመልከቻዎ በተሳካ ሁኔታ ተልኳል (Registration submitted successfully)',
     201
+  );
+}
+
+/**
+ * Public: Member login using Name (or Registration Number / Phone) and Password
+ */
+export async function loginMember(req: Request, res: Response): Promise<void> {
+  const { name, password } = req.body;
+  const identifier = (name || '').trim();
+
+  // Find member by full name, registration number, or phone number
+  const member = await prisma.memberRegistration.findFirst({
+    where: {
+      OR: [
+        { fullName: identifier },
+        { registrationNumber: identifier },
+        { phoneNumber: identifier },
+      ],
+    },
+  });
+
+  if (!member || !member.passwordHash) {
+    sendError(res, 'የተሳሳተ ስም ወይም የይለፍ ቃል (Invalid name, registration number, or password)', 401);
+    return;
+  }
+
+  const isPasswordValid = await comparePassword(password, member.passwordHash);
+  if (!isPasswordValid) {
+    sendError(res, 'የተሳሳተ ስም ወይም የይለፍ ቃል (Invalid name, registration number, or password)', 401);
+    return;
+  }
+
+  const accessToken = generateAccessToken({
+    memberId: member.id,
+    name: member.fullName,
+    role: 'MEMBER',
+  });
+
+  const { passwordHash: _, ...safeMember } = member;
+
+  sendSuccess(
+    res,
+    {
+      accessToken,
+      member: safeMember,
+    },
+    'እንኳን ደህና መጡ! ወደ ሲስተሙ በተሳካ ሁኔታ ገብተዋል (Login successful)'
   );
 }
 

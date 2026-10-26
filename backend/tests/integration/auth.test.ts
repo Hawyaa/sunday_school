@@ -18,7 +18,7 @@ describe('Authentication & Authorization Tests', () => {
 
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe('Invalid email or password');
+    expect(res.body.message).toMatch(/Invalid/);
   });
 
   test('POST /api/auth/login - fails with non-existent user', async () => {
@@ -29,6 +29,18 @@ describe('Authentication & Authorization Tests', () => {
 
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
+  });
+
+  test('POST /api/auth/login - succeeds with admin name and password', async () => {
+    const res = await request(app).post('/api/auth/login').send({
+      name: 'System Administrator',
+      password: 'SecureAdminPassword123!',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.accessToken).toBeDefined();
+    expect(res.body.data.admin.name).toBe('System Administrator');
   });
 
   test('POST /api/auth/login - succeeds with seeded admin credentials and does NOT return password hash', async () => {

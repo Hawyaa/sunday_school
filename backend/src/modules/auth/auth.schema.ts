@@ -1,9 +1,16 @@
 import { z } from 'zod';
 
-export const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+export const loginSchema = z
+  .object({
+    email: z.string().optional(),
+    name: z.string().optional(),
+    identifier: z.string().optional(),
+    password: z.string().min(1, 'Password is required'),
+  })
+  .refine((data) => data.email || data.name || data.identifier, {
+    message: 'Please enter your name or email address',
+    path: ['identifier'],
+  });
 
 export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),

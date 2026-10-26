@@ -1,7 +1,10 @@
-import { createMemberRegistrationSchema } from '../../src/modules/members/members.schema';
+import {
+  createMemberRegistrationSchema,
+  memberLoginSchema,
+} from '../../src/modules/members/members.schema';
 
 describe('Member Registration Validation (Zod Schema)', () => {
-  test('validates a correct youth registration', () => {
+  test('validates a correct youth registration with password', () => {
     const validYouth = {
       registrationType: 'LONG_TERM',
       division: 'YOUTH',
@@ -14,6 +17,7 @@ describe('Member Registration Validation (Zod Schema)', () => {
       emergencyContactName: 'ገብረመስቀል አበበ',
       emergencyContactPhone: '0911223344',
       youthCovenantAccepted: true,
+      password: 'SecurePassword123!',
     };
 
     const parsed = createMemberRegistrationSchema.safeParse(validYouth);
@@ -33,6 +37,7 @@ describe('Member Registration Validation (Zod Schema)', () => {
       emergencyContactName: 'ገብረመስቀል አበበ',
       emergencyContactPhone: '0911223344',
       youthCovenantAccepted: false,
+      password: 'SecurePassword123!',
     };
 
     const parsed = createMemberRegistrationSchema.safeParse(youthWithoutCovenant);
@@ -43,7 +48,7 @@ describe('Member Registration Validation (Zod Schema)', () => {
     }
   });
 
-  test('validates a correct children registration with parent consent', () => {
+  test('validates a correct children registration with parent consent and password', () => {
     const validChild = {
       registrationType: 'SHORT_TERM',
       division: 'CHILDREN',
@@ -57,6 +62,7 @@ describe('Member Registration Validation (Zod Schema)', () => {
       emergencyContactPhone: '0911223344',
       parentName: 'ተስፋዬ ገብረመስቀል',
       parentConsent: true,
+      password: 'ChildSecurePass123',
     };
 
     const parsed = createMemberRegistrationSchema.safeParse(validChild);
@@ -76,6 +82,7 @@ describe('Member Registration Validation (Zod Schema)', () => {
       emergencyContactName: 'ተስፋዬ ገብረመስቀል',
       emergencyContactPhone: '0911223344',
       parentConsent: false,
+      password: 'ChildSecurePass123',
     };
 
     const parsed = createMemberRegistrationSchema.safeParse(childWithoutConsent);
@@ -84,5 +91,14 @@ describe('Member Registration Validation (Zod Schema)', () => {
       const consentError = parsed.error.issues.find((i) => i.path.includes('parentConsent'));
       expect(consentError).toBeDefined();
     }
+  });
+
+  test('validates member login with name and password', () => {
+    const validLogin = {
+      name: 'ተስፋዬ ገብረመስቀል',
+      password: 'SecurePassword123!',
+    };
+    const parsed = memberLoginSchema.safeParse(validLogin);
+    expect(parsed.success).toBe(true);
   });
 });

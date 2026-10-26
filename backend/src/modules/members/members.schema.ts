@@ -20,6 +20,7 @@ export const createMemberRegistrationSchema = z
     phoneNumber: z.string().optional().nullable(),
     photoUrl: z.string().optional().nullable(),
     schoolOrOccupation: z.string().optional().nullable(),
+    password: z.string().min(6, 'የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት (Password must be at least 6 characters)'),
 
     // Confession father info
     confessionFather: z.string().min(2, 'የንስሐ አባት ስም ያስፈልጋል (Confession father name is required)'),
@@ -122,3 +123,9 @@ export const updateMemberStatusSchema = z.object({
   chairmanName: z.string().optional(),
   adminNotes: z.string().optional(),
 });
+
+export const memberLoginSchema = z.object({
+  name: z.string().min(1, 'ስም ወይም የምዝገባ ቁጥር ያስፈልጋል (Name, registration number or phone number is required)'),
+  password: z.string().min(1, 'የይለፍ ቃል ያስፈልጋል (Password is required)'),
+});
+

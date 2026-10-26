@@ -3,8 +3,10 @@ import crypto from 'crypto';
 import { env } from '../config/env';
 
 export interface TokenPayload {
-  adminId: string;
-  email: string;
+  adminId?: string;
+  memberId?: string;
+  email?: string;
+  name?: string;
   role: string;
   tokenVersion?: number;
 }

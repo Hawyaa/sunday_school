@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   registerMember,
+  loginMember,
   getAdminMembers,
   getMemberById,
   updateMember,
@@ -15,6 +16,7 @@ import {
   createMemberRegistrationSchema,
   updateMemberRegistrationSchema,
   updateMemberStatusSchema,
+  memberLoginSchema,
 } from './members.schema';
 
 export const publicRegistrationRouter = Router();
@@ -136,6 +138,42 @@ publicRegistrationRouter.post(
   '/',
   validate({ body: createMemberRegistrationSchema }),
   registerMember
+);
+
+/**
+ * @openapi
+ * /api/registration/login:
+ *   post:
+ *     tags:
+ *       - Members Registration
+ *     summary: Member Portal Login
+ *     description: Authenticate a registered member using Full Name, Registration Number, or Phone Number and Password.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "ተስፋዬ ገብረመስቀል"
+ *               password:
+ *                 type: string
+ *                 example: "SecretPassword123!"
+ *     responses:
+ *       200:
+ *         description: Member login successful
+ *       401:
+ *         description: Invalid name or password
+ */
+publicRegistrationRouter.post(
+  '/login',
+  validate({ body: memberLoginSchema }),
+  loginMember
 );
 
 // Admin-only protected endpoints

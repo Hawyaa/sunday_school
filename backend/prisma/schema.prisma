@@ -216,6 +216,7 @@ model MemberRegistration {
   phoneNumber           String?
   photoUrl              String?
   schoolOrOccupation    String?
+  passwordHash          String?
 
   // የንስሐ አባት መረጃ (Confession Father Info)
   confessionFather      String
