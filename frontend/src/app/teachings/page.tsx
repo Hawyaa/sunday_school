@@ -2,37 +2,20 @@
 
 /**
  * app/teachings/page.tsx
- * Header > Hero > [panel: toolbar + lessons | quote banner + categories] > Footer
- *
- * Data comes from your useTeachingsData hook. Each item is converted to the
- * TeachingLesson shape by toLesson() below; filtering and sorting happen here.
+ * Header > Hero > [panel: toolbar + lessons | quote banner] > Footer
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useTeachingsData } from '@/hooks/useTeachingsData';
 import { TeachingsHero } from '@/components/teachings/TeachingsHero';
 import { TeachingsFilterToolbar, type SortKey } from '@/components/teachings/TeachingsFilterToolbar';
 import { TeachingsList } from '@/components/teachings/TeachingsList';
-import { TeachingsScriptureSidebar, CATEGORIES } from '@/components/teachings/TeachingsScriptureSidebar';
+import { TeachingsScriptureSidebar } from '@/components/teachings/TeachingsScriptureSidebar';
 import type { TeachingLesson } from '@/components/teachings/TeachingsLessonCard';
-
-const CATEGORY_NAMES = CATEGORIES.map((c) => c.label);
-
-const FALLBACK_IMAGES = [
-  'https://i.pinimg.com/1200x/aa/b6/55/aab655bda9ce179c5c34b95c20816317.jpg',
-  'https://i.pinimg.com/736x/76/2f/81/762f8159fd690075012fe0396ed13ae8.jpg',
-  'https://i.pinimg.com/736x/b1/a4/95/b1a495df356cc25ee55bbda406aa8c19.jpg',
-];
-
-/** Shown only when the API returns nothing, so the page is never blank. Remove when your API has data. */
-const SAMPLE_LESSONS: TeachingLesson[] = [
-  { id: 's1', title: 'The Power of Prayer', description: 'Prayer connects us to God, gives peace to our hearts, and strengthens our faith in daily life.', speaker: 'Abune Yohannes', date: '2025-01-30', minutes: 16, category: 'Spiritual Life', image: FALLBACK_IMAGES[0]! },
-  { id: 's2', title: 'Living the Teachings of the Church Fathers', description: 'Let us learn from the wisdom of the Church Fathers and apply their teachings in our daily lives.', speaker: 'Abune Matheos', date: '2025-01-12', minutes: 24, category: 'Church Fathers', image: FALLBACK_IMAGES[1]! },
-  { id: 's3', title: 'The Meaning of the Cross', description: 'The Cross is not just a symbol, but the victory of love, sacrifice, and eternal life.', speaker: 'Abune Samuel', date: '2024-12-28', minutes: 18, category: 'Faith & Practice', image: FALLBACK_IMAGES[2]! },
-  { id: 's4', title: 'Faith and Good Works', description: 'Faith without works is dead. Let us live our faith through love, kindness, and service to others.', speaker: 'Abune Yohannes', date: '2024-12-15', minutes: 21, category: 'Bible Teachings', image: FALLBACK_IMAGES[0]! },
-];
+import { getStoredTeachingCategories } from '@/lib/contentStore';
+import { TeachingCategory, INITIAL_TEACHING_CATEGORIES, DEFAULT_TEACHING_COVER } from '@/types/teaching';
 
 // ── Convert whatever your hook returns into a TeachingLesson ────────────────
 type Raw = Record<string, unknown>;
@@ -49,6 +32,8 @@ function toLesson(raw: unknown, i: number): TeachingLesson {
   const t = (raw ?? {}) as Raw;
   const dur = pick(t, 'minutes', 'durationMinutes', 'duration');
   const text = str(pick(t, 'description', 'summary', 'content'));
+  const rawImg = pick(t, 'image', 'thumbnail', 'thumbnailUrl', 'coverImage', 'imageUrl');
+
   return {
     id: str(pick(t, 'id', '_id'), String(i)),
     title: str(pick(t, 'title', 'name'), 'Untitled'),
@@ -57,7 +42,12 @@ function toLesson(raw: unknown, i: number): TeachingLesson {
     date: str(pick(t, 'date', 'publishedAt', 'createdAt'), '2025-01-01').slice(0, 10),
     minutes: typeof dur === 'number' ? dur : parseInt(str(dur), 10) || 10,
     category: str(pick(t, 'category', 'subject')),
-    image: str(pick(t, 'image', 'thumbnail', 'thumbnailUrl', 'coverImage'), FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]),
+    image: rawImg ? str(rawImg) : DEFAULT_TEACHING_COVER,
+    format: pick(t, 'format') as TeachingLesson['format'],
+    pdfUrl: pick(t, 'pdfUrl') as string | undefined,
+    pdfFileName: pick(t, 'pdfFileName') as string | undefined,
+    videoUrl: pick(t, 'videoUrl') as string | undefined,
+    audioUrl: pick(t, 'audioUrl') as string | undefined,
   };
 }
 
@@ -66,12 +56,36 @@ export default function TeachingsPage() {
   const [category, setCategory] = useState(''); // '' = all categories
   const [sort, setSort] = useState<SortKey>('latest');
 
+  // Dynamic Teaching Categories managed by Admin
+  const [categories, setCategories] = useState<TeachingCategory[]>(() => {
+    if (typeof window !== 'undefined') {
+      return getStoredTeachingCategories();
+    }
+    return INITIAL_TEACHING_CATEGORIES;
+  });
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setCategories(getStoredTeachingCategories());
+    };
+    window.addEventListener('abune_content_store_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('abune_content_store_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  const categoryNames = useMemo(() => {
+    return categories.map((c) => c.en);
+  }, [categories]);
+
   // Load everything once; filtering/sorting is done below.
   const { teachings, isLoading } = useTeachingsData('all', 'All', '', 'all');
 
   const all = useMemo<TeachingLesson[]>(() => {
     const list = Array.isArray(teachings) ? teachings : [];
-    return list.length > 0 ? list.map(toLesson) : SAMPLE_LESSONS;
+    return list.map(toLesson);
   }, [teachings]);
 
   const lessons = useMemo(() => {
@@ -100,7 +114,7 @@ export default function TeachingsPage() {
             <TeachingsFilterToolbar
               query={query}
               onQuery={setQuery}
-              categories={CATEGORY_NAMES}
+              categories={categoryNames}
               category={category}
               onCategory={setCategory}
               sort={sort}
@@ -110,12 +124,9 @@ export default function TeachingsPage() {
           <TeachingsList lessons={lessons} isLoading={isLoading} onReset={reset} />
         </section>
 
-        {/* Right column: quote banner + Browse by Category */}
+        {/* Right column: quote banner */}
         <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
-          <TeachingsScriptureSidebar
-            active={category}
-            onSelect={(c) => setCategory((prev) => (prev === c ? '' : c))}
-          />
+          <TeachingsScriptureSidebar />
         </div>
       </main>
 

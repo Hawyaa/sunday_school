@@ -8,7 +8,7 @@ export function UrgentBanner() {
   const { locale } = useAppStore();
 
   return (
-    <div className="bg-[#B4232C] text-white px-6 py-2.5 text-sm font-medium flex justify-between items-center z-50">
+    <div className="bg-[#1E2A5E] text-white px-6 py-2.5 text-sm font-medium flex justify-between items-center z-50">
       <div className="max-w-[1280px] mx-auto w-full flex justify-between items-center">
         <span className="flex items-center gap-2">
           <span>⚠️</span>

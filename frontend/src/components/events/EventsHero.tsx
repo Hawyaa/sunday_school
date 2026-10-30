@@ -1,119 +1,158 @@
 'use client';
 
 /**
- * EventsHero.tsx
+ * EventsHero.tsx: self-contained Church Events hero.
  *
- * Abune Media Events Hero:
- * - Background image with referrerPolicy="no-referrer"
- * - Cream gradient overlay (#f5eee1, same shade as the About page)
- * - Gold Ethiopian Orthodox cross loaded from /public/images/cross.png
- * - Small gold corner ornament, bottom-left (/public/images/corner-ornament.png)
- * - Breadcrumb: Home › Events
- * - Heading in Playfair Display (58px, #0f2352)
- * - Gold accent bar (50px by 2px, #c8952f)
- * - Right scripture quote: “አግዚአብሔር ይባርከን” — መዝሙር 150:6
+ * Owns everything about itself: the looping YouTube background, the poster
+ * fallback, and its entrance animation. Drop <EventsHero /> anywhere.
+ *
+ * Change here only:
+ *   VIDEO_ID  the YouTube video (a Short works)
+ *   POSTER    still image shown while loading / for reduced motion
+ *
+ * Motion:
+ *   breadcrumb fades in -> heading words slide up from a mask -> subtitle fades in
+ *   background slowly zooms out and drifts with a light parallax on scroll
+ *   plays on every mount (page visit, back/forward) and on bfcache restore
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { EventIcon } from './EventIcons';
+import { useAppStore } from '@/lib/store';
+import { gsap, useGSAP, ScrollTrigger, EASE, DURATION, STAGGER, motionAllowed } from '@/lib/motion/gsap';
+import { SplitWords } from '@/components/motion/SplitWords';
+import { YouTubeBackground } from '@/components/motion/YouTubeBackground';
+
+const VIDEO_ID = 'uPty-Paq2E4';
+const POSTER = '/images/events/hero.jpg';
+
+const TINT =
+  'linear-gradient(90deg, rgba(9,18,38,.92) 0%, rgba(9,18,38,.6) 45%, rgba(9,18,38,.15) 100%),' +
+  'linear-gradient(0deg, rgba(9,18,38,.55), transparent 40%)';
+
+const SERIF = { fontFamily: 'var(--serif, "Fraunces", Georgia, serif)' } as const;
 
 export function EventsHero() {
+  const { locale } = useAppStore();
+  const am = locale === 'am';
+
+  const root = useRef<HTMLElement>(null);
+  const replay = useRef<(() => void) | null>(null);
+
+  useGSAP(
+    () => {
+      const el = root.current;
+      if (!el || !motionAllowed()) return;
+
+      const part = (name: string) => el.querySelector<HTMLElement>(`[data-hero="${name}"]`);
+      const crumbs = part('crumbs');
+      const subtitle = part('subtitle');
+      const zoom = part('zoom');
+      const parallax = part('parallax');
+      const words = el.querySelectorAll<HTMLElement>('[data-split-word]');
+      if (!crumbs || !subtitle || !zoom || !parallax) return;
+
+      const intro = gsap
+        .timeline({ defaults: { ease: EASE } })
+        .fromTo(crumbs, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: DURATION.fast })
+        .fromTo(words, { yPercent: 110 }, { yPercent: 0, duration: DURATION.slow, stagger: STAGGER }, '-=0.3')
+        .fromTo(subtitle, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: DURATION.base }, '+=0.1');
+
+      const zoomOut = gsap.fromTo(zoom, { scale: 1.15 }, { scale: 1, duration: 14, ease: 'power1.out' });
+
+      gsap.to(parallax, {
+        yPercent: 8,
+        ease: 'none',
+        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
+      });
+
+      replay.current = () => {
+        intro.restart();
+        zoomOut.restart();
+      };
+    },
+    { scope: root },
+  );
+
+  // Restored from the browser's back/forward cache: the page is not re-mounted, so replay by hand.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        replay.current?.();
+        ScrollTrigger.refresh();
+      }
+    };
+    window.addEventListener('pageshow', onShow);
+    return () => window.removeEventListener('pageshow', onShow);
+  }, []);
+
   return (
-    <section className="relative h-[238px] max-md:h-auto max-md:min-h-[250px] overflow-hidden bg-[#e9eef6]">
-      {/* Background Hero Image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="https://i.pinimg.com/474x/25/f2/cf/25f2cf69f3228dff18d2e3b0105baeac.jpg"
-        alt=""
-        referrerPolicy="no-referrer"
-        className="absolute inset-0 w-full h-full object-cover object-[right_center] z-0"
-      />
-
-      {/* Gradient Mask Overlay */}
-      <div
-        className="absolute inset-0 z-[1] pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(90deg, #f5eee1 0%, #f5eee1 38%, rgba(245,238,225,0.55) 56%, rgba(245,238,225,0) 72%)',
-        }}
-      />
-
-      {/* Bottom-left corner ornament (artwork is a top-right corner, so rotate 180°) */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/corner-ornament.png"
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        className="hidden sm:block absolute bottom-2 left-2 z-[2] w-[80px] lg:w-[100px] -scale-100 mix-blend-multiply select-none pointer-events-none"
-      />
-
-      {/* Hero Inner Container */}
-      <div className="relative z-10 max-w-[1536px] h-full mx-auto px-4 sm:px-8 lg:px-[70px] max-md:py-6 flex flex-col justify-center">
-        <div className="relative h-full flex flex-col justify-center">
-          {/* Gold Ethiopian Orthodox Cross (file: public/images/cross.png) */}
-          <Image
-            src="/images/cross.png"
-            alt="Ethiopian Orthodox cross"
-            width={213}
-            height={420}
-            priority
-            className="hidden md:block absolute left-0 top-[42px] h-[92px] w-auto drop-shadow-[0_2px_3px_rgba(120,80,10,0.25)] select-none pointer-events-none"
-          />
-
-          {/* Left Text Column: Breadcrumb, Title & Subtitle */}
-          <div className="md:ml-[73px] flex flex-col justify-center">
-            {/* Breadcrumb */}
-            <nav
-              aria-label="Breadcrumb"
-              className="flex items-center gap-2 text-[13px] text-[#1c2740] font-medium mb-1.5"
-            >
-              <Link href="/" className="hover:text-[#0f2352] flex items-center gap-1.5">
-                <EventIcon name="home" className="w-3.5 h-3.5 text-[#0f2352]" />
-                <span>Home</span>
-              </Link>
-              <span className="text-[#0f2352] font-semibold">›</span>
-              <span className="text-[#0f2352] font-semibold">Events</span>
-            </nav>
-
-            {/* Main Title */}
-            <h1
-              className="text-4xl sm:text-5xl lg:text-[58px] font-bold text-[#0f2352] leading-[1.1] mb-2 tracking-tight"
-              style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
-            >
-              Events
-            </h1>
-
-            {/* Subtitle */}
-            <p
-              className="text-base sm:text-lg lg:text-[19px] text-[#3d4f77] leading-[1.45] max-w-[450px] font-normal"
-              style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
-            >
-              Join our upcoming spiritual gatherings, feast celebrations and community events.
-            </p>
-
-            {/* Gold Accent Bar */}
-            <div className="w-[50px] h-[2px] bg-[#c8952f] mt-3" />
-          </div>
-
-          {/* Verse on Right */}
-          <div
-            className="hidden md:block absolute right-4 lg:right-[66px] bottom-[36px] text-right text-white select-none pointer-events-none"
-            style={{
-              fontFamily: '"Noto Serif Ethiopic", serif',
-              textShadow: '0 1px 8px rgba(0,0,0,0.45)',
-            }}
-          >
-            <blockquote className="text-[19px] italic font-medium leading-normal m-0 p-0">
-              “አግዚአብሔር ይባርከን”
-            </blockquote>
-            <cite className="block text-sm not-italic mt-2 text-amber-100 font-sans">
-              — መዝሙር 150:6
-            </cite>
+    <section
+      ref={root}
+      aria-labelledby="events-title"
+      className="relative flex min-h-[430px] items-center overflow-hidden bg-[#0e1b38] text-[#f6efdd]"
+    >
+      {/* Background: parallax > zoom > poster + video */}
+      <div aria-hidden="true" className="absolute inset-0">
+        <div data-hero="parallax" className="absolute inset-x-0 -bottom-[10%] -top-[10%] will-change-transform">
+          <div data-hero="zoom" className="absolute inset-0 will-change-transform">
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${POSTER}')` }} />
+            <YouTubeBackground videoId={VIDEO_ID} />
           </div>
         </div>
+      </div>
+
+      {/* Navy tint, darker on the left so the title stays readable */}
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: TINT }} />
+
+      {/* Content */}
+      <div
+        className="relative z-10 mx-auto pb-24 pt-[72px] lg:pl-20"
+        style={{ width: 'min(1680px, 100% - clamp(32px, 5vw, 96px))' }}
+      >
+        <nav
+          data-hero="crumbs"
+          aria-label="Breadcrumb"
+          className="mb-4 flex items-center gap-2.5 text-[13px] tracking-[0.08em] text-[#b4bfd9] motion-safe:opacity-0"
+        >
+          <Link href="/" className="transition hover:text-[#e3c476]">
+            {am ? 'መነሻ' : 'Home'}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" className="font-semibold text-[#e3c476]">
+            {am ? 'ሁነቶች' : 'Events'}
+          </span>
+        </nav>
+
+        <h1
+          id="events-title"
+          className="text-[clamp(46px,7vw,92px)] font-semibold leading-[0.95] tracking-[-0.03em] [text-shadow:0_3px_14px_rgba(0,0,0,.5)]"
+          style={SERIF}
+        >
+          {am ? (
+            <>
+              <SplitWords text="የቤተክርስቲያን" />{' '}
+              <em className="text-[#e3c476]">
+                <SplitWords text="ሁነቶች" />
+              </em>
+            </>
+          ) : (
+            <>
+              <SplitWords text="Church" />{' '}
+              <em className="text-[#e3c476]">
+                <SplitWords text="Events" />
+              </em>
+            </>
+          )}
+        </h1>
+
+        <p
+          data-hero="subtitle"
+          className="mt-4 text-[clamp(19px,2.2vw,24px)] italic text-[#cdd6ea] motion-safe:opacity-0"
+          style={SERIF}
+        >
+          {am ? 'ይሰብሰቡ። ያምልኩ። በአንድነት ያገልግሉ።' : 'Gather. Worship. Serve together.'}
+        </p>
       </div>
     </section>
   );

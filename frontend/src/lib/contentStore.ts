@@ -7,7 +7,8 @@
  */
 
 import { ChurchReport } from '@/types/report';
-import { MezmurItem } from '@/components/mezmur/mezmurData';
+import { MezmurItem, MezmurCategory, INITIAL_MEZMUR_CATEGORIES } from '@/components/mezmur/mezmurData';
+import { Teaching, TeachingCategory, INITIAL_TEACHING_CATEGORIES } from '@/types/teaching';
 
 // --- REPORTS SEED DATA ---
 export const INITIAL_REPORTS: ChurchReport[] = [
@@ -521,6 +522,25 @@ export function saveStoredMezmurs(mezmurs: MezmurItem[]) {
   notifyStoreUpdate('mezmur');
 }
 
+// Mezmur Categories
+export function getStoredMezmurCategories(): MezmurCategory[] {
+  if (typeof window === 'undefined') return INITIAL_MEZMUR_CATEGORIES;
+  try {
+    const raw = localStorage.getItem('abune_admin_mezmur_categories');
+    if (!raw) return INITIAL_MEZMUR_CATEGORIES;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_MEZMUR_CATEGORIES;
+  } catch (e) {
+    return INITIAL_MEZMUR_CATEGORIES;
+  }
+}
+
+export function saveStoredMezmurCategories(categories: MezmurCategory[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('abune_admin_mezmur_categories', JSON.stringify(categories));
+  notifyStoreUpdate('mezmur_categories');
+}
+
 // Gallery Mosaic
 export function getStoredGalleryMosaic(): GalleryMosaicItem[] {
   if (typeof window === 'undefined') return INITIAL_GALLERY_MOSAIC;
@@ -595,4 +615,207 @@ export function saveStoredEvents(items: StoredEventItem[]) {
   if (typeof window === 'undefined') return;
   localStorage.setItem('abune_admin_events', JSON.stringify(items));
   notifyStoreUpdate('events');
+}
+
+// Teachings Seed Data
+export const INITIAL_TEACHINGS: Teaching[] = [
+  {
+    id: '1',
+    title: 'The Mystery of the Holy Trinity & Dogma',
+    titleAm: 'ምሥጢረ ሥላሴ እና የኦርቶዶክስ ተዋሕዶ ሃይማኖት',
+    content: `The mystery of the Holy Trinity is the foundational truth of Christian theology in the Ethiopian Orthodox Tewahedo Church. God is one in Essence (Bahrey) and three in Persons (Akalat) — the Father, the Son, and the Holy Spirit.
+
+In this comprehensive teaching, we study the scriptural foundations from the Old and New Testaments, the teachings of the Church Fathers (Patristics) at the Council of Nicaea, and the deep symbolic mysteries preserved throughout the centuries.
+
+Key Study Topics:
+1. One Essence, Three Persons (አንድነትና ሦስትነት)
+2. Biblical Basis from Genesis to the Epistles
+3. The Liturgical Prayers and Confessions of Faith
+4. The Council of Nicaea and Saint Athanasius the Apostolic
+5. Practical Application: Praying in the name of the Trinity in daily life`,
+    author: 'Abba Melke Sedek',
+    category: 'Dogma',
+    subject: 'Dogma',
+    format: 'both',
+    metaExtra: 'Video + Book (24 min, 18 pages)',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    pdfFileName: 'Mystery_of_the_Holy_Trinity_Study_Guide.pdf',
+    pdfPages: 18,
+    durationMinutes: 24,
+    description: 'A deep lecture and complete accompanying PDF study book exploring the mystery of the Holy Trinity and Church Dogma.',
+    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80',
+    isPublished: true,
+    publishedAt: '2025-03-21',
+    createdAt: '2025-03-21T08:00:00.000Z',
+    updatedAt: '2025-03-21T08:00:00.000Z',
+    outline: [
+      'Introduction to Orthodox Dogmatics',
+      'The Mystery of the Trinity in the Old Testament',
+      'The Mystery of the Trinity in the Gospels',
+      'Patristic Commentary by Saint Cyril and Saint Athanasius',
+      'Summary & Reflection Questions',
+    ],
+  },
+  {
+    id: '2',
+    title: 'Spiritual Lessons from the Holy Bible',
+    titleAm: 'መንፈሳዊ ትምህርቶች ከመጽሐፍ ቅዱስ',
+    content: `Deep insights from the Holy Scriptures that guide us in our spiritual journey, moral conduct, and daily prayer life.
+
+This document serves as an official textbook and study guide for Sunday School students, covering core themes of repentance, fasting, forgiveness, and unconditional love towards neighbors as exemplified by Our Lord Jesus Christ.
+
+Students are encouraged to read the accompanying PDF book, take personal notes, and meditate on the scriptural verses outlined within each chapter.`,
+    author: 'Abune Yohannes',
+    category: 'Holy Bible',
+    subject: 'Holy Bible',
+    format: 'pdf',
+    metaExtra: 'PDF Book (12 Pages)',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    pdfFileName: 'Spiritual_Lessons_Bible_Guide.pdf',
+    pdfPages: 12,
+    durationMinutes: 30,
+    description: 'An authoritative study book outlining essential spiritual practices, scriptural readings, and moral conduct for believers.',
+    imageUrl: 'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?auto=format&fit=crop&w=800&q=80',
+    isPublished: true,
+    publishedAt: '2025-03-15',
+    createdAt: '2025-03-15T08:00:00.000Z',
+    updatedAt: '2025-03-15T08:00:00.000Z',
+    outline: [
+      'The Importance of Daily Scripture Meditation',
+      'The Beatitudes (ማቴዎስ 5)',
+      'The Power of Forgiveness and Reconciliation',
+      'Practical Christian Living in Contemporary Times',
+    ],
+  },
+  {
+    id: '3',
+    title: 'Orthodox Church History Overview',
+    titleAm: 'የኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን ታሪክ አጠቃላይ እይታ',
+    content: `A comprehensive video documentary and historical examination of the ancient Ethiopian Orthodox Tewahedo Church.
+
+From the faith of the Queen of Sheba and the baptism of the Ethiopian Eunuch in Acts 8, to the arrival of Saint Frumentius (Abba Salama Kesate Berhan) and the Nine Saints who translated the Holy Scriptures into Ge'ez.
+
+Watch the full recorded lecture and observe the historical milestones that have preserved this apostolic tradition unbroken through centuries.`,
+    author: 'Teacher Samuel',
+    category: 'Church History',
+    subject: 'Church History',
+    format: 'video',
+    metaExtra: 'Video Lecture (35 min)',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    durationMinutes: 35,
+    description: 'A visual exploration of the heritage, apostolic lineage, and sacred monuments of the Ethiopian Orthodox Church.',
+    imageUrl: 'https://images.unsplash.com/photo-1548625361-16a75f974274?auto=format&fit=crop&w=800&q=80',
+    isPublished: true,
+    publishedAt: '2025-02-28',
+    createdAt: '2025-02-28T08:00:00.000Z',
+    updatedAt: '2025-02-28T08:00:00.000Z',
+    outline: [
+      'Biblical Roots: Solomon and Sheba',
+      'The New Testament Dawn: The Ethiopian Eunuch',
+      'Saint Frumentius and King Ezana (4th Century)',
+      'The Nine Saints and Monastic Traditions',
+      'Lalibela, Gondar, and Modern Heritage',
+    ],
+  },
+  {
+    id: '4',
+    title: 'Faith and Salvation (Voice Sermon)',
+    titleAm: 'እምነትና ድነት — መንፈሳዊ ትምህርት',
+    content: `An inspiring audio sermon and theological reflection on true faith, grace, and divine mercy.
+
+Saint James teaches us that faith without works is dead. True Orthodox faith is an active, loving communion with God manifested through obedience, holy sacraments, and selfless service to our brothers and sisters.
+
+Listen to the sacred recording and meditate upon the divine grace given to mankind.`,
+    author: 'Deacon Yared',
+    category: 'Dogma',
+    subject: 'Dogma',
+    format: 'audio',
+    metaExtra: 'Audio Sermon (28 min)',
+    audioUrl: 'https://cdn.freesound.org/previews/612/612089_11861866-lq.mp3',
+    audioFileName: 'Faith_and_Salvation_Deacon_Yared.mp3',
+    durationMinutes: 28,
+    description: 'An uplifting audio lecture on active faith, divine grace, repentance, and living in fellowship with Christ.',
+    imageUrl: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=800&q=80',
+    isPublished: true,
+    publishedAt: '2025-01-20',
+    createdAt: '2025-01-20T08:00:00.000Z',
+    updatedAt: '2025-01-20T08:00:00.000Z',
+    outline: [
+      'The Definition of Faith according to Hebrews 11',
+      'Faith and Deeds (ያዕቆብ 2)',
+      'The Role of Holy Communion and Confession',
+      'Remaining Firm in Trials and Hardships',
+    ],
+  },
+  {
+    id: '5',
+    title: 'Living the Teachings of the Desert Fathers',
+    titleAm: 'የአበው ቅዱሳን የመንፈስ ሕይወት ምክሮች',
+    content: `A dual educational resource featuring both video lecture and companion monastic booklet.
+
+Study the golden sayings (Apophthegmata Patrum) of Saint Anthony the Great, Saint Macarius, and Saint Pachomius. Discover how solitude, fasting, prayer of the heart, and humility triumph over worldly temptations.
+
+Use the video lecture for classroom review and read the downloadable PDF book for personal spiritual nourishment.`,
+    author: 'Abba Gebriel',
+    category: 'Patristics',
+    subject: 'Patristics',
+    format: 'both',
+    metaExtra: 'Video + Book (32 min, 14 pages)',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    pdfFileName: 'Desert_Fathers_Wisdom_Handbook.pdf',
+    pdfPages: 14,
+    durationMinutes: 32,
+    description: 'Inspiring monastic wisdom, sayings of the desert fathers, and spiritual guidance for youth in modern times.',
+    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80',
+    isPublished: true,
+    publishedAt: '2024-12-18',
+    createdAt: '2024-12-18T08:00:00.000Z',
+    updatedAt: '2024-12-18T08:00:00.000Z',
+    outline: [
+      'Introduction to Monasticism in Alexandria and Ethiopia',
+      'Saint Anthony the Great: Overcoming Temptation',
+      'Silence and Inner Peace (ዝምታ እና ጸጥታ)',
+      'Humility as the Mother of All Virtues',
+    ],
+  },
+];
+
+// Teachings Store Getter & Setter
+export function getStoredTeachings(): Teaching[] {
+  if (typeof window === 'undefined') return INITIAL_TEACHINGS;
+  try {
+    const raw = localStorage.getItem('abune_admin_teachings');
+    if (!raw) return INITIAL_TEACHINGS;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_TEACHINGS;
+  } catch (e) {
+    return INITIAL_TEACHINGS;
+  }
+}
+
+export function saveStoredTeachings(teachings: Teaching[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('abune_admin_teachings', JSON.stringify(teachings));
+  notifyStoreUpdate('teachings');
+}
+
+// Teaching Categories Store Getter & Setter
+export function getStoredTeachingCategories(): TeachingCategory[] {
+  if (typeof window === 'undefined') return INITIAL_TEACHING_CATEGORIES;
+  try {
+    const raw = localStorage.getItem('abune_admin_teaching_categories');
+    if (!raw) return INITIAL_TEACHING_CATEGORIES;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_TEACHING_CATEGORIES;
+  } catch (e) {
+    return INITIAL_TEACHING_CATEGORIES;
+  }
+}
+
+export function saveStoredTeachingCategories(categories: TeachingCategory[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('abune_admin_teaching_categories', JSON.stringify(categories));
+  notifyStoreUpdate('teaching_categories');
 }

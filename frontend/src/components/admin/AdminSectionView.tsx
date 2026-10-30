@@ -26,13 +26,21 @@ import {
   saveStoredAnnouncements,
   getStoredEvents,
   saveStoredEvents,
+  getStoredMezmurCategories,
+  saveStoredMezmurCategories,
+  getStoredTeachings,
+  saveStoredTeachings,
+  getStoredTeachingCategories,
+  saveStoredTeachingCategories,
+  INITIAL_TEACHINGS,
   GalleryMosaicItem,
   FeaturedAlbumData,
   AnnouncementItem,
   StoredEventItem,
 } from '@/lib/contentStore';
 import { ChurchReport } from '@/types/report';
-import { MezmurItem } from '@/components/mezmur/mezmurData';
+import { MezmurItem, MezmurCategory } from '@/components/mezmur/mezmurData';
+import { Teaching, TeachingCategory, DEFAULT_TEACHING_COVER } from '@/types/teaching';
 import { apiClient } from '@/lib/api';
 
 export interface AdminContentItem {
@@ -97,6 +105,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
   // Gallery
   const [galleryTarget, setGalleryTarget] = useState<'mosaic' | 'featured' | 'addToAlbum'>('mosaic');
   const [mosaicSlot, setMosaicSlot] = useState<number>(1);
+  const [albumPosition, setAlbumPosition] = useState<'top' | 'end'>('end');
   const [featuredDate, setFeaturedDate] = useState('Ter 19, 2011');
   const [featuredThumbnails, setFeaturedThumbnails] = useState<string[]>([]);
 
@@ -128,21 +137,40 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
   const [featuredAlbum, setFeaturedAlbum] = useState<FeaturedAlbumData>(() =>
     getStoredFeaturedAlbum()
   );
+  const [mezmurCategories, setMezmurCategories] = useState<MezmurCategory[]>(() =>
+    getStoredMezmurCategories()
+  );
 
-  const [teachingsList, setTeachingsList] = useState<AdminContentItem[]>([
-    {
-      id: 'teach-1',
-      section: 'teachings',
-      title: 'Spiritual Lessons from the Holy Bible',
-      subtitle: 'Abba Melke Sedek',
-      category: 'Holy Bible',
-      status: 'Published',
-      date: 'Megabit 12, 2017',
-      thumbnail:
-        'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80',
-      content: 'Deep insights from the Holy Scriptures that guide us in our spiritual journey...',
-    },
-  ]);
+  // Mezmur Category Management State
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCatKey, setNewCatKey] = useState('');
+  const [newCatEn, setNewCatEn] = useState('');
+  const [newCatAm, setNewCatAm] = useState('');
+  const [editingCatKey, setEditingCatKey] = useState<string | null>(null);
+  const [editingCatEn, setEditingCatEn] = useState('');
+  const [editingCatAm, setEditingCatAm] = useState('');
+
+  // Teaching Category Management State
+  const [teachingCategories, setTeachingCategories] = useState<TeachingCategory[]>(() =>
+    getStoredTeachingCategories()
+  );
+  const [showTeachingCatModal, setShowTeachingCatModal] = useState(false);
+  const [newTeachCatEn, setNewTeachCatEn] = useState('');
+  const [newTeachCatAm, setNewTeachCatAm] = useState('');
+  const [editingTeachCatKey, setEditingTeachCatKey] = useState<string | null>(null);
+  const [editingTeachCatEn, setEditingTeachCatEn] = useState('');
+  const [editingTeachCatAm, setEditingTeachCatAm] = useState('');
+
+  // Teachings Specific Fields
+  const [teachingFormat, setTeachingFormat] = useState<'both' | 'pdf' | 'video' | 'audio'>('both');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [pdfUrl, setPdfUrl] = useState('');
+  const [pdfFileName, setPdfFileName] = useState('');
+  const [pdfPages, setPdfPages] = useState('');
+  const [teachingDuration, setTeachingDuration] = useState('20');
+  const [teachingOutline, setTeachingOutline] = useState('');
+
+  const [teachingsList, setTeachingsList] = useState<Teaching[]>(() => getStoredTeachings());
 
   // Sync state when content store updates
   useEffect(() => {
@@ -153,12 +181,160 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       setEventsList(getStoredEvents());
       setMosaicList(getStoredGalleryMosaic());
       setFeaturedAlbum(getStoredFeaturedAlbum());
+      setMezmurCategories(getStoredMezmurCategories());
+      setTeachingsList(getStoredTeachings());
+      setTeachingCategories(getStoredTeachingCategories());
     };
     window.addEventListener('abune_content_store_updated', handleUpdate);
     return () => {
       window.removeEventListener('abune_content_store_updated', handleUpdate);
     };
   }, []);
+
+  // Teaching Category Management Handlers
+  const handleAddTeachingCategory = () => {
+    if (!newTeachCatEn.trim()) {
+      alert('Please enter category name in English');
+      return;
+    }
+    const cleanKey =
+      newTeachCatEn.trim().toLowerCase().replace(/[^a-z0-9]/g, '-') ||
+      `tcat-${Date.now()}`;
+    if (
+      teachingCategories.some(
+        (c) =>
+          c.key === cleanKey ||
+          c.en.toLowerCase() === newTeachCatEn.trim().toLowerCase()
+      )
+    ) {
+      alert('A category with this name already exists');
+      return;
+    }
+
+    const newCat: TeachingCategory = {
+      key: cleanKey,
+      en: newTeachCatEn.trim(),
+      am: newTeachCatAm.trim() || newTeachCatEn.trim(),
+      icon: 'bible',
+    };
+
+    const updated = [...teachingCategories, newCat];
+    setTeachingCategories(updated);
+    saveStoredTeachingCategories(updated);
+    setCategory(newCat.en);
+    setNewTeachCatEn('');
+    setNewTeachCatAm('');
+    showToast(`Teaching Category "${newCat.en}" added and saved!`);
+  };
+
+  const handleStartEditTeachingCategory = (cat: TeachingCategory) => {
+    setEditingTeachCatKey(cat.key);
+    setEditingTeachCatEn(cat.en);
+    setEditingTeachCatAm(cat.am);
+  };
+
+  const handleSaveEditTeachingCategory = () => {
+    if (!editingTeachCatKey || !editingTeachCatEn.trim()) return;
+    const updated = teachingCategories.map((c) => {
+      if (c.key === editingTeachCatKey) {
+        return {
+          ...c,
+          en: editingTeachCatEn.trim(),
+          am: editingTeachCatAm.trim() || editingTeachCatEn.trim(),
+        };
+      }
+      return c;
+    });
+    setTeachingCategories(updated);
+    saveStoredTeachingCategories(updated);
+    setEditingTeachCatKey(null);
+    setEditingTeachCatEn('');
+    setEditingTeachCatAm('');
+    showToast('Teaching category updated successfully!');
+  };
+
+  const handleDeleteTeachingCategory = (key: string, name: string) => {
+    if (teachingCategories.length <= 1) {
+      alert('You must have at least one teaching category');
+      return;
+    }
+    if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
+    const updated = teachingCategories.filter((c) => c.key !== key);
+    setTeachingCategories(updated);
+    saveStoredTeachingCategories(updated);
+    if (category === name) {
+      setCategory(updated[0]?.en || '');
+    }
+    showToast(`Category "${name}" deleted successfully!`);
+  };
+
+  // Category Management Handlers
+  const handleAddCategory = () => {
+    if (!newCatEn.trim()) {
+      alert('Please enter category name in English');
+      return;
+    }
+    const cleanKey =
+      (newCatKey.trim() || newCatEn.trim().toLowerCase().replace(/[^a-z0-9]/g, '')) ||
+      `cat-${Date.now()}`;
+    if (mezmurCategories.some((c) => c.key === cleanKey)) {
+      alert('A category with this key already exists');
+      return;
+    }
+
+    const newCat: MezmurCategory = {
+      key: cleanKey,
+      en: newCatEn.trim(),
+      am: newCatAm.trim() || newCatEn.trim(),
+      icon: 'music',
+    };
+
+    const updated = [...mezmurCategories, newCat];
+    setMezmurCategories(updated);
+    saveStoredMezmurCategories(updated);
+    setCategory(newCat.key);
+    setNewCatKey('');
+    setNewCatEn('');
+    setNewCatAm('');
+    showToast(`Category "${newCat.en}" added and saved!`);
+  };
+
+  const handleStartEditCategory = (cat: MezmurCategory) => {
+    setEditingCatKey(cat.key);
+    setEditingCatEn(cat.en);
+    setEditingCatAm(cat.am);
+  };
+
+  const handleSaveEditCategory = () => {
+    if (!editingCatKey || !editingCatEn.trim()) return;
+    const updated = mezmurCategories.map((c) => {
+      if (c.key === editingCatKey) {
+        return {
+          ...c,
+          en: editingCatEn.trim(),
+          am: editingCatAm.trim() || editingCatEn.trim(),
+        };
+      }
+      return c;
+    });
+    setMezmurCategories(updated);
+    saveStoredMezmurCategories(updated);
+    setEditingCatKey(null);
+    setEditingCatEn('');
+    setEditingCatAm('');
+    showToast('Category updated and synchronized!');
+  };
+
+  const handleDeleteCategory = (key: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
+    const updated = mezmurCategories.filter((c) => c.key !== key);
+    setMezmurCategories(updated);
+    saveStoredMezmurCategories(updated);
+    if (category === key) {
+      setCategory(updated[0]?.key || '');
+    }
+    showToast(`Category "${name}" deleted!`);
+  };
 
   // Section categories definitions
   const categoriesBySection: Record<AdminSection, { label: string; value: string }[]> = {
@@ -170,12 +346,10 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
     ],
     mezmur: [
       { label: 'All Categories', value: 'All' },
-      { label: 'Ethiopian Orthodox Hymns (hymns)', value: 'hymns' },
-      { label: 'Sunday School Songs (sundayschool)', value: 'sundayschool' },
-      { label: 'Choir Songs (choir)', value: 'choir' },
-      { label: 'Special Occasions (special)', value: 'special' },
-      { label: 'Traditional Mezmur (traditional)', value: 'traditional' },
-      { label: 'Fast & Prayer (fasting)', value: 'fasting' },
+      ...mezmurCategories.map((c) => ({
+        label: `${c.en} (${c.key})`,
+        value: c.key,
+      })),
     ],
     announcements: [
       { label: 'All Categories', value: 'All' },
@@ -203,9 +377,10 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
     ],
     teachings: [
       { label: 'All Categories', value: 'All' },
-      { label: 'Holy Bible', value: 'Holy Bible' },
-      { label: 'Dogma', value: 'Dogma' },
-      { label: 'Church History', value: 'Church History' },
+      ...teachingCategories.map((c) => ({
+        label: `${c.en} (${c.am})`,
+        value: c.en,
+      })),
     ],
     users: [{ label: 'All', value: 'All' }],
   };
@@ -218,11 +393,13 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
     const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
     setFileSize(sizeMb);
     setFileName(file.name);
+    setPdfFileName(file.name);
 
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
       setFileUrl(result);
+      setPdfUrl(result);
       showToast(`Uploaded PDF: ${file.name} (${sizeMb})`);
     };
     reader.readAsDataURL(file);
@@ -295,8 +472,16 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
     setEventIcon('cross');
     setGalleryTarget('mosaic');
     setMosaicSlot(1);
+    setAlbumPosition('end');
     setFeaturedDate('Ter 19, 2011');
     setFeaturedThumbnails([]);
+    setTeachingFormat('both');
+    setVideoUrl('');
+    setPdfUrl('');
+    setPdfFileName('');
+    setPdfPages('');
+    setTeachingDuration('20');
+    setTeachingOutline('');
   };
 
   // Populate form for editing
@@ -377,11 +562,21 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       const itm = teachingsList.find((i) => i.id === String(id));
       if (itm) {
         setTitle(itm.title);
-        setSubtitle(itm.subtitle || '');
-        setCategory(itm.category);
+        setTitleAm(itm.titleAm || '');
+        setSubtitle(itm.author || '');
+        setCategory(itm.category || 'Holy Bible');
         setContent(itm.content || '');
-        setImageUrl(itm.thumbnail || '');
-        setIsPublished(itm.status === 'Published');
+        setImageUrl(itm.imageUrl || '');
+        setIsPublished(itm.isPublished !== false);
+        setTeachingFormat(itm.format || 'both');
+        setVideoUrl(itm.videoUrl || '');
+        setPdfUrl(itm.pdfUrl || '');
+        setPdfFileName(itm.pdfFileName || '');
+        setPdfPages(itm.pdfPages ? String(itm.pdfPages) : '');
+        setAudioUrl(itm.audioUrl || '');
+        setAudioName(itm.audioFileName || '');
+        setTeachingDuration(itm.durationMinutes ? String(itm.durationMinutes) : '20');
+        setTeachingOutline(itm.outline ? itm.outline.join('\n') : '');
       }
     }
   };
@@ -416,7 +611,10 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
         alert('Please choose or upload a photo to add to the album');
         return;
       }
-      const updatedThumbs = [...featuredAlbum.thumbnails, imageUrl];
+      const updatedThumbs =
+        albumPosition === 'top'
+          ? [imageUrl, ...featuredAlbum.thumbnails]
+          : [...featuredAlbum.thumbnails, imageUrl];
       setFeaturedThumbnails(updatedThumbs);
       const updatedAlbum: FeaturedAlbumData = {
         ...featuredAlbum,
@@ -426,7 +624,9 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       saveStoredFeaturedAlbum(updatedAlbum);
       setImageUrl('');
       setImageName('');
-      showToast(`Photo added to end of album! Total: ${updatedThumbs.length} photos on /gallery.`);
+      showToast(
+        `Photo added to the ${albumPosition === 'top' ? 'top' : 'end'} of Complete Album! Total: ${updatedThumbs.length} photos on /gallery.`
+      );
       handleResetForm();
       return;
     }
@@ -498,6 +698,8 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
         category: targetCategory,
         addedAt: new Date().toISOString().slice(0, 10),
         lyrics: lyricsArray.length > 0 ? lyricsArray : [title.trim()],
+        audioUrl: audioUrl || undefined,
+        audioName: audioName || undefined,
       };
 
       if (existingIdx >= 0) {
@@ -660,35 +862,97 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       handleResetForm();
     } else {
       const updated = [...teachingsList];
-      const targetId = editingId || `${section}-${Date.now()}`;
+      const targetId = editingId || `teach-${Date.now()}`;
       const existingIdx = updated.findIndex((i) => i.id === targetId);
 
-      const genericItem: AdminContentItem = {
+      const outlineArray = teachingOutline
+        ? teachingOutline
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+      const newTeaching: Teaching = {
         id: targetId,
-        section,
         title: title.trim(),
-        subtitle: subtitle.trim(),
-        category: category && category !== 'All' ? category : currentCategories[1]?.value || 'General',
-        status: isPublished ? 'Published' : 'Draft',
-        thumbnail:
-          imageUrl ||
-          'https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&w=400&q=80',
-        content: content.trim(),
-        date: new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        }),
+        titleAm: titleAm.trim() || undefined,
+        content: content.trim() || 'Teaching study notes and scriptural analysis.',
+        author: subtitle.trim() || 'Abune Media Teacher',
+        category:
+          category && category !== 'All'
+            ? category
+            : teachingCategories[0]?.en || 'Holy Bible',
+        subject:
+          category && category !== 'All'
+            ? category
+            : teachingCategories[0]?.en || 'Holy Bible',
+        format: teachingFormat,
+        videoUrl:
+          teachingFormat === 'video' || teachingFormat === 'both'
+            ? videoUrl.trim() || null
+            : null,
+        pdfUrl:
+          teachingFormat === 'pdf' || teachingFormat === 'both'
+            ? pdfUrl.trim() || null
+            : null,
+        pdfFileName: pdfFileName.trim() || (pdfUrl ? `${title.trim()}.pdf` : null),
+        pdfPages: pdfPages ? Number(pdfPages) : null,
+        audioUrl: teachingFormat === 'audio' ? audioUrl.trim() || null : null,
+        audioFileName: audioName.trim() || (audioUrl ? `${title.trim()}.mp3` : null),
+        durationMinutes: teachingDuration ? Number(teachingDuration) : 20,
+        metaExtra:
+          teachingFormat === 'both'
+            ? `Video + Book (${teachingDuration || 20} min, ${pdfPages || 12} pages)`
+            : teachingFormat === 'pdf'
+            ? `PDF Book (${pdfPages || 12} Pages)`
+            : teachingFormat === 'audio'
+            ? `Audio Sermon (${teachingDuration || 25} min)`
+            : `Video Lecture (${teachingDuration || 30} min)`,
+        imageUrl: imageUrl.trim() || DEFAULT_TEACHING_COVER,
+        outline: outlineArray.length > 0 ? outlineArray : undefined,
+        isPublished,
+        publishedAt: new Date().toISOString().slice(0, 10),
+        createdAt:
+          existingIdx >= 0
+            ? updated[existingIdx].createdAt
+            : new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       if (existingIdx >= 0) {
-        updated[existingIdx] = genericItem;
+        updated[existingIdx] = newTeaching;
       } else {
-        updated.unshift(genericItem);
+        updated.unshift(newTeaching);
       }
 
       setTeachingsList(updated);
-      showToast('Teaching saved successfully!');
+      saveStoredTeachings(updated);
+
+      try {
+        if (existingIdx >= 0) {
+          await apiClient.put(`/admin/teachings/${targetId}`, {
+            title: newTeaching.title,
+            content: newTeaching.content,
+            author: newTeaching.author,
+            category: newTeaching.category,
+            mediaUrl:
+              newTeaching.videoUrl || newTeaching.pdfUrl || newTeaching.audioUrl,
+            isPublished: newTeaching.isPublished,
+          });
+        } else {
+          await apiClient.post('/admin/teachings', {
+            title: newTeaching.title,
+            content: newTeaching.content,
+            author: newTeaching.author,
+            category: newTeaching.category,
+            mediaUrl:
+              newTeaching.videoUrl || newTeaching.pdfUrl || newTeaching.audioUrl,
+            isPublished: newTeaching.isPublished,
+          });
+        }
+      } catch (err) {}
+
+      showToast('Teaching material saved & updated on /teachings!');
       handleResetForm();
     }
   };
@@ -730,8 +994,13 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       } catch (e) {}
       showToast('Announcement removed & updated on /announcements!');
     } else {
-      setTeachingsList((prev) => prev.filter((i) => i.id !== String(id)));
-      showToast('Item deleted successfully!');
+      const next = teachingsList.filter((i) => i.id !== String(id));
+      setTeachingsList(next);
+      saveStoredTeachings(next);
+      try {
+        await apiClient.delete(`/admin/teachings/${id}`);
+      } catch (e) {}
+      showToast('Teaching material deleted & updated on /teachings!');
     }
 
     if (editingId === String(id)) handleResetForm();
@@ -1135,11 +1404,13 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       );
     }
 
-    // Generic (teachings)
+    // Teachings
     const filtered = teachingsList.filter((i) => {
+      const q = searchQuery.toLowerCase();
       const matchesSearch =
-        i.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (i.subtitle && i.subtitle.toLowerCase().includes(searchQuery.toLowerCase()));
+        i.title.toLowerCase().includes(q) ||
+        (i.titleAm && i.titleAm.toLowerCase().includes(q)) ||
+        (i.author && i.author.toLowerCase().includes(q));
       const matchesCategory =
         selectedCategory === 'All' || i.category === selectedCategory;
       return matchesSearch && matchesCategory;
@@ -1154,50 +1425,58 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
       >
         <td className="py-3.5 px-4">
           <div className="flex items-center gap-3">
-            {i.thumbnail ? (
+            {i.imageUrl ? (
               <img
-                src={i.thumbnail}
+                src={i.imageUrl}
                 alt={i.title}
                 className="w-10 h-10 rounded-lg object-cover border border-[#EAE6DF]"
               />
             ) : (
               <div className="w-10 h-10 rounded-lg bg-[#FAF4E6] flex items-center justify-center text-[#C8952F]">
-                📁
+                📖
               </div>
             )}
             <div className="min-w-0">
               <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
                 {i.title}
               </p>
-              {i.subtitle && (
-                <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
-                  {i.subtitle}
-                </p>
-              )}
+              <div className="flex items-center gap-2 text-[11px] text-[#7C88A8]">
+                <span>{i.author || 'Abune Media'}</span>
+                <span>•</span>
+                <span className="font-medium text-[#b9852a]">
+                  {i.format === 'both'
+                    ? '🎥 Video + 📖 Book'
+                    : i.format === 'pdf'
+                    ? '📄 PDF Book'
+                    : i.format === 'audio'
+                    ? '🎧 Audio Sermon'
+                    : '🎥 Video Lecture'}
+                </span>
+              </div>
             </div>
           </div>
         </td>
 
         <td className="py-3.5 px-4">
           <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FAF4E6] text-[#8B6E32] border border-[#E9D9B2]">
-            {i.category}
+            {i.category || 'General'}
           </span>
         </td>
 
         <td className="py-3.5 px-4">
           <span
             className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-              i.status === 'Published'
+              i.isPublished !== false
                 ? 'bg-[#E6F4EA] text-[#137333]'
                 : 'bg-[#FFF3E0] text-[#B76E00]'
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                i.status === 'Published' ? 'bg-[#137333]' : 'bg-[#B76E00]'
+                i.isPublished !== false ? 'bg-[#137333]' : 'bg-[#B76E00]'
               }`}
             ></span>
-            {i.status}
+            {i.isPublished !== false ? 'Published' : 'Draft'}
           </span>
         </td>
 
@@ -1524,20 +1803,28 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                      Category
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                        Category (ምድብ)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowCategoryModal(true)}
+                        className="text-[11px] font-bold text-[#C8952F] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        ⚙️ Manage Categories ({mezmurCategories.length})
+                      </button>
+                    </div>
                     <select
-                      value={category || 'hymns'}
+                      value={category || (mezmurCategories[0]?.key || 'hymns')}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
+                      className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white font-medium"
                     >
-                      <option value="hymns">Ethiopian Orthodox Hymns (የኢትዮጵያ ኦርቶዶክስ መዝሙራት)</option>
-                      <option value="sundayschool">Sunday School Songs (የሰንበት ት/ቤት መዝሙራት)</option>
-                      <option value="choir">Choir Songs (የመዘምራን መዝሙራት)</option>
-                      <option value="special">Special Occasions (ልዩ በዓላት)</option>
-                      <option value="traditional">Traditional Mezmur (ባህላዊ መዝሙር)</option>
-                      <option value="fasting">Fast & Prayer (ጾምና ጸሎት)</option>
+                      {mezmurCategories.map((c) => (
+                        <option key={c.key} value={c.key}>
+                          {c.en} {c.am ? `(${c.am})` : ''}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -1871,14 +2158,14 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 </>
               )}
 
-              {/* === 5. GALLERY SECTION FORM (MOSAIC & FEATURED ALBUM) === */}
+              {/* === 5. GALLERY SECTION FORM (MOSAIC & COMPLETE ALBUM) === */}
               {section === 'gallery' && (
                 <>
                   <div className="p-3 bg-[#FAF4E6]/60 rounded-xl border border-[#E9D9B2] space-y-2">
                     <label className="block text-xs font-bold text-[#0F1B3E]">
                       Select Gallery Destination
                     </label>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         onClick={() => {
@@ -1887,13 +2174,27 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                           setTitleAm('');
                           setImageUrl('');
                         }}
-                        className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                        className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center ${
                           galleryTarget === 'mosaic'
                             ? 'bg-[#0F1B3E] text-white shadow-xs'
-                            : 'bg-white text-[#505E7B] border'
+                            : 'bg-white text-[#505E7B] border border-[#D5D0C7]'
                         }`}
                       >
                         Mosaic Grid (7 Slots)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGalleryTarget('addToAlbum');
+                          setImageUrl('');
+                        }}
+                        className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center ${
+                          galleryTarget === 'addToAlbum'
+                            ? 'bg-[#0F1B3E] text-white shadow-xs'
+                            : 'bg-white text-[#505E7B] border border-[#D5D0C7]'
+                        }`}
+                      >
+                        ➕ Complete Album
                       </button>
                       <button
                         type="button"
@@ -1905,48 +2206,87 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                           setImageUrl(featuredAlbum.coverSrc);
                           setFeaturedThumbnails(featuredAlbum.thumbnails);
                         }}
-                        className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                        className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center ${
                           galleryTarget === 'featured'
                             ? 'bg-[#0F1B3E] text-white shadow-xs'
-                            : 'bg-white text-[#505E7B] border'
+                            : 'bg-white text-[#505E7B] border border-[#D5D0C7]'
                         }`}
                       >
-                        ⭐ Featured Album
+                        ⭐ Album Info
                       </button>
                     </div>
                   </div>
 
-                  {galleryTarget === 'mosaic' ? (
-                    <>
-                      <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                          Mosaic Grid Slot Position
-                        </label>
-                        <select
-                          value={mosaicSlot}
-                          onChange={(e) => {
-                            const slotNum = Number(e.target.value);
-                            setMosaicSlot(slotNum);
-                            const item = mosaicList.find((m) => m.slot === slotNum);
-                            if (item) {
-                              setTitle(item.titleEn);
-                              setTitleAm(item.titleAm);
-                              setCategory(item.category);
-                              setImageUrl(item.src);
-                            }
-                          }}
-                          className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white font-medium"
-                        >
-                          <option value={1}>Slot 1: Tall Left (Col 1, Row 1-2)</option>
-                          <option value={2}>Slot 2: Top Center (Col 2-3, Row 1)</option>
-                          <option value={3}>Slot 3: Mid Center Left (Col 2, Row 2)</option>
-                          <option value={4}>Slot 4: Mid Center Right (Col 3, Row 2)</option>
-                          <option value={5}>Slot 5: Tall Right (Col 4, Row 1-2)</option>
-                          <option value={6}>Slot 6: Bottom Left (Col 1, Row 3)</option>
-                          <option value={7}>Slot 7: Bottom Mid Left (Col 2, Row 3)</option>
-                        </select>
-                      </div>
+                  {/* Dropdown position selector - exactly matches what the user screenshotted */}
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      {galleryTarget === 'mosaic'
+                        ? 'Mosaic Grid Slot Position'
+                        : galleryTarget === 'addToAlbum'
+                        ? 'Album Placement Position'
+                        : 'Destination Position'}
+                    </label>
+                    <select
+                      value={
+                        galleryTarget === 'addToAlbum'
+                          ? albumPosition === 'top'
+                            ? 'album-top'
+                            : 'album-end'
+                          : galleryTarget === 'featured'
+                          ? 'featured'
+                          : String(mosaicSlot)
+                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'album-top') {
+                          setGalleryTarget('addToAlbum');
+                          setAlbumPosition('top');
+                          setImageUrl('');
+                        } else if (val === 'album-end') {
+                          setGalleryTarget('addToAlbum');
+                          setAlbumPosition('end');
+                          setImageUrl('');
+                        } else if (val === 'featured') {
+                          setGalleryTarget('featured');
+                          setTitle(featuredAlbum.titleEn);
+                          setTitleAm(featuredAlbum.titleAm);
+                          setFeaturedDate(featuredAlbum.dateStr);
+                          setImageUrl(featuredAlbum.coverSrc);
+                          setFeaturedThumbnails(featuredAlbum.thumbnails);
+                        } else {
+                          setGalleryTarget('mosaic');
+                          const slotNum = Number(val);
+                          setMosaicSlot(slotNum);
+                          const item = mosaicList.find((m) => m.slot === slotNum);
+                          if (item) {
+                            setTitle(item.titleEn);
+                            setTitleAm(item.titleAm);
+                            setCategory(item.category);
+                            setImageUrl(item.src);
+                          }
+                        }
+                      }}
+                      className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white font-medium cursor-pointer"
+                    >
+                      <optgroup label="🖼️ Mosaic Grid (7 Homepage Slots)">
+                        <option value={1}>Slot 1: Tall Left (Col 1, Row 1-2)</option>
+                        <option value={2}>Slot 2: Top Center (Col 2-3, Row 1)</option>
+                        <option value={3}>Slot 3: Mid Center Left (Col 2, Row 2)</option>
+                        <option value={4}>Slot 4: Mid Center Right (Col 3, Row 2)</option>
+                        <option value={5}>Slot 5: Tall Right (Col 4, Row 1-2)</option>
+                        <option value={6}>Slot 6: Bottom Left (Col 1, Row 3)</option>
+                        <option value={7}>Slot 7: Bottom Mid Left (Col 2, Row 3)</option>
+                      </optgroup>
+                      <optgroup label="📚 Complete Album (All Photos Page)">
+                        <option value="album-top">⬆️ Complete Album: Add at the Top / Beginning</option>
+                        <option value="album-end">⬇️ Complete Album: Add at the End</option>
+                      </optgroup>
+                    </select>
+                  </div>
 
+                  {/* BRANCH 1: MOSAIC SLOT */}
+                  {galleryTarget === 'mosaic' && (
+                    <>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
@@ -2036,7 +2376,100 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         </div>
                       </div>
                     </>
-                  ) : (
+                  )}
+
+                  {/* BRANCH 2: ADD TO COMPLETE ALBUM (TOP OR END) */}
+                  {galleryTarget === 'addToAlbum' && (
+                    <div className="space-y-4">
+                      {/* Placement Choice */}
+                      <div>
+                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1.5">
+                          Where to Add Photo in Complete Album:
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setAlbumPosition('top')}
+                            className={`py-2 px-3 rounded-lg border text-xs font-bold text-center cursor-pointer transition-all ${
+                              albumPosition === 'top'
+                                ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-sm'
+                                : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:bg-[#FAF9F5]'
+                            }`}
+                          >
+                            ⬆️ At the Top (Beginning)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAlbumPosition('end')}
+                            className={`py-2 px-3 rounded-lg border text-xs font-bold text-center cursor-pointer transition-all ${
+                              albumPosition === 'end'
+                                ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-sm'
+                                : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:bg-[#FAF9F5]'
+                            }`}
+                          >
+                            ⬇️ At the End (Latest)
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-[#7C88A8] mt-1.5">
+                          {albumPosition === 'top'
+                            ? 'Will appear right after the cover photo at the start of /gallery/album.'
+                            : 'Will appear at the very end of the /gallery/album photo grid.'}
+                        </p>
+                      </div>
+
+                      {/* Photo Upload */}
+                      <div>
+                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                          Album Photo Upload
+                        </label>
+                        <div
+                          onClick={() => imageInputRef.current?.click()}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            if (e.dataTransfer.files?.[0]) handleImageUpload(e.dataTransfer.files[0]);
+                          }}
+                          className="border-2 border-dashed border-[#D5D0C7] hover:border-[#C8952F] rounded-xl p-4 text-center bg-[#FAF9F6] cursor-pointer transition-colors"
+                        >
+                          {imageUrl ? (
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={imageUrl}
+                                alt="Preview"
+                                className="w-16 h-16 object-cover rounded-lg border border-[#EAE6DF]"
+                              />
+                              <div className="text-left">
+                                <p className="text-xs font-bold text-[#137333] flex items-center gap-1">
+                                  <IconCheck className="w-3.5 h-3.5" />
+                                  <span>Photo Selected</span>
+                                </p>
+                                <p className="text-[10px] text-[#7C88A8]">Click to replace image</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="w-8 h-8 rounded-full bg-[#FAF4E6] flex items-center justify-center text-[#C8952F] mx-auto mb-1">
+                                <IconUpload className="w-4 h-4" />
+                              </div>
+                              <p className="text-xs font-semibold text-[#2A354F]">
+                                Drop photo here, or <span className="text-[#C8952F] underline">browse</span>
+                              </p>
+                              <p className="text-[10px] text-[#7C88A8]">PNG, JPG up to 10MB</p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Info Banner */}
+                      <div className="p-3 bg-[#FAF4E6] border border-[#E9D9B2] rounded-xl text-xs text-[#0F1B3E]">
+                        ℹ️ This photo will be added to the Complete Album page (<strong>/gallery/album</strong>). Currently has{' '}
+                        <strong>{featuredAlbum.thumbnails.length} photos</strong>.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* BRANCH 3: FEATURED ALBUM SETTINGS & PHOTOS */}
+                  {galleryTarget === 'featured' && (
                     <>
                       <div>
                         <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
@@ -2104,27 +2537,52 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         </div>
                       </div>
 
-                      {/* Additional Album Photos Strip */}
+                      {/* Additional Album Photos Strip with DELETE buttons */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                          Additional Photos in this Album ({featuredThumbnails.length} photos)
-                        </label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {featuredThumbnails.map((src, i) => (
-                            <img
-                              key={i}
-                              src={src}
-                              alt=""
-                              className="w-12 h-10 object-cover rounded-md border"
-                            />
-                          ))}
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-semibold text-[#0F1B3E]">
+                            Complete Album Photos ({featuredThumbnails.length} photos)
+                          </label>
+                          <span className="text-[10px] text-[#7C88A8]">Hover over photo to delete</span>
                         </div>
+                        {featuredThumbnails.length === 0 ? (
+                          <p className="text-xs text-[#7C88A8] italic p-3 border rounded-lg bg-[#FAF9F6]">
+                            No additional photos added yet. Click &quot;+ Add More Photos&quot; or choose &quot;➕ Complete Album&quot; above.
+                          </p>
+                        ) : (
+                          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2 max-h-48 overflow-y-auto p-1 border rounded-lg bg-[#FAF9F6]">
+                            {featuredThumbnails.map((src, i) => (
+                              <div
+                                key={i}
+                                className="relative group aspect-square rounded-md overflow-hidden border border-[#D5D0C7] bg-white shadow-xs"
+                              >
+                                <img
+                                  src={src}
+                                  alt={`Album photo ${i + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveAlbumThumbnail(i);
+                                  }}
+                                  className="absolute inset-0 bg-red-600/85 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold cursor-pointer"
+                                  title="Delete this photo"
+                                >
+                                  <IconTrash className="w-4 h-4 mb-0.5" />
+                                  <span className="text-[9px]">Delete</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <button
                           type="button"
                           onClick={() => multiImageInputRef.current?.click()}
-                          className="text-xs text-[#0F1B3E] font-bold border border-[#D5D0C7] px-3 py-1.5 rounded-lg hover:bg-[#FAF6EF]"
+                          className="text-xs text-[#0F1B3E] font-bold border border-[#D5D0C7] px-3 py-1.5 rounded-lg hover:bg-[#FAF6EF] cursor-pointer"
                         >
-                          + Add More Photos to Album
+                          + Add More Photos from Computer
                         </button>
                       </div>
                     </>
@@ -2137,12 +2595,12 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 <>
                   <div>
                     <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                      Teaching Title
+                      Teaching Title (English / Ge&apos;ez)
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Spiritual Lessons from the Holy Bible"
+                      placeholder="e.g. The Mystery of the Holy Trinity & Dogma"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
@@ -2151,64 +2609,301 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div>
                     <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                      Teacher / Speaker / Author
+                      Teaching Title (Amharic)
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Abba Melke Sedek, Deacon Ermias"
-                      value={subtitle}
-                      onChange={(e) => setSubtitle(e.target.value)}
+                      placeholder="e.g. ምሥጢረ ሥላሴ እና የኦርቶዶክስ ተዋሕዶ ሃይማኖት"
+                      value={titleAm}
+                      onChange={(e) => setTitleAm(e.target.value)}
                       className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={category || 'Holy Bible'}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
-                    >
-                      <option value="Holy Bible">Holy Bible (መጽሐፍ ቅዱስ)</option>
-                      <option value="Dogma">Dogma (ነገረ መለኮት)</option>
-                      <option value="Church History">Church History (የቤተክርስቲያን ታሪክ)</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        Teacher / Speaker / Preacher
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Abba Melke Sedek, Deacon Yared"
+                        value={subtitle}
+                        onChange={(e) => setSubtitle(e.target.value)}
+                        className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-semibold text-[#0F1B3E]">
+                          Category
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowTeachingCatModal(true)}
+                          className="text-[11px] font-semibold text-[#C8952F] hover:text-[#9A701E] flex items-center gap-1 cursor-pointer"
+                        >
+                          ⚙️ Manage Categories
+                        </button>
+                      </div>
+                      <select
+                        value={category || teachingCategories[0]?.en || 'Holy Bible'}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
+                      >
+                        {teachingCategories.map((c) => (
+                          <option key={c.key} value={c.en}>
+                            {c.en} {c.am ? `(${c.am})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                      Cover Banner Image
+                  {/* Format Selector */}
+                  <div className="bg-[#FAF9F5] p-3 rounded-xl border border-[#EAE6DF]">
+                    <label className="block text-xs font-bold text-[#0F1B3E] mb-1">
+                      Teaching Material Format
                     </label>
-                    <div
-                      onClick={() => imageInputRef.current?.click()}
-                      className="border-2 border-dashed border-[#D5D0C7] hover:border-[#C8952F] rounded-xl p-4 text-center bg-[#FAF9F6] cursor-pointer transition-colors"
-                    >
+                    <p className="text-[11px] text-[#7C88A8] mb-2.5">
+                      Select if this lesson has video, study book (PDF), audio sermon, or both.
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setTeachingFormat('both')}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                          teachingFormat === 'both'
+                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
+                        }`}
+                      >
+                        🎥 Video + 📖 Book
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTeachingFormat('pdf')}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                          teachingFormat === 'pdf'
+                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
+                        }`}
+                      >
+                        📄 PDF Book Only
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTeachingFormat('video')}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                          teachingFormat === 'video'
+                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
+                        }`}
+                      >
+                        🎥 Video Only
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTeachingFormat('audio')}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                          teachingFormat === 'audio'
+                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
+                        }`}
+                      >
+                        🎧 Audio Only
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Video URL Input (if both or video) */}
+                  {(teachingFormat === 'both' || teachingFormat === 'video') && (
+                    <div className="rounded-xl border border-[#D5D0C7] bg-white p-3 space-y-2">
+                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                        🎥 Video Lecture URL (YouTube or MP4)
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="e.g. https://www.youtube.com/watch?v=... or MP4 direct link"
+                        value={videoUrl}
+                        onChange={(e) => setVideoUrl(e.target.value)}
+                        className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                      />
+                      <p className="text-[10px] text-[#7C88A8]">
+                        Supports direct YouTube links or MP4 video streaming URLs.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* PDF Study Book Attachment (if both or pdf) */}
+                  {(teachingFormat === 'both' || teachingFormat === 'pdf') && (
+                    <div className="rounded-xl border border-[#D5D0C7] bg-white p-3 space-y-2">
+                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                        📖 Companion Study Book / PDF Document
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="PDF URL or upload file below..."
+                          value={pdfUrl}
+                          onChange={(e) => setPdfUrl(e.target.value)}
+                          className="flex-1 text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => pdfInputRef.current?.click()}
+                          className="px-3 py-2 rounded-lg bg-[#FAF4E6] border border-[#E9D9B2] text-[#8B6E32] hover:bg-[#F2E8CF] text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                        >
+                          <IconUpload className="w-3.5 h-3.5" />
+                          <span>Upload PDF</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                          <label className="block text-[10px] font-semibold text-[#7C88A8] mb-0.5">
+                            PDF File Name
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Trinity_Study_Guide.pdf"
+                            value={pdfFileName}
+                            onChange={(e) => setPdfFileName(e.target.value)}
+                            className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-[#D5D0C7]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-[#7C88A8] mb-0.5">
+                            Page Count
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="e.g. 18"
+                            value={pdfPages}
+                            onChange={(e) => setPdfPages(e.target.value)}
+                            className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-[#D5D0C7]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Audio Attachment (if audio) */}
+                  {teachingFormat === 'audio' && (
+                    <div className="rounded-xl border border-[#D5D0C7] bg-white p-3 space-y-2">
+                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                        🎧 Audio Sermon Track (MP3)
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="Audio URL or upload below..."
+                          value={audioUrl}
+                          onChange={(e) => setAudioUrl(e.target.value)}
+                          className="flex-1 text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => audioInputRef.current?.click()}
+                          className="px-3 py-2 rounded-lg bg-[#FAF4E6] border border-[#E9D9B2] text-[#8B6E32] hover:bg-[#F2E8CF] text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                        >
+                          <IconUpload className="w-3.5 h-3.5" />
+                          <span>Upload Audio</span>
+                        </button>
+                      </div>
+                      {audioName && (
+                        <p className="text-[11px] text-[#137333]">Attached: {audioName}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Duration & Banner Image */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        Duration (Minutes)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 24"
+                        value={teachingDuration}
+                        onChange={(e) => setTeachingDuration(e.target.value)}
+                        className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        Cover Image{' '}
+                        <span className="text-[10px] font-normal text-[#7C88A8]">
+                          (Optional — defaults to Holy Book image)
+                        </span>
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Optional image URL (leave empty for default book cover)..."
+                          value={imageUrl}
+                          onChange={(e) => setImageUrl(e.target.value)}
+                          className="flex-1 text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => imageInputRef.current?.click()}
+                          className="px-2.5 py-1.5 rounded-lg border border-[#D5D0C7] text-xs hover:bg-[#FAF6EF]"
+                          title="Upload Image"
+                        >
+                          Upload
+                        </button>
+                      </div>
                       {imageUrl ? (
-                        <div className="flex items-center gap-3">
+                        <div className="mt-1.5 flex items-center gap-2 text-xs text-[#137333]">
                           <img
                             src={imageUrl}
                             alt="Preview"
-                            className="w-14 h-14 object-cover rounded-lg border"
+                            className="h-7 w-10 rounded object-cover border"
                           />
-                          <span className="text-xs font-semibold text-[#137333]">
-                            Image attached
-                          </span>
+                          <span>Custom cover attached</span>
+                          <button
+                            type="button"
+                            onClick={() => setImageUrl('')}
+                            className="ml-auto text-xs text-[#B3261E] hover:underline"
+                          >
+                            Remove (Use Default Book)
+                          </button>
                         </div>
                       ) : (
-                        <p className="text-xs text-[#7C88A8]">Click to upload banner image</p>
+                        <div className="mt-1.5 flex items-center gap-2 text-xs text-[#7C88A8]">
+                          <img
+                            src={DEFAULT_TEACHING_COVER}
+                            alt="Default Book"
+                            className="h-7 w-10 rounded object-cover border opacity-80"
+                          />
+                          <span>Default Holy Book Cover will be used</span>
+                        </div>
                       )}
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
-                      Teaching Content / Study Notes
+                      Key Study Topics / Outline (One per line)
                     </label>
                     <textarea
-                      rows={4}
-                      placeholder="Enter scriptural explanation or sermon transcription..."
+                      rows={3}
+                      placeholder="1. One Essence, Three Persons&#10;2. Biblical Basis from Genesis to the Gospels&#10;3. Sayings of the Church Fathers"
+                      value={teachingOutline}
+                      onChange={(e) => setTeachingOutline(e.target.value)}
+                      className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      Teaching Content / Study Notes / Full Lecture Text
+                    </label>
+                    <textarea
+                      rows={5}
+                      placeholder="Enter scriptural explanation, sermon transcription, or commentary..."
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                       className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F]"
@@ -2228,15 +2923,368 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors"
+                  className="px-5 py-2 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
-                  Save & Publish
+                  {section === 'gallery' && galleryTarget === 'addToAlbum'
+                    ? albumPosition === 'top'
+                      ? '⬆️ Add to Top of Album'
+                      : '⬇️ Add to End of Album'
+                    : 'Save & Publish'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       </div>
+
+      {/* Category Management Modal */}
+      {showCategoryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+          onClick={() => setShowCategoryModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl border border-[#EAE6DF] shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[#0F1B3E]">
+                  Manage Mezmur Categories (የመዝሙር ምድቦች)
+                </h3>
+                <p className="text-xs text-[#7C88A8]">
+                  Add, edit, or delete categories used in the dropdown and on /mezmur.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCategoryModal(false)}
+                className="w-8 h-8 rounded-full bg-[#FAF9F5] border border-[#EAE6DF] flex items-center justify-center text-[#5A6479] hover:text-[#0F1B3E] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Add New Category Form */}
+            <div className="bg-[#FAF9F5] p-4 rounded-xl border border-[#EAE6DF] space-y-3">
+              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+                + Add New Category
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#5A6479] mb-1">
+                    English Name *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Youth Fellowship Songs"
+                    value={newCatEn}
+                    onChange={(e) => {
+                      setNewCatEn(e.target.value);
+                      if (!newCatKey) {
+                        setNewCatKey(
+                          e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '')
+                        );
+                      }
+                    }}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#5A6479] mb-1">
+                    Amharic Name (የምድቡ ስም)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ምሳሌ፡ የወጣቶች መዝሙራት"
+                    value={newCatAm}
+                    onChange={(e) => setNewCatAm(e.target.value)}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-[#5A6479] mb-1">
+                  Category Key (Identifier, e.g. youth)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. youth"
+                  value={newCatKey}
+                  onChange={(e) => setNewCatKey(e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white font-mono"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleAddCategory}
+                className="w-full py-2 bg-[#0F1B3E] hover:bg-[#19377D] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              >
+                + Add Category to Dropdown
+              </button>
+            </div>
+
+            {/* List of Existing Categories */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+                Current Categories ({mezmurCategories.length})
+              </h4>
+              <div className="divide-y divide-[#EAE6DF] border border-[#EAE6DF] rounded-xl overflow-hidden bg-white">
+                {mezmurCategories.map((c) => {
+                  const isEditing = editingCatKey === c.key;
+                  return (
+                    <div
+                      key={c.key}
+                      className="p-3 flex items-center justify-between gap-3 hover:bg-[#FAF9F5] transition-colors"
+                    >
+                      {isEditing ? (
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={editingCatEn}
+                            onChange={(e) => setEditingCatEn(e.target.value)}
+                            placeholder="English Name"
+                            className="text-xs px-2.5 py-1.5 border border-[#C8952F] rounded-md"
+                          />
+                          <input
+                            type="text"
+                            value={editingCatAm}
+                            onChange={(e) => setEditingCatAm(e.target.value)}
+                            placeholder="Amharic Name"
+                            className="text-xs px-2.5 py-1.5 border border-[#C8952F] rounded-md"
+                          />
+                        </div>
+                      ) : (
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-xs text-[#0F1B3E]">
+                              {c.en}
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#FAF4E6] text-[#8B6E32] font-mono">
+                              {c.key}
+                            </span>
+                          </div>
+                          {c.am && (
+                            <p className="text-[11px] text-[#7C88A8] mt-0.5">
+                              {c.am}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isEditing ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleSaveEditCategory}
+                              className="px-2.5 py-1 bg-[#137333] text-white text-[11px] font-semibold rounded-md hover:bg-[#0e5c28] cursor-pointer"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingCatKey(null)}
+                              className="px-2.5 py-1 bg-[#EAE6DF] text-[#5A6479] text-[11px] font-semibold rounded-md hover:bg-[#d8d2c6] cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditCategory(c)}
+                              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors cursor-pointer"
+                              title="Edit Category"
+                            >
+                              <IconEdit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCategory(c.key, c.en)}
+                              className="p-1.5 text-[#B3261E] hover:bg-[#FCE8E6] rounded-md transition-colors cursor-pointer"
+                              title="Delete Category"
+                            >
+                              <IconTrash className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Teaching Category Management Modal */}
+      {showTeachingCatModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+          onClick={() => setShowTeachingCatModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl border border-[#EAE6DF] shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[#0F1B3E]">
+                  Manage Teaching Categories (የትምህርት ምድቦች)
+                </h3>
+                <p className="text-xs text-[#7C88A8]">
+                  Add, edit, or delete categories displayed in the teachings filter and admin dropdown.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTeachingCatModal(false)}
+                className="w-8 h-8 rounded-full bg-[#FAF9F5] border border-[#EAE6DF] flex items-center justify-center text-[#5A6479] hover:text-[#0F1B3E] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Add New Category Form */}
+            <div className="bg-[#FAF9F5] p-4 rounded-xl border border-[#EAE6DF] space-y-3">
+              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+                + Add New Teaching Category
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#5A6479] mb-1">
+                    English Category Name *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Patristics or Liturgy"
+                    value={newTeachCatEn}
+                    onChange={(e) => setNewTeachCatEn(e.target.value)}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#5A6479] mb-1">
+                    Amharic Category Name (የምድቡ ስም)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="ምሳሌ፡ የአበው ትምህርት ወይም ሥርዓተ ቤተክርስቲያን"
+                    value={newTeachCatAm}
+                    onChange={(e) => setNewTeachCatAm(e.target.value)}
+                    className="w-full text-xs px-3 py-2 rounded-lg border border-[#D5D0C7] focus:outline-none focus:border-[#C8952F] bg-white"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddTeachingCategory}
+                className="w-full py-2 bg-[#0F1B3E] hover:bg-[#19377D] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              >
+                + Add Category to Teachings
+              </button>
+            </div>
+
+            {/* List of Existing Categories */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+                Current Teaching Categories ({teachingCategories.length})
+              </h4>
+              <div className="divide-y divide-[#EAE6DF] border border-[#EAE6DF] rounded-xl overflow-hidden bg-white">
+                {teachingCategories.map((c) => {
+                  const isEditing = editingTeachCatKey === c.key;
+                  return (
+                    <div
+                      key={c.key}
+                      className="p-3 flex items-center justify-between gap-3 hover:bg-[#FAF9F5] transition-colors"
+                    >
+                      {isEditing ? (
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={editingTeachCatEn}
+                            onChange={(e) => setEditingTeachCatEn(e.target.value)}
+                            placeholder="English Name"
+                            className="text-xs px-2.5 py-1.5 border border-[#C8952F] rounded-md"
+                          />
+                          <input
+                            type="text"
+                            value={editingTeachCatAm}
+                            onChange={(e) => setEditingTeachCatAm(e.target.value)}
+                            placeholder="Amharic Name"
+                            className="text-xs px-2.5 py-1.5 border border-[#C8952F] rounded-md"
+                          />
+                        </div>
+                      ) : (
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-xs text-[#0F1B3E]">
+                              {c.en}
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#FAF4E6] text-[#8B6E32] font-mono">
+                              {c.key}
+                            </span>
+                          </div>
+                          {c.am && (
+                            <p className="text-[11px] text-[#7C88A8] mt-0.5">
+                              {c.am}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isEditing ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleSaveEditTeachingCategory}
+                              className="px-2.5 py-1 bg-[#137333] text-white text-[11px] font-semibold rounded-md hover:bg-[#0e5c28] cursor-pointer"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingTeachCatKey(null)}
+                              className="px-2.5 py-1 bg-[#EAE6DF] text-[#5A6479] text-[11px] font-semibold rounded-md hover:bg-[#d8d2c6] cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditTeachingCategory(c)}
+                              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors cursor-pointer"
+                              title="Edit Category"
+                            >
+                              <IconEdit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTeachingCategory(c.key, c.en)}
+                              className="p-1.5 text-[#B3261E] hover:bg-[#FCE8E6] rounded-md transition-colors cursor-pointer"
+                              title="Delete Category"
+                            >
+                              <IconTrash className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

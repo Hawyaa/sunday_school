@@ -5,7 +5,14 @@
 
 export type MezmurIconKey = 'music' | 'users' | 'star' | 'building' | 'pray';
 
-export const CATEGORIES: { key: string; en: string; am: string; icon: MezmurIconKey }[] = [
+export interface MezmurCategory {
+  key: string;
+  en: string;
+  am: string;
+  icon?: MezmurIconKey | string;
+}
+
+export const INITIAL_MEZMUR_CATEGORIES: MezmurCategory[] = [
   { key: 'hymns', en: 'Ethiopian Orthodox Hymns', am: 'የኢትዮጵያ ኦርቶዶክስ መዝሙራት', icon: 'music' },
   { key: 'sundayschool', en: 'Sunday School Songs', am: 'የሰንበት ት/ቤት መዝሙራት', icon: 'users' },
   { key: 'choir', en: 'Choir Songs', am: 'የመዘምራን መዝሙራት', icon: 'music' },
@@ -13,6 +20,8 @@ export const CATEGORIES: { key: string; en: string; am: string; icon: MezmurIcon
   { key: 'traditional', en: 'Traditional Mezmur', am: 'ባህላዊ መዝሙር', icon: 'building' },
   { key: 'fasting', en: 'Fast & Prayer', am: 'ጾምና ጸሎት', icon: 'pray' },
 ];
+
+export const CATEGORIES = INITIAL_MEZMUR_CATEGORIES;
 
 export interface MezmurItem {
   id: string;

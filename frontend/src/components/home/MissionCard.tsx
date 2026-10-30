@@ -1,55 +1,99 @@
 'use client';
 
-/** MissionCard.tsx — "Our Mission" band: cross + text, Faith/Knowledge/Service, St. Athanasius quote. */
+/**
+ * MissionCard.tsx
+ *
+ * "Preserving Faith, Sharing Heritage" mission section:
+ * - Left: Ethiopian Cross, large heading, mission description, and 3 pillars (Faith, Knowledge, Service).
+ * - Right: Large rounded warm candlelit quote card: "The Church is the anchor of our soul."
+ */
 
 import React from 'react';
-import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { Cross } from './Cross';
-import { HomeIcon, type HomeIconName } from './HomeIcons';
-
-const PF = { fontFamily: '"Playfair Display", serif' };
-const VALUES: { icon: HomeIconName; solid?: boolean; t: string; d: string }[] = [
-  { icon: 'book', solid: true, t: 'Faith', d: 'Guided by the teachings of the Church' },
-  { icon: 'users', solid: true, t: 'Knowledge', d: 'Learning for a better tomorrow' },
-  { icon: 'heart', solid: true, t: 'Service', d: 'Together for a stronger community' },
-];
-
+import { Reveal } from '@/components/motion/Reveal';
+import { Parallax } from '@/components/motion/Parallax';
 export function MissionCard() {
   const { locale } = useAppStore();
+  const isAm = locale === 'am';
 
   return (
-    <section className="mt-[26px] grid grid-cols-1 items-center gap-[18px] py-[22px] lg:grid-cols-[1.25fr_1.05fr_1fr]">
-      <div className="relative pl-[62px]">
-        <Cross className="absolute left-0 top-0.5 h-[66px]" />
-        <h2 className="mb-1.5 text-[27px] font-bold text-[#0f2352]" style={PF}>{locale === 'am' ? 'ተልዕኳችን' : 'Our Mission'}</h2>
-        <p className="mb-3.5 max-w-[280px] text-[10.5px] text-[#39445d]">
-          {locale === 'am'
-            ? 'አቡነ ሚዲያ የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን እምነትን፣ መንፈሳዊ እሴቶችን እና ባህላዊ ቅርሶችን ለማስፋፋት የተፈጠረ ዲጂታል መድረክ ነው።'
-            : 'Abune Media is a digital platform created to spread the teachings, spiritual values, and cultural heritage of the Ethiopian Orthodox Tewahedo Church. We aim to connect our community through faith, knowledge, and service.'}
-        </p>
-        <Link href="/about" className="inline-flex items-center gap-2.5 rounded-full bg-gradient-to-b from-[#d3a03c] to-[#b9852a] px-[22px] py-2.5 text-[11px] font-semibold text-white">
-          {locale === 'am' ? 'ተጨማሪ ያንብቡ' : 'Learn More'} <HomeIcon name="arrow" className="h-3.5 w-3.5" />
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {VALUES.map((v) => (
-          <div key={v.t} className="rounded-[10px] bg-[#fffdf9]/70 px-1.5 py-2 text-center">
-            <span className="mx-auto mb-1.5 grid h-[42px] w-[42px] place-items-center rounded-full border border-[#f1dcae] bg-gradient-to-b from-[#fcefd6] to-[#f6e3bf] text-[#bf7d17]">
-              <HomeIcon name={v.icon} solid={v.solid} className="h-[21px] w-[21px]" />
-            </span>
-            <b className="block text-[11.5px] font-semibold text-[#0f2352]" style={PF}>{v.t}</b>
-            <span className="mt-[3px] block text-[8px] leading-[1.4] text-[#5a6479]">{v.d}</span>
+    <section aria-label="Our Mission" className="max-w-[1140px] mx-auto px-4 sm:px-6 py-14 sm:py-16">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        {/* Left Column: Heading & Mission Details */}
+        <div className="lg:col-span-7">
+          <div className="text-[#C99A3B] mb-3">
+            <Cross className="w-6 h-10" />
           </div>
-        ))}
-      </div>
 
-      <div className="relative min-h-[150px] rounded-[10px] bg-[linear-gradient(90deg,rgba(245,238,225,.97)_35%,rgba(245,238,225,.15)),url('https://i.pinimg.com/236x/54/60/fa/5460fadba1fc15124905df442994a08a.jpg')] bg-cover bg-[right_bottom] px-6 py-5 text-[13px] font-semibold italic leading-[1.7] text-[#33466d]" style={PF}>
-        “The Church is the mother of us all.”
-        <small className="mt-2 block text-[10px] text-[#5a6479]" style={{ fontFamily: 'Inter, sans-serif' }}>— St. Athanasius</small>
-        <div className="mt-[22px] flex w-[130px] items-center gap-2" aria-hidden>
-          <span className="h-px flex-1 bg-[#c8952f]" /><Cross className="h-[22px]" /><span className="h-px flex-1 bg-[#c8952f]" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[#C99A3B] block mb-2">
+            {isAm ? 'ተልዕኳችን' : 'OUR MISSION'}
+          </span>
+
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#0F1B3E] leading-tight mb-4">
+            {isAm ? 'እምነትን መጠበቅ፤ ቅርስን ማካፈል' : 'Preserving Faith, Sharing Heritage'}
+          </h2>
+
+          <p className="text-sm sm:text-base text-[#505E7B] leading-relaxed mb-8 max-w-xl">
+            {isAm
+              ? 'አቡነ ሚዲያ የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን እምነትን፣ መንፈሳዊ እሴቶችን እና ባህላዊ ቅርሶችን ለማስፋፋት የተፈጠረ ዲጂታል መድረክ ነው።'
+              : 'Axum Media is a digital platform created to spread the teachings and cultural heritage of the Ethiopian Orthodox Tewahedo Church.'}
+          </p>
+
+          {/* 3 Pillars */}
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#EAE6DF]">
+            <div>
+              <strong className="block text-base sm:text-lg font-serif font-bold text-[#0F1B3E]">
+                {isAm ? 'እምነት' : 'Faith'}
+              </strong>
+              <span className="text-xs text-[#7C88A8]">
+                {isAm ? 'ትምህርቶች' : 'Teachings'}
+              </span>
+            </div>
+            <div>
+              <strong className="block text-base sm:text-lg font-serif font-bold text-[#0F1B3E]">
+                {isAm ? 'እውቀት' : 'Knowledge'}
+              </strong>
+              <span className="text-xs text-[#7C88A8]">
+                {isAm ? 'መማር' : 'Learn'}
+              </span>
+            </div>
+            <div>
+              <strong className="block text-base sm:text-lg font-serif font-bold text-[#0F1B3E]">
+                {isAm ? 'አገልግሎት' : 'Service'}
+              </strong>
+              <span className="text-xs text-[#7C88A8]">
+                {isAm ? 'ማገልገል' : 'Serve'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Quote Card with warm glowing candlelit flare */}
+        <div className="lg:col-span-5">
+          <div className="relative rounded-3xl overflow-hidden aspect-[4/3] shadow-2xl border border-[#EAE6DF] bg-[#180A03] p-7 sm:p-9 flex flex-col justify-end">
+            {/* Candle glow radial gradient */}
+            <Parallax speed={0.06} className="absolute inset-x-0 -inset-y-[12%]">
+  <div
+    aria-hidden
+    className="absolute inset-0 bg-[radial-gradient(circle_at_65%_45%,rgba(235,145,30,0.6)_0%,rgba(165,80,10,0.3)_45%,rgba(15,8,3,0.95)_85%)]"
+  />
+</Parallax>
+            {/* Dark bottom vignette */}
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30"
+            />
+
+            {/* Quote Text */}
+            <div className="relative z-10">
+              <blockquote className="font-serif italic text-xl sm:text-2xl md:text-3xl text-white font-medium leading-snug drop-shadow-md">
+                {isAm
+                  ? '“ቤተክርስቲያን የነፍሳችን መልሕቅ ናት።”'
+                  : '“The Church is the anchor of our soul.”'}
+              </blockquote>
+            </div>
+          </div>
         </div>
       </div>
     </section>

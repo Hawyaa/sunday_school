@@ -39,7 +39,7 @@ export function MezmurCategoriesCard({ active, onSelect }: Props) {
 
       <ul>
         {CATEGORIES.map((c, i) => {
-          const Icon = ICONS[c.icon];
+          const Icon = (c.icon && ICONS[c.icon as MezmurIconKey]) || MusicIcon;
           const isActive = active === c.key;
           return (
             <li key={c.key} className={i < CATEGORIES.length - 1 ? 'border-b border-[#efe6d3]' : ''}>

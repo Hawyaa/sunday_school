@@ -19,29 +19,33 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import {
   getStoredGalleryMosaic,
   getStoredFeaturedAlbum,
   GalleryMosaicItem,
   FeaturedAlbumData,
+  INITIAL_GALLERY_MOSAIC,
+  INITIAL_FEATURED_ALBUM,
 } from '@/lib/contentStore';
 
 export function GalleryMosaicGrid() {
   const { locale } = useAppStore();
   const isAm = locale === 'am';
+  const router = useRouter();
 
-  const [mosaicItems, setMosaicItems] = useState<GalleryMosaicItem[]>(() =>
-    getStoredGalleryMosaic()
-  );
-  const [featuredAlbum, setFeaturedAlbum] = useState<FeaturedAlbumData>(() =>
-    getStoredFeaturedAlbum()
-  );
+  const [mosaicItems, setMosaicItems] = useState<GalleryMosaicItem[]>(INITIAL_GALLERY_MOSAIC);
+  const [featuredAlbum, setFeaturedAlbum] = useState<FeaturedAlbumData>(INITIAL_FEATURED_ALBUM);
   const [activeImage, setActiveImage] = useState<{ src: string; alt: string; title: string } | null>(
     null
   );
 
   useEffect(() => {
+    // Sync initial client-side localStorage after hydration to avoid SSR mismatch
+    setMosaicItems(getStoredGalleryMosaic());
+    setFeaturedAlbum(getStoredFeaturedAlbum());
+
     const handleUpdate = () => {
       setMosaicItems(getStoredGalleryMosaic());
       setFeaturedAlbum(getStoredFeaturedAlbum());
@@ -245,21 +249,23 @@ export function GalleryMosaicGrid() {
 
         {/* Featured Bottom Card (grid 3/5, row 3/4) */}
         <div className="bg-white rounded-[14px] border border-[#E8EEF5] shadow-[0_4px_16px_rgba(15,27,62,0.05)] p-3 grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-4 items-center overflow-hidden lg:col-start-3 lg:col-end-5 lg:row-start-3 lg:row-end-4">
+          {/* Clicking the cover image navigates to the full album page */}
           <div
-            onClick={() =>
-              setActiveImage({
-                src: featuredAlbum.coverSrc,
-                alt: featuredAlbum.titleEn,
-                title: isAm ? featuredAlbum.titleAm : featuredAlbum.titleEn,
-              })
-            }
-            className="w-full h-[136px] rounded-[10px] overflow-hidden shrink-0 bg-slate-100 cursor-pointer"
+            onClick={() => router.push('/gallery/album')}
+            className="w-full h-[136px] rounded-[10px] overflow-hidden shrink-0 bg-slate-100 cursor-pointer group relative"
+            title={isAm ? 'ሁሉንም ፎቶዎች ይመልከቱ' : 'View Full Album'}
           >
             <img
               src={featuredAlbum.coverSrc}
               alt="Featured Album Main"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
+            {/* Hover overlay hint */}
+            <div className="absolute inset-0 bg-[#0F1B3E]/0 group-hover:bg-[#0F1B3E]/40 transition-colors flex items-center justify-center">
+              <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity bg-[#C99A3B]/90 px-3 py-1 rounded-full">
+                {isAm ? 'ሁሉንም ይመልከቱ' : 'View All'}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-col justify-between h-full py-1 pr-1 min-w-0">
@@ -298,13 +304,7 @@ export function GalleryMosaicGrid() {
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F1F4F9]">
               <button
                 type="button"
-                onClick={() =>
-                  setActiveImage({
-                    src: featuredAlbum.coverSrc,
-                    alt: featuredAlbum.titleEn,
-                    title: `${isAm ? featuredAlbum.titleAm : featuredAlbum.titleEn} (Cover)`,
-                  })
-                }
+                onClick={() => router.push('/gallery/album')}
                 className="text-[11px] font-semibold text-[#C99A3B] hover:underline cursor-pointer"
               >
                 {isAm ? 'የተሟላ አልበም' : 'Complete Album'}

@@ -1,0 +1,36 @@
+/* ===== Events page: smaller type scale ===== */
+.events-page { font-size: 15px; }
+
+.ev-eyebrow { font-size: 11px; }
+.ev-count { font-size: 13px; }
+
+.ev-btn { font-size: 13px; padding: 11px 20px; }
+.ev-field { height: 46px; }
+.ev-field input,
+.ev-field select { font-size: 14px; }
+.ev-btn--dark { height: 46px !important; }
+
+.ev-featured h2 { font-size: clamp(24px, 2.4vw, 32px); }
+.ev-featured p { font-size: 14px; }
+.ev-pill { font-size: 10.5px; }
+.ev-meta { font-size: 12.5px; }
+
+.ev-row h3 { font-size: 21px; }
+.ev-row p { font-size: 13.5px; }
+.ev-cat { font-size: 10.5px; }
+.ev-row__tag time { font-size: 11.5px; }
+
+.ev-date { width: 54px; }
+.ev-date b { font-size: 22px; }
+.ev-date span { font-size: 9.5px; }
+
+.ev-panel h2 { font-size: 18px; }
+.ev-cal__grid { font-size: 12.5px; }
+.ev-cal__grid .dow { font-size: 10px; }
+.ev-cal__key { font-size: 11.5px; }
+.ev-cats button { font-size: 14px; padding: 10px 0; }
+.ev-cats b { font-size: 12px; }
+.ev-cta h2 { font-size: 21px; }
+.ev-cta p { font-size: 13.5px; }
+
+.ev-empty b { font-size: 20px; }

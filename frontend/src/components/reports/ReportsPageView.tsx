@@ -1,117 +1,48 @@
 'use client';
 
 /**
- * ReportsPageView.tsx  (NEW — components/reports/ReportsPageView.tsx)
+ * ReportsPageView.tsx  (components/reports/ReportsPageView.tsx)
  *
- * Composes the whole Reports page: hero, filter bar, list, security banner
- * and sidebar. Header/Footer come from your existing layout, so they are
- * NOT included here.
- *
- * Use it from  src/app/reports/page.tsx :
- *
- *   import { ReportsPageView } from '@/components/reports/ReportsPageView';
- *   export default function Page() { return <ReportsPageView />; }
- *
- * Replace SAMPLE_REPORTS with your real data source (store / API) when ready.
+ * Composes the Reports page: hero, filter bar, list, sidebar and the PDF viewer pop-up.
+ * - Restricted / locked reports are not shown.
+ * - The list renders only AFTER the page has mounted in the browser. This keeps the server HTML
+ *   and the first client render identical (fixes the "Hydration failed" error when the real
+ *   data comes from a store / localStorage / API).
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ReportsHero } from '@/components/reports/ReportsHero';
 import { ReportsFilterBar, type ReportSort } from '@/components/reports/ReportsFilterBar';
 import { ReportsList } from '@/components/reports/ReportsList';
-import { ReportsSecurityBanner } from '@/components/reports/ReportsSecurityBanner';
 import { ReportsSidebar } from '@/components/reports/ReportsSidebar';
+import { ReportViewer } from '@/components/reports/ReportViewer';
 import type { ChurchReport } from '@/types/report';
 
-/**
- * Sample data matching the HTML mock. Adjust fields to your ChurchReport type
- * (iconKey and publishedAt are optional extras — add them to the type if you
- * want per-report icons and real date sorting).
- */
+/** Sample data (used only when the page passes no `reports`). */
 const SAMPLE_REPORTS = [
-  {
-    id: '1',
-    title: 'Clergy Service Report',
-    dateStr: 'April 2025',
-    fileSize: '2.4 MB',
-    description:
-      'Administrative and clergy service summary report, including pastoral visits, liturgical activities, and community engagement.',
-    fileUrl: '#',
-    isRestricted: false,
-    category: 'Administrative',
-    year: '2025',
-    iconKey: 'doc',
-    publishedAt: '2025-04-01',
-  },
-  {
-    id: '2',
-    title: 'Education Department Activity Report',
-    dateStr: 'Megabit 2025',
-    fileSize: '1.8 MB',
-    description:
-      'Educational and student activity performance report, including Sunday School, youth programs, and academic progress.',
-    fileUrl: '#',
-    isRestricted: false,
-    category: 'Administrative',
-    year: '2025',
-    iconKey: 'book',
-    publishedAt: '2025-03-01',
-  },
-  {
-    id: '3',
-    title: 'Choirs Service Performance Report',
-    dateStr: 'Yekatit 2025',
-    fileSize: '2.3 MB',
-    description:
-      'Sacred music and choir group ministry performance report, including festivals, rehearsals, and special services.',
-    fileUrl: '#',
-    isRestricted: false,
-    category: 'Administrative',
-    year: '2025',
-    iconKey: 'music',
-    publishedAt: '2025-02-01',
-  },
-  {
-    id: '4',
-    title: 'Audit Financial Report',
-    dateStr: 'Tir 2024',
-    fileSize: '2.7 MB',
-    description:
-      'Administrative and financial audit document summary, including budget analysis and expenditure reports.',
-    fileUrl: '#',
-    isRestricted: false,
-    category: 'Financial',
-    year: '2024',
-    iconKey: 'chart',
-    publishedAt: '2024-01-01',
-  },
-  {
-    id: '5',
-    title: 'Financial Management Report',
-    dateStr: 'Hidar 2024',
-    fileSize: '1.2 MB',
-    description: '',
-    fileUrl: '',
-    isRestricted: true,
-    category: 'Financial',
-    year: '2024',
-    iconKey: 'lock',
-    publishedAt: '2023-12-01',
-  },
+  { id: '1', title: 'Clergy Service Report', dateStr: 'April 2025', fileSize: '2.4 MB', description: 'Administrative and clergy service summary report, including pastoral visits, liturgical activities, and community engagement.', fileUrl: '#', isRestricted: false, category: 'Administrative', year: '2025', iconKey: 'doc', publishedAt: '2025-04-01' },
+  { id: '2', title: 'Education Department Activity Report', dateStr: 'Megabit 2025', fileSize: '1.8 MB', description: 'Educational and student activity performance report, including Sunday School, youth programs, and academic progress.', fileUrl: '#', isRestricted: false, category: 'Administrative', year: '2025', iconKey: 'book', publishedAt: '2025-03-01' },
+  { id: '3', title: 'Choirs Service Performance Report', dateStr: 'Yekatit 2025', fileSize: '2.3 MB', description: 'Sacred music and choir group ministry performance report, including festivals, rehearsals, and special services.', fileUrl: '#', isRestricted: false, category: 'Administrative', year: '2025', iconKey: 'music', publishedAt: '2025-02-01' },
+  { id: '4', title: 'Audit Financial Report', dateStr: 'Tir 2024', fileSize: '2.7 MB', description: 'Administrative and financial audit document summary, including budget analysis and expenditure reports.', fileUrl: '#', isRestricted: false, category: 'Financial', year: '2024', iconKey: 'chart', publishedAt: '2024-01-01' },
 ] as unknown as ChurchReport[];
 
 type Extra = { year?: string; category?: string; publishedAt?: string };
 
 export function ReportsPageView({ reports = SAMPLE_REPORTS, isLoading = false }: { reports?: ChurchReport[]; isLoading?: boolean }) {
+  const [mounted, setMounted] = useState(false);
   const [year, setYear] = useState('All');
   const [category, setCategory] = useState('All Types');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<ReportSort>('newest');
+  const [viewing, setViewing] = useState<ChurchReport | null>(null); // report open in the PDF viewer
+
+  useEffect(() => setMounted(true), []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
 
     const list = reports.filter((r) => {
+      if (r.isRestricted) return false; // locked reports are not shown
       const x = r as ChurchReport & Extra;
       if (year !== 'All' && x.year && x.year !== year) return false;
       if (category !== 'All Types' && x.category && x.category !== category) return false;
@@ -147,13 +78,16 @@ export function ReportsPageView({ reports = SAMPLE_REPORTS, isLoading = false }:
               sort={sort}
               onSortChange={setSort}
             />
-            <ReportsList reports={filtered} isLoading={isLoading} />
-            <ReportsSecurityBanner />
+            {/* skeleton until mounted, so server HTML === first client render */}
+            <ReportsList reports={filtered} isLoading={isLoading || !mounted} onView={setViewing} />
           </section>
 
           <ReportsSidebar />
         </div>
       </div>
+
+      {/* PDF opens here, inside the website */}
+      <ReportViewer report={viewing} onClose={() => setViewing(null)} />
     </div>
   );
 }

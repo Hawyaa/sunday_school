@@ -2,14 +2,19 @@
 
 /**
  * app/about/page.tsx — About Us Page
- *
- * Order matches the design:
- * Hero > Legacy of Abune Diskoros > Journey > Mission/Vision/Values
- * > Sunday School > Programs > CTA > Footer.
- * ValuesSection now renders inside MissionVisionSection, so it's not imported here.
+ * Redesigned to exactly match the Tewahedo design mockup:
+ * - Hero with At-a-glance stats card & diamond lattice background
+ * - Golden tricolor ribbon
+ * - The Legacy of Abune Diskoros (arch portrait, facts, expandable bio)
+ * - A Path of Faith and Service (horizontal milestone timeline)
+ * - Guided by Faith, Driven by Service (3 pillar cards + James 2:17 quote)
+ * - Sunday School Journey (deep navy section, 3 metrics + Mark 10:14 quote card)
+ * - More Ways to Serve (4 ministry cards)
+ * - Be Part of Our Mission (CTA banner)
  */
 
 import React from 'react';
+import './about.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AboutHero } from '@/components/about/AboutHero';
@@ -22,27 +27,42 @@ import { AboutCta } from '@/components/about/AboutCta';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#f5eee1]">
-      {/* 1. Header Navigation */}
+    <div className="about-page">
+      {/* SVG Defs for Orthodox Cross & Lattice Pattern */}
+      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+        <defs>
+          <symbol id="x" viewBox="0 0 64 64">
+            <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round">
+              <path d="M26 6h12v14h14v12H38v26H26V32H12V20h14z" />
+              <circle cx="32" cy="26" r="5" />
+              <circle cx="32" cy="6" r="2" fill="currentColor" />
+              <circle cx="12" cy="26" r="2" fill="currentColor" />
+              <circle cx="52" cy="26" r="2" fill="currentColor" />
+              <circle cx="32" cy="58" r="2" fill="currentColor" />
+            </g>
+          </symbol>
+          <pattern id="lat" width="64" height="64" patternUnits="userSpaceOnUse">
+            <path
+              d="M32 6 58 32 32 58 6 32z M32 18 46 32 32 46 18 32z"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2"
+            />
+          </pattern>
+        </defs>
+      </svg>
+
       <Header />
-
-      {/* 2. Full-width hero (outside the container so it runs edge to edge) */}
-      <AboutHero />
-
-      {/* 3. Main Page Container */}
-      <main className="max-w-[1200px] mx-auto px-4 sm:px-9 pb-[26px] w-full flex-1">
+      <main>
+        <AboutHero />
         <LeadersSection />
         <JourneyTimeline />
         <MissionVisionSection />
         <SundaySchoolSection />
         <ServicesContentSection />
-      </main>
-
-      {/* 4 + 5. CTA strip and footer sit flush (no gap): any top margin on the footer root is cancelled here */}
-      <div className="flex flex-col [&>*]:!mt-0">
         <AboutCta />
-        <Footer />
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

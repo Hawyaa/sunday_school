@@ -13,7 +13,11 @@ import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { SiteLogo } from '@/components/layout/SiteLogo';
 
-export function Header() {
+interface HeaderProps {
+  transparent?: boolean;
+}
+
+export function Header({ transparent = false }: HeaderProps) {
   const pathname = usePathname();
   const { locale, toggleLocale } = useAppStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,7 +26,6 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
     { href: '/events', label: 'Events' },
-    { href: '/announcements', label: 'Announcements' },
     { href: '/reports', label: 'Reports' },
     { href: '/mezmur', label: 'Mezmur' },
     { href: '/teachings', label: 'Teachings' },
@@ -31,23 +34,37 @@ export function Header() {
   ];
 
   return (
-    <header className="bg-white border-b-2 border-[#C99A3B] sticky top-0 z-50 shadow-[0_3px_12px_rgba(15,27,62,0.04)]">
+    <header
+      className={
+        transparent
+          ? 'absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/75 via-black/35 to-transparent border-none text-white'
+          : 'bg-white border-b-2 border-[#C99A3B] sticky top-0 z-50 shadow-[0_3px_12px_rgba(15,27,62,0.04)] text-[#0F1B3E]'
+      }
+    >
       <div className="max-w-[1280px] mx-auto px-6 sm:px-9 py-3 flex items-center justify-between">
         {/* Logo Group */}
         <Link href="/" className="flex items-center gap-3 no-underline group shrink-0">
-          <SiteLogo size={52} className="group-hover:scale-105 transition-transform shadow-xs" />
+          <SiteLogo size={48} className="group-hover:scale-105 transition-transform shadow-xs" />
           <div className="flex flex-col">
-            <h1 className="text-xl font-extrabold text-[#0F1B3E] leading-[1.1] m-0">
+            <h1
+              className={`text-lg sm:text-xl font-extrabold leading-[1.1] m-0 font-serif ${
+                transparent ? 'text-white' : 'text-[#0F1B3E]'
+              }`}
+            >
               አቡነ ሚዲያ
             </h1>
-            <span className="text-[11px] text-[#A27B2C] tracking-[1.5px] uppercase font-bold block mt-0.5">
-              ABUNE MEDIA
+            <span
+              className={`text-[10px] sm:text-[11px] tracking-[1.5px] uppercase font-bold block mt-0.5 ${
+                transparent ? 'text-[#D4AF37]' : 'text-[#A27B2C]'
+              }`}
+            >
+              ETHIOPIAN ORTHODOX
             </span>
           </div>
         </Link>
 
         {/* Desktop Navigation Menu */}
-        <nav className="hidden lg:flex items-center gap-5 xl:gap-[22px]">
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-[24px]">
           {navLinks.map((link) => {
             const isActive =
               pathname === link.href ||
@@ -60,13 +77,17 @@ export function Header() {
                 href={link.href}
                 className={`text-[13.5px] font-semibold transition-colors relative py-1 ${
                   isActive
-                    ? 'text-[#0F1B3E] font-bold'
+                    ? transparent
+                      ? 'text-white font-bold'
+                      : 'text-[#0F1B3E] font-bold'
+                    : transparent
+                    ? 'text-white/80 hover:text-white'
                     : 'text-[#2A354F] hover:text-[#0F1B3E]'
                 }`}
               >
                 {link.label}
                 {isActive && (
-                  <span className="absolute -bottom-[14px] left-0 right-0 h-[3px] bg-[#C99A3B] rounded-[2px]" />
+                  <span className="absolute -bottom-[10px] left-0 right-0 h-[2.5px] bg-[#C99A3B] rounded-[2px]" />
                 )}
               </Link>
             );
@@ -74,24 +95,43 @@ export function Header() {
         </nav>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-3.5 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-3.5">
           {/* Language Switcher Pill */}
           <button
             type="button"
             onClick={toggleLocale}
-            className="bg-[#0F1B3E] text-white border-[1.5px] border-[#C99A3B] rounded-full py-1 pl-3 pr-1.5 flex items-center gap-2 text-xs font-bold cursor-pointer transition hover:bg-[#13224F]"
+            className={`border rounded-full py-1 pl-3 pr-1.5 flex items-center gap-2 text-xs font-bold cursor-pointer transition ${
+              transparent
+                ? 'bg-black/30 text-white border-white/30 hover:bg-black/50'
+                : 'bg-[#0F1B3E] text-white border-[#C99A3B] hover:bg-[#13224F]'
+            }`}
           >
             <span>{locale === 'am' ? 'አማ' : 'EN'}</span>
-            <span className="bg-white text-[#0F1B3E] px-2 py-0.5 rounded-xl text-[11px] font-extrabold">
+            <span
+              className={`px-2 py-0.5 rounded-xl text-[11px] font-extrabold ${
+                transparent ? 'bg-[#C99A3B] text-[#0F1B3E]' : 'bg-white text-[#0F1B3E]'
+              }`}
+            >
               {locale === 'am' ? 'EN' : 'አማ'}
             </span>
           </button>
+
+          {/* Get Started Gold Button (from structure) */}
+          <Link
+            href="/register"
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#C99A3B] hover:bg-[#d8a846] text-[#0F1B3E] text-xs font-bold shadow-md transition-all cursor-pointer"
+          >
+            <span>Get Started</span>
+            <span>→</span>
+          </Link>
 
           {/* Calendar Icon Button */}
           <Link
             href="/schedule"
             title="Service Schedule & Calendar"
-            className="text-[#0F1B3E] hover:text-[#C99A3B] text-lg p-1.5 transition flex items-center justify-center"
+            className={`text-lg p-1.5 transition flex items-center justify-center ${
+              transparent ? 'text-white/90 hover:text-[#C99A3B]' : 'text-[#0F1B3E] hover:text-[#C99A3B]'
+            }`}
           >
             📅
           </Link>
@@ -101,7 +141,9 @@ export function Header() {
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation"
-            className="text-[#0F1B3E] hover:text-[#C99A3B] text-lg p-1.5 transition flex items-center justify-center cursor-pointer lg:hidden"
+            className={`text-lg p-1.5 transition flex items-center justify-center cursor-pointer lg:hidden ${
+              transparent ? 'text-white hover:text-[#C99A3B]' : 'text-[#0F1B3E] hover:text-[#C99A3B]'
+            }`}
           >
             {mobileMenuOpen ? '✕' : '☰'}
           </button>
@@ -110,7 +152,7 @@ export function Header() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-[#E8EEF5] px-6 py-4 space-y-2.5 shadow-lg animate-in slide-in-from-top duration-200">
+        <div className="lg:hidden bg-[#0F1B3E] text-white border-t border-white/10 px-6 py-4 space-y-2.5 shadow-2xl animate-in slide-in-from-top duration-200">
           {navLinks.map((link) => {
             const isActive =
               pathname === link.href ||
@@ -121,16 +163,25 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-2 text-sm font-semibold transition-colors border-b border-slate-50 ${
+                className={`block py-2 text-sm font-semibold transition-colors border-b border-white/5 ${
                   isActive
-                    ? 'text-[#0F1B3E] font-bold border-l-4 border-l-[#C99A3B] pl-2'
-                    : 'text-[#2A354F] hover:text-[#0F1B3E]'
+                    ? 'text-[#C99A3B] font-bold border-l-4 border-l-[#C99A3B] pl-2'
+                    : 'text-white/80 hover:text-white'
                 }`}
               >
                 {link.label}
               </Link>
             );
           })}
+          <div className="pt-2">
+            <Link
+              href="/register"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full text-center py-2.5 rounded-full bg-[#C99A3B] text-[#0F1B3E] text-xs font-bold"
+            >
+              Get Started →
+            </Link>
+          </div>
         </div>
       )}
     </header>

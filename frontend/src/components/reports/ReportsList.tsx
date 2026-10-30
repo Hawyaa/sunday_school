@@ -11,9 +11,10 @@ import type { ChurchReport } from '@/types/report';
 interface Props {
   reports: ChurchReport[];
   isLoading?: boolean;
+  onView?: (report: ChurchReport) => void; // opens the PDF viewer
 }
 
-export function ReportsList({ reports, isLoading }: Props) {
+export function ReportsList({ reports, isLoading, onView }: Props) {
   if (isLoading) {
     return (
       <div aria-busy="true">
@@ -48,7 +49,7 @@ export function ReportsList({ reports, isLoading }: Props) {
   return (
     <div>
       {reports.map((report) => (
-        <ReportCard key={report.id} report={report} />
+        <ReportCard key={report.id} report={report} onView={onView} />
       ))}
     </div>
   );

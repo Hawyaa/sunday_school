@@ -1,8 +1,7 @@
 'use client';
 
 /**
- * MezmurCategoriesCard.tsx — "Mezmur Categories" (right column, top).
- * Clicking a row filters the page; click again to clear.
+ * MezmurCategoryPills.tsx
  */
 
 import React from 'react';
@@ -24,7 +23,7 @@ interface Props {
   onSelect: (key: string) => void;
 }
 
-export function MezmurCategoriesCard({ active, onSelect }: Props) {
+export function MezmurCategoryPills({ active, onSelect }: Props) {
   const { locale } = useAppStore();
   const am = locale === 'am';
 
@@ -39,7 +38,7 @@ export function MezmurCategoriesCard({ active, onSelect }: Props) {
 
       <ul>
         {CATEGORIES.map((c, i) => {
-          const Icon = ICONS[c.icon];
+          const Icon = (c.icon && ICONS[c.icon as MezmurIconKey]) || MusicIcon;
           const isActive = active === c.key;
           return (
             <li key={c.key} className={i < CATEGORIES.length - 1 ? 'border-b border-[#efe6d3]' : ''}>

@@ -42,10 +42,10 @@ export function IconBadge({ name, dark = false, solid = false }: { name: string;
   );
 }
 
-/** Small uppercase label with gold line */
-export function Eyebrow({ children }: { children: React.ReactNode }) {
+/** Small uppercase label with gold accent line */
+export function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="mb-2 flex items-center gap-2.5 text-[10px] uppercase tracking-[.12em] text-[#5a6479]">
+    <div className={`mb-2 flex items-center gap-2.5 text-[10px] uppercase tracking-[.12em] ${className ?? 'text-[#5a6479]'}`}>
       <span className="h-[1.5px] w-[26px] bg-[#c8952f]" />
       {children}
     </div>

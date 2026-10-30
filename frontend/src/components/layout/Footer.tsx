@@ -11,7 +11,56 @@ import React from 'react';
 import Link from 'next/link';
 import { SiteLogo } from '@/components/layout/SiteLogo';
 
-export function Footer() {
+interface FooterProps {
+  compact?: boolean;
+}
+
+export function Footer({ compact = false }: FooterProps) {
+  if (compact) {
+    return (
+      <footer className="bg-[#070D18] text-white py-8 px-6 sm:px-9 border-t border-white/10 select-none">
+        <div className="max-w-[1140px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/70">
+          {/* Left Brand */}
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 font-serif font-bold text-base text-white hover:text-[#C99A3B] transition-colors"
+          >
+            <SiteLogo size={32} />
+            <span>Axum Media</span>
+          </Link>
+
+          {/* Center Navigation Links */}
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs text-white/80">
+            <Link href="/" className="hover:text-[#C99A3B] transition-colors">
+              Home
+            </Link>
+            <span>·</span>
+            <Link href="/teachings" className="hover:text-[#C99A3B] transition-colors">
+              Teachings
+            </Link>
+            <span>·</span>
+            <Link href="/events" className="hover:text-[#C99A3B] transition-colors">
+              Events
+            </Link>
+            <span>·</span>
+            <Link href="/gallery" className="hover:text-[#C99A3B] transition-colors">
+              Gallery
+            </Link>
+            <span>·</span>
+            <Link href="/contact" className="hover:text-[#C99A3B] transition-colors">
+              Contact
+            </Link>
+          </div>
+
+          {/* Right Copyright */}
+          <div className="text-[11px] text-white/50 text-center md:text-right">
+            © 2026 Axum Media. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="bg-[#0F1B3E] text-white pt-6 pb-4 px-6 sm:px-9 border-t-[3px] border-[#C99A3B] mt-16 select-none">
       {/* 1. Main Footer Row */}
