@@ -5,9 +5,9 @@
  *
  * Composes the Reports page: hero, filter bar, list, sidebar and the PDF viewer pop-up.
  * - Restricted / locked reports are not shown.
- * - The list renders only AFTER the page has mounted in the browser. This keeps the server HTML
- *   and the first client render identical (fixes the "Hydration failed" error when the real
- *   data comes from a store / localStorage / API).
+ * - The list renders only AFTER the page has mounted (skeleton first) so server HTML and the
+ *   first client render match (no hydration error).
+ * - The "View All Reports" hero button scrolls to the list (id="reports").
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -67,7 +67,7 @@ export function ReportsPageView({ reports = SAMPLE_REPORTS, isLoading = false }:
 
       <div className="mx-auto max-w-[1440px] px-5 pb-10 lg:px-[70px]">
         <div className="mt-[13px] grid grid-cols-1 gap-7 lg:grid-cols-[1fr_313px]">
-          <section className="rounded-[14px] border border-[#ece5d8] bg-[#fffdf9]/70 px-[15px] pb-3.5 pt-3">
+          <section id="reports" className="scroll-mt-6 rounded-[14px] border border-[#ece5d8] bg-[#fffdf9]/70 px-[15px] pb-3.5 pt-3">
             <ReportsFilterBar
               year={year}
               onYearChange={setYear}

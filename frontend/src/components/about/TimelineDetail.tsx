@@ -22,7 +22,7 @@ function YearImage({ m, alt }: { m: Milestone; alt: string }) {
       <div className="grid aspect-[4/3] w-full place-items-center rounded-2xl border border-[#ecdcb8] bg-[linear-gradient(135deg,#fdf7ea,#f1e3c3)]">
         <div className="text-center">
           <div className="mb-2 flex justify-center"><IconBadge name={m.icon} dark /></div>
-          <span className={`${PF} text-4xl font-bold text-[#b9852a]`}>{m.year}</span>
+          <span className={`${PF} text-3xl font-bold text-[#b9852a]`}>{m.year}</span>
         </div>
       </div>
     );
@@ -49,7 +49,7 @@ export function TimelineDetail() {
       {/* Back link */}
       <Link
         href="/about"
-        className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#35609a] hover:text-[#0f2352]"
+        className="mb-6 inline-flex items-center gap-2 text-[13px] font-semibold text-[#35609a] hover:text-[#0f2352]"
       >
         <span aria-hidden="true">←</span>
         {am ? 'ወደ ስለ እኛ ተመለስ' : 'Back to About'}
@@ -58,10 +58,10 @@ export function TimelineDetail() {
       {/* Heading */}
       <header className="mb-8 max-w-[760px]">
         <Eyebrow>{am ? 'ጉዟችን' : 'Our Journey'}</Eyebrow>
-        <h1 className={`${PF} mb-3 text-[38px] font-bold leading-[1.1] text-[#0f2352] lg:text-[52px]`}>
+        <h1 className={`${PF} mb-3 text-[30px] font-bold leading-[1.1] text-[#0f2352] lg:text-[40px]`}>
           {am ? 'የእምነትና የአገልግሎት መንገድ' : 'A Path of Faith and Service'}
         </h1>
-        <p className="text-[16.5px] leading-[1.7] text-[#39445d]">
+        <p className="text-[15px] leading-[1.7] text-[#39445d]">
           {am
             ? 'ከጅማሬያችን እስከ ዛሬ ድረስ — እያንዳንዱ ዓመት ምን እንደተከናወነ ይመልከቱ።'
             : 'From our first steps to today — see what happened in each year of our story.'}
@@ -111,10 +111,10 @@ export function TimelineDetail() {
                 <div className={flip ? 'md:order-1 md:text-right' : ''}>
                   <div className={`mb-3 flex items-center gap-3 ${flip ? 'md:flex-row-reverse' : ''}`}>
                     <IconBadge name={m.icon} dark />
-                    <span className={`${PF} text-[44px] font-bold leading-none text-[#b9852a]`}>{m.year}</span>
+                    <span className={`${PF} text-[32px] font-bold leading-none text-[#b9852a]`}>{m.year}</span>
                   </div>
-                  <h2 className={`${PF} mb-3 text-[26px] font-bold leading-tight text-[#0f2352]`}>{title}</h2>
-                  <div className="space-y-3 text-[16px] leading-[1.75] text-[#39445d]">
+                  <h2 className={`${PF} mb-3 text-[21px] font-bold leading-tight text-[#0f2352]`}>{title}</h2>
+                  <div className="space-y-3 text-[14px] leading-[1.75] text-[#39445d]">
                     {paragraphs.map((p, k) => (
                       <p key={k}>{p}</p>
                     ))}

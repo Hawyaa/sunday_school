@@ -31,6 +31,11 @@ export function markSeen(els: Iterable<Element>): void {
   for (const el of els) el.setAttribute(SEEN, '');
 }
 
+/** Removes the revealed markers (call from a cleanup, so React Strict Mode's dev re-run animates again). */
+export function clearSeen(root: ParentNode): void {
+  root.querySelectorAll(`[${SEEN}]`).forEach((el) => el.removeAttribute(SEEN));
+}
+
 /** Plays a reveal on the given elements right now. */
 export function reveal(
   targets: HTMLElement[],

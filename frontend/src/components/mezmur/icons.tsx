@@ -91,7 +91,7 @@ export const FlameIcon = ({ className }: P) => (
  * The artwork (public/images/corner-ornament.png) is a TOP-RIGHT corner, so the others are flipped.
  */
 export function Corners({ size = 34, inset = 5 }: { size?: number; inset?: number }) {
-  const base = 'pointer-events-none absolute h-auto select-none mix-blend-multiply';
+  const base = 'mz-corner pointer-events-none absolute h-auto select-none mix-blend-multiply';
   const src = '/images/corner-ornament.png';
   return (
     <>

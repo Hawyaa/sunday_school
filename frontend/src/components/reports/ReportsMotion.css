@@ -1,0 +1,66 @@
+/* =====================================================================
+   ReportsMotion.css  (components/reports/ReportsMotion.css)
+   Scroll animations for the Reports page (filter bar, cards, sidebar).
+   Driven by data attributes set in motion.tsx — plays once when the
+   element enters the viewport. Everything is skipped for reduced-motion.
+   ===================================================================== */
+
+   :root {
+    --rm-ease: cubic-bezier(0.215, 0.61, 0.355, 1); /* ≈ GSAP power2.out */
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    /* base: hidden + eased transition (delay comes from --rm-d) */
+    [data-rm] {
+      opacity: 0;
+      transition:
+        opacity 0.8s var(--rm-ease) var(--rm-d, 0ms),
+        transform 0.8s var(--rm-ease) var(--rm-d, 0ms),
+        clip-path 1.1s var(--rm-ease) var(--rm-d, 0ms);
+    }
+    [data-rm='up']    { transform: translate3d(0, 26px, 0); }
+    [data-rm='right'] { transform: translate3d(48px, 0, 0); }
+    [data-rm='scale'] { transform: scale(0.6); }
+    [data-rm='line']  { opacity: 1; clip-path: inset(0 100% 0 0); }          /* line / border reveal */
+    [data-rm='zoom']  {                                                       /* slow image zoom-in */
+      opacity: 1;
+      transform: scale(1.14);
+      transition: transform 2.2s var(--rm-ease) var(--rm-d, 0ms);
+    }
+  
+    /* shown: the group root (or any child) settles into place */
+    [data-shown='true'][data-rm],
+    [data-shown='true'] [data-rm] {
+      opacity: 1;
+      transform: none;
+    }
+    [data-shown='true'][data-rm='line'],
+    [data-shown='true'] [data-rm='line'] {
+      clip-path: inset(0 0 0 0);
+    }
+  
+    /* decorative gold corner borders draw outward from the corner */
+    [data-rm-orn] > img {
+      clip-path: inset(0 0 100% 100%);
+      transition: clip-path 1.1s var(--rm-ease) 0.45s;
+    }
+    [data-shown='true'][data-rm-orn] > img {
+      clip-path: inset(0 0 0 0);
+    }
+  
+    /* word-by-word reveal */
+    .rm-word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: top;
+      padding: 0 0.08em 0.16em;
+      margin: 0 -0.08em -0.16em;
+    }
+    .rm-word > span {
+      display: inline-block;
+      transform: translate3d(0, 115%, 0);
+      transition: transform 0.8s var(--rm-ease)
+        calc(var(--rm-d, 0ms) + var(--i, 0) * var(--rm-step, 70ms));
+    }
+    [data-shown='true'] .rm-word > span { transform: none; }
+  }

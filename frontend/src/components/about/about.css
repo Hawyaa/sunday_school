@@ -33,14 +33,14 @@
   --serif: 'Fraunces', 'Playfair Display', Georgia, serif;
 
   /* type scale */
-  --fs-hero: clamp(34px, 4.2vw, 48px);
-  --fs-h2: clamp(28px, 3.2vw, 40px);
-  --fs-h3: clamp(18px, 1.6vw, 21px);
-  --fs-lead: 17px;
-  --fs-body: 15.5px;
-  --fs-small: 13.5px;
-  --fs-eyebrow: 12px;
-  --fs-btn: 14.5px;
+  --fs-hero: clamp(30px, 3.6vw, 40px);
+  --fs-h2: clamp(24px, 2.6vw, 32px);
+  --fs-h3: clamp(16px, 1.4vw, 18px);
+  --fs-lead: 15px;
+  --fs-body: 14px;
+  --fs-small: 12.5px;
+  --fs-eyebrow: 11px;
+  --fs-btn: 13px;
 }
 
 /* shared container */
@@ -119,19 +119,20 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 28px;
+  padding: 11px 22px;
   border-radius: 999px;
   font-size: var(--fs-btn);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   border: 1.5px solid transparent;
-  transition: transform 0.2s, background 0.2s, color 0.2s;
+  transition: translate 0.3s ease, scale 0.3s ease, box-shadow 0.3s ease, background 0.25s, color 0.25s;
 }
 .about-legacy .btn:hover,
 .about-journey .btn:hover,
 .about-cta-section .btn:hover {
-  transform: translateY(-2px);
+  translate: 0 -2px;
+  box-shadow: 0 10px 22px rgba(15, 35, 82, 0.16);
 }
 .btn.dark {
   background: var(--navy);
@@ -240,7 +241,7 @@
 }
 .about-hero .glance .row b {
   font-family: var(--serif);
-  font-size: 20px;
+  font-size: 17px;
   color: var(--gold-soft);
 }
 .about-ribbon {
@@ -299,13 +300,13 @@
 .about-legacy .badge b {
   display: block;
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: 19px;
   color: var(--gold-soft);
 }
 .about-legacy .badge span {
   display: block;
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #c9d3ea;
@@ -327,7 +328,7 @@
 .about-legacy .facts b {
   display: block;
   font-family: var(--serif);
-  font-size: 18px;
+  font-size: 16px;
   color: var(--ink);
 }
 .about-legacy .facts span {
@@ -376,6 +377,7 @@
   left: 10%;
   right: 10%;
   border-top: 2px dashed var(--gold-soft);
+  clip-path: inset(0 calc((1 - var(--tl-progress, 1)) * 100%) 0 0);
 }
 .about-journey .tl a {
   position: relative;
@@ -397,15 +399,16 @@
   background: var(--navy);
   color: #fff;
   box-shadow: 0 0 0 5px #f8ecd3, 0 0 0 6.5px var(--gold-soft);
-  transition: transform 0.2s;
+  transition: translate 0.25s ease, box-shadow 0.25s ease;
 }
 .about-journey .tl a:hover .d {
-  transform: translateY(-3px);
+  translate: 0 -3px;
+  box-shadow: 0 0 0 5px #f8ecd3, 0 0 0 6.5px var(--gold), 0 10px 20px rgba(15, 35, 82, 0.18);
 }
 .about-journey .tl b {
   display: block;
   font-family: var(--serif);
-  font-size: 26px;
+  font-size: 22px;
   color: var(--gold);
 }
 .about-journey .tl h3 {
@@ -449,6 +452,15 @@
   border-radius: 20px;
   background: #fff;
   box-shadow: 0 4px 18px rgba(15, 35, 82, 0.05);
+  transition: translate 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.about-guided .card:hover {
+  translate: 0 -6px;
+  border-color: var(--gold);
+  box-shadow: 0 18px 36px rgba(15, 35, 82, 0.12);
+}
+.about-guided .card.hi:hover {
+  border-color: var(--gold);
 }
 .about-guided .card.hi {
   background: var(--navy);
@@ -526,7 +538,7 @@
   quotes: none;
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(18px, 1.8vw, 22px);
+  font-size: clamp(16px, 1.5vw, 19px);
   line-height: 1.45;
   color: #fff;
 }
@@ -588,7 +600,7 @@
 .about-school .stats b {
   display: block;
   font-family: var(--serif);
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
   color: var(--gold-soft);
 }
@@ -606,9 +618,9 @@
 }
 .about-school .sq .qm {
   display: block;
-  height: 44px;
+  height: 36px;
   font-family: var(--serif);
-  font-size: 90px;
+  font-size: 72px;
   line-height: 0.9;
   color: var(--gold-soft);
 }
@@ -617,7 +629,7 @@
   quotes: none;
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(18px, 1.8vw, 22px);
+  font-size: clamp(16px, 1.5vw, 19px);
   line-height: 1.5;
   color: #fff;
 }
@@ -661,10 +673,10 @@
   background: var(--paper);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition: translate 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
 .about-serve .way:hover {
-  transform: translateY(-4px);
+  translate: 0 -4px;
   border-color: var(--gold);
   box-shadow: 0 12px 28px rgba(15, 35, 82, 0.1);
 }
@@ -745,6 +757,9 @@
 }
 .about-cta-section .btn:hover {
   background: #f0c97c;
+  translate: 0 0;
+  scale: 1.05;
+  box-shadow: 0 0 0 6px rgba(227, 184, 103, 0.18), 0 12px 32px rgba(227, 184, 103, 0.5);
 }
 
 /* ---------- 9. Responsive ---------- */

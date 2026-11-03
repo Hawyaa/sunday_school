@@ -5,8 +5,10 @@
  * Features gold arch portrait frame with badge, facts row, and expandable story.
  */
 
-import React, { useId, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import { useAppStore } from '@/lib/store';
+import { SplitWords } from '@/components/motion/SplitWords';
+import { useLegacyMotion } from './useAboutMotion';
 
 const MORE_EN: string[] = [
   'He served with tireless dedication, mentoring countless servants and teachers while nurturing the Sunday School movement across generations.',
@@ -23,14 +25,16 @@ export function LeadersSection() {
   const am = locale === 'am';
   const [open, setOpen] = useState(false);
   const moreId = useId();
+  const root = useRef<HTMLElement>(null);
+  useLegacyMotion(root);
 
   const more = am ? MORE_AM : MORE_EN;
 
   return (
-    <section className="about-legacy" aria-label="Legacy of Abune Diskoros">
+    <section ref={root} className="about-legacy" aria-label="Legacy of Abune Diskoros">
       <div className="c">
         {/* Left: Golden Arch Portrait with Badge */}
-        <div className="arch">
+        <div className="arch" data-a="arch">
           <div className="ring" aria-hidden="true" />
           <div className="ph">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -39,7 +43,7 @@ export function LeadersSection() {
               alt="Abune Diskoros"
             />
           </div>
-          <div className="badge">
+          <div className="badge" data-a="badge">
             <b>1930 – 2008</b>
             <span>{am ? 'እረኛና መምህር' : 'Shepherd & teacher'}</span>
           </div>
@@ -47,20 +51,20 @@ export function LeadersSection() {
 
         {/* Right: Story & Facts */}
         <div>
-          <div className="eyebrow">
+          <div className="eyebrow" data-a="eyebrow">
             <i aria-hidden="true" />
             {am ? 'ታሪካችን' : 'Our story'}
           </div>
           <h2>
             {am ? (
-              'የአቡነ ዲዮስቆሮስ ቅርስ'
+              <SplitWords text="የአቡነ ዲዮስቆሮስ ቅርስ" />
             ) : (
               <>
-                The Legacy of <em>Abune Diskoros</em>
+                <SplitWords text="The Legacy of" /> <em><SplitWords text="Abune Diskoros" /></em>
               </>
             )}
           </h2>
-          <p className="l">
+          <p className="l" data-a="desc">
             {am
               ? 'አቡነ ዲዮስቆሮስ (1930 – 2008) ራዕይ ያላቸው መሪ፣ ጥልቅ እምነት ያላቸውና የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን ደከመኝ የማያውቁ አገልጋይ ነበሩ። ሕይወታቸውን ወንጌልን በማስፋፋት፣ ቤተክርስቲያንን በማጽናትና የምዕመናንን መንፈሳዊና ማኅበራዊ ሕይወት በማሳደግ ሰጥተዋል።'
               : 'Abune Diskoros was a visionary leader, a man of deep faith, and a tireless servant of the Ethiopian Orthodox Tewahedo Church. He dedicated his life to spreading the Gospel, strengthening the Church, and uplifting the spiritual and social life of the faithful.'}
@@ -74,7 +78,7 @@ export function LeadersSection() {
             }`}
           >
             <div className="overflow-hidden">
-              <div className="space-y-3 pb-2 text-[17px] text-[#5b6479] leading-[1.7]">
+              <div className="space-y-3 pb-2 text-[15px] text-[#5b6479] leading-[1.7]">
                 {more.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
@@ -83,15 +87,15 @@ export function LeadersSection() {
           </div>
 
           <div className="facts">
-            <div>
+            <div data-a="fact">
               <b>{am ? 'ወንጌል' : 'Gospel'}</b>
               <span>{am ? 'እምነትን ማስፋፋት' : 'Spread the faith'}</span>
             </div>
-            <div>
+            <div data-a="fact">
               <b>{am ? 'ቤተክርስቲያን' : 'Church'}</b>
               <span>{am ? 'አካሉን ማጽናት' : 'Strengthened the body'}</span>
             </div>
-            <div>
+            <div data-a="fact">
               <b>{am ? 'ምዕመናን' : 'Faithful'}</b>
               <span>{am ? 'ሕይወትን ማሳደግ' : 'Uplifted every life'}</span>
             </div>
@@ -103,6 +107,7 @@ export function LeadersSection() {
             aria-expanded={open}
             aria-controls={moreId}
             className="btn dark"
+            data-a="btn"
           >
             {open
               ? am

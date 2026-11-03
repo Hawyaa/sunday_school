@@ -2,6 +2,7 @@
 
 /**
  * ReportsList.tsx
+ * Cards get a staggered delay (index) so they appear one after another.
  */
 
 import React from 'react';
@@ -48,8 +49,8 @@ export function ReportsList({ reports, isLoading, onView }: Props) {
 
   return (
     <div>
-      {reports.map((report) => (
-        <ReportCard key={report.id} report={report} onView={onView} />
+      {reports.map((report, i) => (
+        <ReportCard key={report.id} report={report} onView={onView} index={i} />
       ))}
     </div>
   );

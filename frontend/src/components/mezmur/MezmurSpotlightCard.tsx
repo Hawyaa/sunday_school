@@ -20,10 +20,10 @@ export function MezmurSpotlightCard({ onPlayAll }: Props) {
   const am = locale === 'am';
 
   return (
-    <div className="relative flex h-full flex-col rounded-xl border border-[#ecdcb8] bg-[#fffdf9] px-[18px] pb-7 pt-[18px] text-center shadow-[0_3px_14px_rgba(15,35,82,0.05)]">
+    <div className="mz-enter-card mz-enter-art-card relative flex h-full flex-col rounded-xl border border-[#ecdcb8] bg-[#fffdf9] px-[18px] pb-7 pt-[18px] text-center shadow-[0_3px_14px_rgba(15,35,82,0.05)]">
       <Corners size={38} inset={4} />
 
-      <div className="relative aspect-[16/10] shrink-0 overflow-hidden rounded-lg bg-[#1c2740]">
+      <div className="mz-enter-art relative aspect-[16/10] shrink-0 overflow-hidden rounded-lg bg-[#1c2740]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={SPOTLIGHT.image} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
         <span className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-[linear-gradient(#d3a03c,#b9852a)] px-3 py-1 font-['Crimson_Text',serif] text-[13px] font-semibold text-white shadow">
@@ -51,7 +51,7 @@ export function MezmurSpotlightCard({ onPlayAll }: Props) {
       <button
         type="button"
         onClick={onPlayAll}
-        className="mx-auto flex cursor-pointer items-center gap-2.5 rounded-full border-[1.5px] border-[#dcc08a] bg-[#fffbf1] px-9 py-2 font-['Crimson_Text',serif] text-[15px] font-semibold text-[#b9852a] transition hover:bg-[#fff4d9]"
+        className="mz-btn mx-auto flex cursor-pointer items-center gap-2.5 rounded-full border-[1.5px] border-[#dcc08a] bg-[#fffbf1] px-9 py-2 font-['Crimson_Text',serif] text-[15px] font-semibold text-[#b9852a] hover:bg-[#fff4d9]"
       >
         <PlayIcon className="h-4 w-4" />
         {am ? 'ሁሉንም አጫውት' : 'Play All'}

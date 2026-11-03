@@ -1,0 +1,173 @@
+/* =====================================================
+   ReportsHero.css  (components/reports/ReportsHero.css)
+   Designed on a 1024 x 548 canvas; every size is N * var(--u) (1 design pixel),
+   so the section scales with its width. Layered entrance animation at the bottom.
+   ===================================================== */
+
+   .rh-wrap {
+    --rh-cream: #faf4e4;
+    --rh-navy: #0e1b38;          /* navy sampled from your screenshot */
+    --rh-gold: #c69c3f;
+    --rh-gold-light: #f0d795;
+    --rh-ink: #1a2748;
+    --rh-shadow: 0 10px 30px rgba(14, 27, 56, 0.16);
+    --rh-ease: cubic-bezier(0.215, 0.61, 0.355, 1); /* ≈ power2.out */
+    --rh-h: 300;                  /* hero height in design pixels (design: 548) */
+  
+    container-type: inline-size;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    background: var(--rh-cream);
+  }
+  
+  .rh-hero {
+    --u: calc(100vw / 1024);
+    position: relative;
+    width: 100%;
+    height: calc(var(--rh-h) * var(--u));
+    background: var(--rh-cream);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  @supports (width: 1cqw) {
+    .rh-hero { --u: calc(100cqw / 1024); }
+  }
+  
+  /* ---- photo / illustration (zoom layer) ---- */
+  .rh-media { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .rh-zoom { position: absolute; inset: 0; transform-origin: 60% 50%; }
+  .rh-zoom > svg { position: absolute; right: 0; top: 0; height: 100%; width: 74%; display: block; }
+  .rh-photo { position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat; }
+  .rh-media::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(270deg, rgba(255, 185, 100, 0.25), rgba(255, 185, 100, 0) 55%);
+  }
+  
+  /* ---- shape layers (each its own full-size SVG, 1024 x 548 canvas) ---- */
+  .rh-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .rh-layer--pattern { z-index: 2; transform-origin: 0% 100%; }
+  .rh-gold-line { vector-effect: non-scaling-stroke; }
+  
+  /* ---- crosses (public/images/cross.png) ---- */
+  .rh-cross {
+    position: absolute; z-index: 3; object-fit: contain; pointer-events: none; user-select: none;
+    filter: drop-shadow(0 2px 3px rgba(120, 80, 10, 0.25));
+  }
+  .rh-cross--tl { left: calc(26 * var(--u)); top: calc(30 * var(--u)); width: calc(32 * var(--u)); height: calc(61 * var(--u)); }
+  .rh-cross--r  { left: 88.6%; top: calc(var(--rh-h) * 0.396 * var(--u)); width: calc(40 * var(--u)); height: calc(73 * var(--u)); }
+  .rh-cross--b  { left: 49.7%; top: calc((var(--rh-h) - 74) * var(--u)); width: calc(31 * var(--u)); height: calc(57 * var(--u)); }
+  .rh-cross--wm1, .rh-cross--wm2 { opacity: 0.17; z-index: 2; filter: none; }
+  .rh-cross--wm1 { left: 40.4%; top: calc(var(--rh-h) * 0.12 * var(--u)); width: calc(140 * var(--u)); height: calc(210 * var(--u)); }
+  .rh-cross--wm2 { left: 16%; top: calc((var(--rh-h) - 123) * var(--u)); width: calc(125 * var(--u)); height: calc(200 * var(--u)); }
+  
+  /* ---- breadcrumb ---- */
+  .rh-crumbs {
+    position: absolute; z-index: 4; left: calc(78 * var(--u)); top: calc(20 * var(--u));
+    font-size: calc(12 * var(--u)); color: #4b5878;
+    display: flex; gap: calc(8 * var(--u)); align-items: center;
+  }
+  .rh-crumbs a:hover { color: var(--rh-navy); }
+  .rh-crumbs b { color: var(--rh-navy); }
+  .rh-crumbs svg { width: calc(8 * var(--u)); height: calc(8 * var(--u)); }
+  
+  /* ---- scripture quote ---- */
+  .rh-quote {
+    position: absolute; z-index: 4; right: 8%; top: calc(20 * var(--u)); width: calc(215 * var(--u));
+    text-align: right; color: #fff;
+    font-family: 'Source Serif 4', 'Crimson Text', Georgia, serif; font-style: italic;
+    font-size: calc(14.5 * var(--u)); line-height: 1.38; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+  .rh-quote cite { display: block; margin-top: calc(8 * var(--u)); font-style: italic; color: var(--rh-gold-light); font-size: calc(13 * var(--u)); }
+  
+  /* ---- text content ---- */
+  .rh-content { position: relative; z-index: 4; padding: calc(60 * var(--u)) 0 0 calc(78 * var(--u)); width: 52%; }
+  .rh-eyebrow {
+    font-family: Inter, system-ui, sans-serif; font-weight: 800; text-transform: uppercase;
+    font-size: calc(22 * var(--u)); letter-spacing: -0.01em; line-height: 1; color: var(--rh-navy);
+  }
+  .rh-eyebrow span { color: var(--rh-gold); }
+  .rh-title {
+    font-family: 'Playfair Display', Georgia, serif; font-weight: 800; color: var(--rh-navy);
+    font-size: calc(44 * var(--u)); line-height: 1.1; margin-top: calc(6 * var(--u));
+  }
+  .rh-line { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 0.04em 0.16em; margin-bottom: -0.16em; }
+  .rh-char { display: inline-block; }
+  .rh-desc {
+    margin-top: calc(8 * var(--u)); max-width: calc(380 * var(--u));
+    font-family: 'Source Serif 4', 'Crimson Text', Georgia, serif; font-size: calc(14.5 * var(--u)); line-height: 1.4; color: var(--rh-ink);
+  }
+  .rh-btn {
+    display: inline-flex; align-items: center; gap: calc(10 * var(--u)); margin-top: calc(14 * var(--u));
+    background: var(--rh-gold); color: var(--rh-navy);
+    font-family: Inter, system-ui, sans-serif; font-weight: 600; font-size: calc(12 * var(--u)); letter-spacing: 0.02em;
+    text-transform: uppercase; height: calc(34 * var(--u)); padding: 0 calc(22 * var(--u)); border-radius: 999px;
+    box-shadow: var(--rh-shadow); transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .rh-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 34px rgba(14, 27, 56, 0.26); }
+  .rh-btn svg { width: calc(15 * var(--u)); height: calc(15 * var(--u)); transition: transform 0.25s ease; }
+  .rh-btn:hover svg { transform: translateX(3px); }
+  
+  /* ---- responsive: below 760px the hero stacks; --u becomes a normal pixel ---- */
+  @media (max-width: 760px) {
+    .rh-hero { --u: 1px; height: auto; }
+    .rh-media { position: relative; inset: auto; height: 240px; }
+    .rh-zoom > svg { width: 100%; }
+    .rh-layer, .rh-cross--wm1, .rh-cross--wm2, .rh-cross--r, .rh-cross--b, .rh-quote { display: none; }
+    .rh-crumbs { position: relative; left: auto; top: auto; padding: 18px 24px 0; }
+    .rh-content { width: 100%; padding: 20px 24px 40px; }
+    .rh-desc { max-width: none; }
+  }
+  
+  /* =====================================================================
+     LAYERED ENTRANCE ANIMATION
+     JS (ReportsHero.tsx) sets  data-play  on the hero when the page opens, and again whenever
+     the user comes back to it (route change / back-forward). Before that, layers are hidden.
+     Fill-mode is "backwards" so hover effects still work after the animation ends.
+     Everything is skipped for prefers-reduced-motion.
+     ===================================================================== */
+  @media (prefers-reduced-motion: no-preference) {
+    /* --- start states --- */
+    .rh-hero:not([data-play]) .rh-zoom { transform: scale(1.05); }
+    .rh-hero:not([data-play]) .rh-layer--edge,
+    .rh-hero:not([data-play]) .rh-layer--corner,
+    .rh-hero:not([data-play]) .rh-layer--pattern,
+    .rh-hero:not([data-play]) .rh-cross,
+    .rh-hero:not([data-play]) .rh-crumbs,
+    .rh-hero:not([data-play]) .rh-quote,
+    .rh-hero:not([data-play]) .rh-eyebrow,
+    .rh-hero:not([data-play]) .rh-desc,
+    .rh-hero:not([data-play]) .rh-btn { opacity: 0; }
+    .rh-hero:not([data-play]) .rh-layer--cream   { clip-path: inset(0 100% 0 0); }
+    .rh-hero:not([data-play]) .rh-layer--divider { clip-path: inset(0 0 100% 0); }
+    .rh-hero:not([data-play]) .rh-char { transform: translate3d(0, 115%, 0); }
+  
+    /* --- keyframes --- */
+    @keyframes rhZoom      { from { transform: scale(1.05); } to { transform: scale(1); } }
+    @keyframes rhSlideL    { from { opacity: 0; transform: translate3d(-18%, 0, 0); } to { opacity: 1; transform: none; } }
+    @keyframes rhWipe      { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+    @keyframes rhDrop      { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+    @keyframes rhFadeScale { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: none; } }
+    @keyframes rhFadeScaleWm { from { opacity: 0; transform: scale(0.82); } to { opacity: 0.17; transform: none; } }
+    @keyframes rhFade      { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rhUp        { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
+    @keyframes rhPop       { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: none; } }
+    @keyframes rhChar      { from { transform: translate3d(0, 115%, 0); } to { transform: none; } }
+  
+    /* --- sequence (≈0.8–1.3s each, 0.1–0.15s apart) --- */
+    .rh-hero[data-play] .rh-zoom           { animation: rhZoom 1.6s var(--rh-ease) backwards; }              /* 1 background */
+    .rh-hero[data-play] .rh-layer--edge    { animation: rhSlideL 0.9s var(--rh-ease) 0.15s backwards; }      /* 2 small navy edge */
+    .rh-hero[data-play] .rh-layer--cream   { animation: rhWipe 1.1s var(--rh-ease) 0.3s backwards; }         /* 3 cream polygon */
+    .rh-hero[data-play] .rh-layer--divider { animation: rhDrop 1.2s var(--rh-ease) 0.45s backwards; }       /* 4 diagonal divider */
+    .rh-hero[data-play] .rh-layer--corner  { animation: rhSlideL 1s var(--rh-ease) 0.6s backwards; }        /* 5 bottom navy extension */
+    .rh-hero[data-play] .rh-layer--pattern,
+    .rh-hero[data-play] .rh-cross          { animation: rhFadeScale 0.9s var(--rh-ease) 0.8s backwards; }   /* 6 crosses + patterns */
+    .rh-hero[data-play] .rh-cross--wm1,
+    .rh-hero[data-play] .rh-cross--wm2     { animation-name: rhFadeScaleWm; }
+    .rh-hero[data-play] .rh-crumbs         { animation: rhFade 0.8s var(--rh-ease) 0.3s backwards; }
+    .rh-hero[data-play] .rh-quote          { animation: rhFade 1s var(--rh-ease) 1s backwards; }
+    .rh-hero[data-play] .rh-eyebrow        { animation: rhFade 0.8s var(--rh-ease) 0.95s backwards; }       /* 7 label */
+    .rh-hero[data-play] .rh-char           { animation: rhChar 0.9s var(--rh-ease) calc(1.05s + var(--i, 0) * 0.07s) backwards; } /* 8 heading */
+    .rh-hero[data-play] .rh-desc           { animation: rhUp 0.9s var(--rh-ease) 1.3s backwards; }          /* 9 description */
+    .rh-hero[data-play] .rh-btn            { animation: rhPop 0.8s var(--rh-ease) 1.5s backwards; }         /* 10 button */
+  }

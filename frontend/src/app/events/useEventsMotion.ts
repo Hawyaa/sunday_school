@@ -23,7 +23,7 @@
 
 import type { RefObject } from 'react';
 import { gsap, useGSAP, ScrollTrigger, EASE, DURATION, STAGGER, motionAllowed } from '@/lib/motion/gsap';
-import { markSeen, revealOnScroll, unseen } from '@/lib/motion/reveal';
+import { clearSeen, markSeen, revealOnScroll, unseen } from '@/lib/motion/reveal';
 
 interface Keys {
   /** Changes when the featured card appears or is replaced. '' = not shown. */
@@ -77,6 +77,9 @@ function useFeaturedCard(scope: Scope, featuredId: string) {
         );
 
       markSeen([card, ...media, ...text, ...fade, ...scale]);
+      return () => {
+        if (root) clearSeen(root);
+      };
     },
     { scope, dependencies: [featuredId], revertOnUpdate: false },
   );
@@ -103,6 +106,7 @@ function useListCards(scope: Scope, cardsKey: string) {
 
       // The list height just changed, so scroll positions need recalculating.
       requestAnimationFrame(() => ScrollTrigger.refresh());
+      return () => clearSeen(root);
     },
     { scope, dependencies: [cardsKey], revertOnUpdate: false },
   );
@@ -127,6 +131,7 @@ function useSidebar(scope: Scope, catsKey: string) {
           { opacity: 1, scale: 1, duration: DURATION.fast, ease: EASE, stagger: STAGGER, delay: 0.15, clearProps: 'transform' },
         );
       });
+      return () => clearSeen(root);
     },
     { scope, dependencies: [catsKey], revertOnUpdate: false },
   );

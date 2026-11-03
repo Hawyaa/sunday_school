@@ -7,30 +7,36 @@
  * and a gold "Get Involved →" button linking to /contact.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
+import { SplitWords } from '@/components/motion/SplitWords';
+import { useCtaMotion } from './useAboutMotion';
 
 export function AboutCta() {
   const { locale } = useAppStore();
   const am = locale === 'am';
+  const root = useRef<HTMLElement>(null);
+  useCtaMotion(root);
 
   return (
-    <section className="about-cta-section" aria-label="Call to Action">
+    <section ref={root} className="about-cta-section" aria-label="Call to Action">
       <div className="c">
         <div className="box">
-          <svg className="pat" viewBox="0 0 360 360" aria-hidden="true">
+          <svg className="pat" data-parallax viewBox="0 0 360 360" aria-hidden="true">
             <rect width="360" height="360" fill="url(#lat)" />
           </svg>
           <div>
-            <h2>{am ? 'የተልዕኳችን አካል ይሁኑ' : 'Be Part of Our Mission'}</h2>
-            <p>
+            <h2>
+              <SplitWords text={am ? 'የተልዕኳችን አካል ይሁኑ' : 'Be Part of Our Mission'} />
+            </h2>
+            <p data-a="desc">
               {am
                 ? 'በእምነት፣ በትምህርትና በማኅበረሰብ መርሐ ግብሮቻችን ላይ ድጋፍ ያድርጉ። በአንድነት ዘላቂ ተጽዕኖ ማምጣት እንችላለን።'
                 : 'Support our work in faith, education and community programs. Together we can make a lasting impact.'}
             </p>
           </div>
-          <Link href="/contact" className="btn">
+          <Link href="/contact" className="btn" data-a="btn">
             {am ? 'ይሳተፉ →' : 'Get Involved →'}
           </Link>
         </div>

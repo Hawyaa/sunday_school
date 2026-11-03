@@ -9,13 +9,14 @@
  * 3. Dynamic Categories: Categories are managed by the admin and updated in real-time.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { MezmurHero } from '@/components/mezmur/MezmurHero';
 import { MezmurFilterBar, type MezmurSort } from '@/components/mezmur/MezmurFilterBar';
 import { MezmurSpotlightCard } from '@/components/mezmur/MezmurSpotlightCard';
 import { MezmurLyricCard } from '@/components/mezmur/MezmurLyricCard';
 import { Corners } from '@/components/mezmur/icons';
+import { useScrollReveal } from '@/components/mezmur/useMezmurMotion';
 import { ChevronRight, MusicIcon } from '@/components/reports/icons';
 import { MezmurItem, MezmurCategory, CATEGORIES } from '@/components/mezmur/mezmurData';
 import { getStoredMezmurs, getStoredMezmurCategories } from '@/lib/contentStore';
@@ -47,6 +48,8 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
 
   // Selected mezmur ID for Image 2 view; null shows Image 1 list
   const [selectedMezmurId, setSelectedMezmurId] = useState<string | null>(initialSelectedId || null);
+  // Last opened row — gets a soft gold highlight when the list comes back
+  const [lastOpenedId, setLastOpenedId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -76,6 +79,10 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
 
   const activeMezmur = items.find((m) => m.id === selectedMezmurId) || null;
 
+  // Scroll-triggered reveals (filter bar, list card, rows). Re-observes when rows or the view change.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef, filtered, selectedMezmurId);
+
   const currentCatObj = categories.find((c) => c.key === category);
   const currentCatLabel =
     category === 'all'
@@ -89,7 +96,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
       : category;
 
   return (
-    <div className="bg-[#f7f1e6] font-['Crimson_Text',Georgia,serif] text-[#1c2740] min-h-[85vh]">
+    <div ref={rootRef} className="bg-[#f7f1e6] font-['Crimson_Text',Georgia,serif] text-[#1c2740] min-h-[85vh]">
       <MezmurHero />
 
       <div className="mx-auto max-w-[1340px] px-5 pb-16 pt-6 lg:px-[70px]">
@@ -108,20 +115,23 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
             />
 
             {/* List Card Matching Image 1 Exactly */}
-            <div className="relative rounded-2xl border border-[#ecdcb8] bg-[#fffdf9] px-6 sm:px-8 pb-8 pt-6 shadow-[0_4px_16px_rgba(15,35,82,0.06)]">
+            <div
+              data-mz-reveal="section"
+              className="mz-card relative rounded-2xl border border-[#ecdcb8] bg-[#fffdf9] px-6 sm:px-8 pb-8 pt-6 shadow-[0_4px_16px_rgba(15,35,82,0.06)]"
+            >
               <Corners size={40} inset={4} />
 
               {/* Card Header Bar */}
               <div className="mb-4 flex items-center justify-between border-b border-[#efe6d3] pb-3.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-[#FAF4E6] border border-[#E9D9B2] flex items-center justify-center text-[#b9852a]">
+                  <div className="mz-card-icon w-8 h-8 rounded-full bg-[#FAF4E6] border border-[#E9D9B2] flex items-center justify-center text-[#b9852a]">
                     <MusicIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="font-['Playfair_Display',serif] text-xl font-bold text-[#0f2352]">
+                    <h2 className="mz-card-h font-['Playfair_Display',serif] text-xl font-bold text-[#0f2352]">
                       {currentCatLabel}
                     </h2>
-                    <p className="text-xs text-[#7C88A8]">
+                    <p className="mz-card-desc text-xs text-[#7C88A8]">
                       {am
                         ? 'መዝሙሩን ለማዳመጥ እና ግጥሙን ለማየት ይጫኑ'
                         : 'Click any mezmur to listen to audio and view lyrics'}
@@ -129,7 +139,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                   </div>
                 </div>
 
-                <span className="text-xs font-semibold text-[#b9852a] bg-[#FAF4E6] px-3 py-1 rounded-full border border-[#E9D9B2]">
+                <span className="mz-card-badge text-xs font-semibold text-[#b9852a] bg-[#FAF4E6] px-3 py-1 rounded-full border border-[#E9D9B2]">
                   {filtered.length} {am ? 'መዝሙራት' : 'Mezmurs'}
                 </span>
               </div>
@@ -162,24 +172,26 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
               ) : (
                 <ul className="divide-y divide-[#efe6d3]">
                   {filtered.map((m) => (
-                    <li key={m.id}>
+                    <li key={m.id} data-mz-reveal="row" className="mz-row">
                       <button
                         type="button"
+                        data-selected={m.id === lastOpenedId ? 'true' : undefined}
                         onClick={() => {
+                          setLastOpenedId(m.id);
                           setSelectedMezmurId(m.id);
                           window.scrollTo({ top: 180, behavior: 'smooth' });
                         }}
-                        className="flex w-full cursor-pointer items-center gap-4 px-2 py-4 text-left font-['Crimson_Text',serif] transition hover:bg-[#FAF4E6]/50 rounded-lg group"
+                        className="mz-row-btn group flex w-full cursor-pointer items-center gap-4 rounded-lg px-[7px] py-[15px] text-left font-['Crimson_Text',serif]"
                       >
                         {/* Gold Music Note Icon */}
-                        <div className="w-8 h-8 rounded-lg bg-[#FAF4E6] border border-[#E9D9B2]/60 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <div className="mz-row-icon w-8 h-8 rounded-lg bg-[#FAF4E6] border border-[#E9D9B2]/60 flex items-center justify-center flex-shrink-0">
                           <MusicIcon className="h-4 w-4 text-[#b9852a]" />
                         </div>
 
                         {/* Title & Subtitle */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-[#0F1B3E] text-base group-hover:text-[#b9852a] transition-colors truncate">
+                            <span className="mz-row-title font-bold text-[#0F1B3E] text-base group-hover:text-[#b9852a] transition-colors truncate">
                               {m.title}
                             </span>
                             {m.audioUrl && (
@@ -193,7 +205,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                             )}
                           </div>
                           {m.titleEn && (
-                            <span className="block truncate text-[13px] text-[#6b7690] mt-0.5">
+                            <span className="mz-row-en block truncate text-[13px] text-[#6b7690] mt-0.5">
                               {m.titleEn}
                             </span>
                           )}
@@ -201,10 +213,10 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
 
                         {/* Date & Chevron Right Arrow */}
                         <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-[12.5px] font-medium text-[#7C88A8]">
+                          <span className="mz-row-date text-[12.5px] font-medium text-[#7C88A8]">
                             {fmt(m.addedAt)}
                           </span>
-                          <ChevronRight className="h-4 w-4 text-[#9aa3b5] group-hover:text-[#b9852a] group-hover:translate-x-0.5 transition-all" />
+                          <ChevronRight className="mz-row-arrow h-4 w-4 text-[#9aa3b5] group-hover:text-[#b9852a]" />
                         </div>
                       </button>
                     </li>
@@ -217,7 +229,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
           /* === VIEW 2: MEZMUR DETAILS & PLAYER VIEW (IMAGE 2) === */
           <div className="space-y-6">
             {/* Top Navigation: Back to List + Breadcrumbs */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-[#fffdf9] p-3.5 rounded-xl border border-[#ece5d8] shadow-xs">
+            <div className="mz-enter-bar flex flex-wrap items-center justify-between gap-3 bg-[#fffdf9] p-3.5 rounded-xl border border-[#ece5d8] shadow-xs">
               <button
                 type="button"
                 onClick={() => setSelectedMezmurId(null)}

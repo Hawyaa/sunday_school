@@ -20,7 +20,6 @@ import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { gsap, useGSAP, ScrollTrigger, EASE, DURATION, STAGGER, motionAllowed } from '@/lib/motion/gsap';
-import { SplitWords } from '@/components/motion/SplitWords';
 import { YouTubeBackground } from '@/components/motion/YouTubeBackground';
 
 const VIDEO_ID = 'uPty-Paq2E4';
@@ -49,14 +48,12 @@ export function EventsHero() {
       const subtitle = part('subtitle');
       const zoom = part('zoom');
       const parallax = part('parallax');
-      const words = el.querySelectorAll<HTMLElement>('[data-split-word]');
       if (!crumbs || !subtitle || !zoom || !parallax) return;
 
       const intro = gsap
         .timeline({ defaults: { ease: EASE } })
         .fromTo(crumbs, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: DURATION.fast })
-        .fromTo(words, { yPercent: 110 }, { yPercent: 0, duration: DURATION.slow, stagger: STAGGER }, '-=0.3')
-        .fromTo(subtitle, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: DURATION.base }, '+=0.1');
+        .fromTo(subtitle, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: DURATION.base }, '+=0.7');
 
       const zoomOut = gsap.fromTo(zoom, { scale: 1.15 }, { scale: 1, duration: 14, ease: 'power1.out' });
 
@@ -71,7 +68,8 @@ export function EventsHero() {
         zoomOut.restart();
       };
     },
-    { scope: root },
+    // Re-run when the language changes.
+    { scope: root, dependencies: [locale], revertOnUpdate: true },
   );
 
   // Restored from the browser's back/forward cache: the page is not re-mounted, so replay by hand.
@@ -92,6 +90,16 @@ export function EventsHero() {
       aria-labelledby="events-title"
       className="relative flex min-h-[430px] items-center overflow-hidden bg-[#0e1b38] text-[#f6efdd]"
     >
+      <style>{`
+/* Title entrance: pure CSS, ends visible no matter what (fill-mode both). */
+@keyframes hero-title-in {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-title-in { animation: hero-title-in 0.9s 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) { .hero-title-in { animation: none; } }
+`}</style>
+
       {/* Background: parallax > zoom > poster + video */}
       <div aria-hidden="true" className="absolute inset-0">
         <div data-hero="parallax" className="absolute inset-x-0 -bottom-[10%] -top-[10%] will-change-transform">
@@ -126,22 +134,16 @@ export function EventsHero() {
 
         <h1
           id="events-title"
-          className="text-[clamp(46px,7vw,92px)] font-semibold leading-[0.95] tracking-[-0.03em] [text-shadow:0_3px_14px_rgba(0,0,0,.5)]"
+          className="hero-title-in text-[clamp(46px,7vw,92px)] font-semibold leading-[0.95] tracking-[-0.03em] [text-shadow:0_3px_14px_rgba(0,0,0,.5)]"
           style={SERIF}
         >
           {am ? (
             <>
-              <SplitWords text="የቤተክርስቲያን" />{' '}
-              <em className="text-[#e3c476]">
-                <SplitWords text="ሁነቶች" />
-              </em>
+              የቤተክርስቲያን <em className="text-[#e3c476]">ሁነቶች</em>
             </>
           ) : (
             <>
-              <SplitWords text="Church" />{' '}
-              <em className="text-[#e3c476]">
-                <SplitWords text="Events" />
-              </em>
+              Church <em className="text-[#e3c476]">Events</em>
             </>
           )}
         </h1>

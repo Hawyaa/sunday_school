@@ -5,34 +5,38 @@
  * Features clean white container, header with outline button, and 5 milestone nodes with gold dashed line.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
+import { SplitWords } from '@/components/motion/SplitWords';
+import { useJourneyMotion } from './useAboutMotion';
 
 export function JourneyTimeline() {
   const { locale } = useAppStore();
   const am = locale === 'am';
+  const root = useRef<HTMLElement>(null);
+  useJourneyMotion(root);
 
   return (
-    <section className="about-journey" aria-label="Our Journey">
+    <section ref={root} className="about-journey" aria-label="Our Journey">
       <div className="c">
         <div className="jbox">
           <div className="jhead">
             <div>
-              <div className="eyebrow">
+              <div className="eyebrow" data-a="eyebrow">
                 <i aria-hidden="true" />
                 {am ? 'ጉዟችን' : 'Our journey'}
               </div>
               <h2>
-                {am ? 'የእምነትና የአገልግሎት መንገድ' : 'A Path of Faith and Service'}
+                <SplitWords text={am ? 'የእምነትና የአገልግሎት መንገድ' : 'A Path of Faith and Service'} />
               </h2>
-              <p>
+              <p data-a="desc">
                 {am
                   ? 'ከቀላል ጅማሬ ወደ ሚያድግ ማኅበረሰብ፤ ጉዟችን የክርስቶስን ብርሃን በሚዲያ፣ በትምህርትና በአገልግሎት ማስፋቱን ቀጥሏል።'
                   : 'Every milestone grew from one aim: keeping the faith alive and within reach of every member of the community.'}
               </p>
             </div>
-            <Link href="/about/timeline" className="btn line">
+            <Link href="/about/timeline" className="btn line" data-a="btn">
               {am ? 'ታሪካችንን ይመልከቱ →' : 'View Our Timeline →'}
             </Link>
           </div>
@@ -40,14 +44,14 @@ export function JourneyTimeline() {
           <div className="tl">
             {/* 1998 */}
             <Link href="/about/timeline#y1998" className="group">
-              <span className="d">
-                <svg width="26" height="26" aria-hidden="true">
+              <span className="d" data-a="dot">
+                <svg data-a="ico" width="26" height="26" aria-hidden="true">
                   <use href="#x" />
                 </svg>
               </span>
-              <b>1998</b>
-              <h3>{am ? 'ጅማሬው' : 'The Beginning'}</h3>
-              <p>
+              <b data-a="yr">1998</b>
+              <h3 data-a="ttl">{am ? 'ጅማሬው' : 'The Beginning'}</h3>
+              <p data-a="txt">
                 {am
                   ? 'የመጀመሪያው መንፈሳዊ ትምህርት ምዕመናንን በጸሎት ሰበሰበ።'
                   : 'First teachings gathered the faithful in prayer and study.'}
@@ -56,8 +60,8 @@ export function JourneyTimeline() {
 
             {/* 2006 */}
             <Link href="/about/timeline#y2006" className="group">
-              <span className="d">
-                <svg
+              <span className="d" data-a="dot">
+                <svg data-a="ico"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
@@ -72,9 +76,9 @@ export function JourneyTimeline() {
                   <path d="M8 20h8M12 16v4" />
                 </svg>
               </span>
-              <b>2006</b>
-              <h3>{am ? 'ዲጂታል መድረክ' : 'Digital Platform'}</h3>
-              <p>
+              <b data-a="yr">2006</b>
+              <h3 data-a="ttl">{am ? 'ዲጂታል መድረክ' : 'Digital Platform'}</h3>
+              <p data-a="txt">
                 {am
                   ? 'ትምህርቶችና ዜናዎች በዓለም ዙሪያ ላሉ ምዕመናን ደረሱ።'
                   : 'Teachings and news reached members everywhere.'}
@@ -83,8 +87,8 @@ export function JourneyTimeline() {
 
             {/* 2012 */}
             <Link href="/about/timeline#y2012" className="group">
-              <span className="d">
-                <svg
+              <span className="d" data-a="dot">
+                <svg data-a="ico"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
@@ -99,9 +103,9 @@ export function JourneyTimeline() {
                   <path d="M4 21V5" />
                 </svg>
               </span>
-              <b>2012</b>
-              <h3>{am ? 'ይዘት ማስፋፋት' : 'Content Expansion'}</h3>
-              <p>
+              <b data-a="yr">2012</b>
+              <h3 data-a="ttl">{am ? 'ይዘት ማስፋፋት' : 'Content Expansion'}</h3>
+              <p data-a="txt">
                 {am
                   ? 'ዝማሬዎች፣ የመጽሐፍ ቅዱስ ጥናትና የቤተ መጻሕፍት ሀብቶች ታከሉ።'
                   : 'Hymns, scripture study and library resources added.'}
@@ -110,8 +114,8 @@ export function JourneyTimeline() {
 
             {/* 2020 */}
             <Link href="/about/timeline#y2020" className="group">
-              <span className="d">
-                <svg
+              <span className="d" data-a="dot">
+                <svg data-a="ico"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
@@ -125,9 +129,9 @@ export function JourneyTimeline() {
                   <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
                 </svg>
               </span>
-              <b>2020</b>
-              <h3>{am ? 'ዘመናዊ መድረክ' : 'Modern Platform'}</h3>
-              <p>
+              <b data-a="yr">2020</b>
+              <h3 data-a="ttl">{am ? 'ዘመናዊ መድረክ' : 'Modern Platform'}</h3>
+              <p data-a="txt">
                 {am
                   ? 'ለአገልግሎቶች፣ ዝግጅቶችና ወጣቶች አዲስ መንፈሳዊ ቤት።'
                   : 'A new home for services, events and youth programs.'}
@@ -136,8 +140,8 @@ export function JourneyTimeline() {
 
             {/* 2024 */}
             <Link href="/about/timeline#y2024" className="group">
-              <span className="d">
-                <svg
+              <span className="d" data-a="dot">
+                <svg data-a="ico"
                   width="26"
                   height="26"
                   viewBox="0 0 24 24"
@@ -153,9 +157,9 @@ export function JourneyTimeline() {
                   <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 1.6 6 5.5" />
                 </svg>
               </span>
-              <b>2024</b>
-              <h3>{am ? 'አብሮ ማደግ' : 'Growing Together'}</h3>
-              <p>
+              <b data-a="yr">2024</b>
+              <h3 data-a="ttl">{am ? 'አብሮ ማደግ' : 'Growing Together'}</h3>
+              <p data-a="txt">
                 {am
                   ? 'ተጨማሪ ቤተሰቦች፣ በርካታ አገልግሎቶች፣ አንድ ማኅበረሰብ።'
                   : 'More families, more ministries, one community.'}

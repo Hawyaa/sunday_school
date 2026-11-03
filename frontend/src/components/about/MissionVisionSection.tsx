@@ -9,12 +9,16 @@
  * - Scripture banner with gold Orthodox cross and James 2:17.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useAppStore } from '@/lib/store';
+import { SplitWords } from '@/components/motion/SplitWords';
+import { useGuidedMotion } from './useAboutMotion';
 
 export function MissionVisionSection() {
   const { locale } = useAppStore();
   const am = locale === 'am';
+  const root = useRef<HTMLElement>(null);
+  useGuidedMotion(root);
 
   const values = [
     { en: 'Faith', am: 'እምነት' },
@@ -25,28 +29,28 @@ export function MissionVisionSection() {
   ];
 
   return (
-    <section className="about-guided" aria-label="Mission and Vision">
+    <section ref={root} className="about-guided" aria-label="Mission and Vision">
       <div className="c">
         {/* Header */}
         <div className="ghead">
           <div>
-            <div className="eyebrow">
+            <div className="eyebrow" data-a="eyebrow">
               <i />
               {am ? 'ተልዕኮና ራዕይ' : 'Our mission & vision'}
             </div>
             <h2>
               {am ? (
-                'በእምነት የሚመራ፣ በአገልግሎት የሚገፋ'
+                <SplitWords text="በእምነት የሚመራ፣ በአገልግሎት የሚገፋ" />
               ) : (
                 <>
-                  Guided by Faith,
+                  <SplitWords text="Guided by Faith," />
                   <br />
-                  Driven by Service
+                  <SplitWords text="Driven by Service" />
                 </>
               )}
             </h2>
           </div>
-          <p>
+          <p data-a="desc">
             {am
               ? 'የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያንን መንፈሳዊ ቅርስ በዘመናዊ ሚዲያ፣ ትምህርትና እርስ በርስ በመተሳሰብ ለመጠበቅና ለማካፈል ቁርጠኞች ነን።'
               : 'We are committed to preserving and sharing the spiritual heritage of the Ethiopian Orthodox Tewahedo Church through worship, learning and care for one another.'}
@@ -56,8 +60,8 @@ export function MissionVisionSection() {
         {/* 3 Pillar Cards */}
         <div className="pil">
           {/* Mission */}
-          <div className="card">
-            <div className="ic">
+          <div className="card" data-a="card">
+            <div className="ic" data-a="icon">
               <svg
                 width="28"
                 height="28"
@@ -74,8 +78,8 @@ export function MissionVisionSection() {
                 <circle cx="12" cy="12" r="0.8" fill="currentColor" />
               </svg>
             </div>
-            <h3>{am ? 'ተልዕኳችን' : 'Our Mission'}</h3>
-            <p>
+            <h3 data-a="title">{am ? 'ተልዕኳችን' : 'Our Mission'}</h3>
+            <p data-a="desc">
               {am
                 ? 'የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያንን ትምህርት፣ መንፈሳዊ እሴቶችና ባህላዊ ቅርስ በፍቅር ማዳረስ።'
                 : 'To proclaim the Gospel, nurture the faithful and serve the community with love.'}
@@ -83,8 +87,8 @@ export function MissionVisionSection() {
           </div>
 
           {/* Vision (Highlighted Navy) */}
-          <div className="card hi">
-            <div className="ic">
+          <div className="card hi" data-a="card">
+            <div className="ic" data-a="icon">
               <svg
                 width="28"
                 height="28"
@@ -100,8 +104,8 @@ export function MissionVisionSection() {
                 <circle cx="12" cy="12" r="3" />
               </svg>
             </div>
-            <h3>{am ? 'ራዕያችን' : 'Our Vision'}</h3>
-            <p>
+            <h3 data-a="title">{am ? 'ራዕያችን' : 'Our Vision'}</h3>
+            <p data-a="desc">
               {am
                 ? 'በአበው እምነት የጸና፣ በእውቀትና በፍቅር የተሳሰረ አንድ የቤተክርስቲያን ማኅበረሰብ።'
                 : 'A united, learned and compassionate church family, rooted in the faith of our fathers.'}
@@ -109,8 +113,8 @@ export function MissionVisionSection() {
           </div>
 
           {/* Values */}
-          <div className="card">
-            <div className="ic">
+          <div className="card" data-a="card">
+            <div className="ic" data-a="icon">
               <svg
                 width="28"
                 height="28"
@@ -125,8 +129,8 @@ export function MissionVisionSection() {
                 <path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" />
               </svg>
             </div>
-            <h3>{am ? 'እሴቶቻችን' : 'Our Values'}</h3>
-            <ul>
+            <h3 data-a="title">{am ? 'እሴቶቻችን' : 'Our Values'}</h3>
+            <ul data-a="desc">
               {values.map((v) => (
                 <li key={v.en}>{am ? v.am : v.en}</li>
               ))}
@@ -137,6 +141,7 @@ export function MissionVisionSection() {
         {/* Verse Banner */}
         <div className="verse">
           <svg
+            data-a="qicon"
             width="44"
             height="44"
             style={{ color: 'var(--gold)', flex: 'none' }}
@@ -145,11 +150,15 @@ export function MissionVisionSection() {
             <use href="#x" />
           </svg>
           <q>
-            {am
-              ? 'ሥራ የሌለው እምነት ቢኖር በራሱ የሞተ ነው።'
-              : 'Faith, if it hath not works, is dead, being alone.'}
+            <SplitWords
+              text={
+                am
+                  ? 'ሥራ የሌለው እምነት ቢኖር በራሱ የሞተ ነው።'
+                  : 'Faith, if it hath not works, is dead, being alone.'
+              }
+            />
           </q>
-          <cite>{am ? 'ያዕቆብ 2፡17' : 'James 2:17'}</cite>
+          <cite data-a="cite">{am ? 'ያዕቆብ 2፡17' : 'James 2:17'}</cite>
         </div>
       </div>
     </section>

@@ -31,7 +31,7 @@ export function MezmurLyricCard({ item }: Props) {
   };
 
   return (
-    <div className="relative flex h-full flex-col rounded-xl border border-[#ecdcb8] bg-[#fffdf9] px-6 pb-7 pt-4 text-center shadow-[0_3px_14px_rgba(15,35,82,0.05)]">
+    <div className="mz-enter-card mz-enter-lyric-card relative flex h-full flex-col rounded-xl border border-[#ecdcb8] bg-[#fffdf9] px-6 pb-7 pt-4 text-center shadow-[0_3px_14px_rgba(15,35,82,0.05)]">
       <Corners size={38} inset={4} />
 
       {/* Header */}
@@ -44,21 +44,21 @@ export function MezmurLyricCard({ item }: Props) {
           type="button"
           onClick={share}
           aria-label={am ? 'አጋራ' : 'Share'}
-          className="mr-6 grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-[#ece5d8] bg-white text-[#b9852a] shadow-sm transition hover:border-[#c8952f]"
+          className="mz-btn mr-6 grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-[#ece5d8] bg-white text-[#b9852a] shadow-sm hover:border-[#c8952f]"
         >
           <ShareIcon className="h-4 w-4" />
         </button>
       </div>
 
       {/* Title */}
-      <h3 className="font-['Noto_Serif_Ethiopic','Playfair_Display',serif] text-[26px] font-bold leading-[1.3] text-[#0f2352]">
+      <h3 className="mz-enter-title font-['Noto_Serif_Ethiopic','Playfair_Display',serif] text-[26px] font-bold leading-[1.3] text-[#0f2352]">
         {item.title}
       </h3>
       {!am && <p className="mt-1 font-['Crimson_Text',serif] text-[17px] text-[#35496b]">({item.titleEn})</p>}
 
       {/* Audio Player Bar */}
       {item.audioUrl ? (
-        <div className="mx-auto my-3 w-full max-w-[420px] rounded-xl bg-[#FAF4E6] border border-[#E9D9B2] p-3 shadow-xs text-left">
+        <div className="mz-enter-player mx-auto my-3 w-full max-w-[420px] rounded-xl bg-[#FAF4E6] border border-[#E9D9B2] p-3 shadow-xs text-left">
           <div className="flex items-center justify-between mb-1.5 px-1">
             <span className="flex items-center gap-1.5 text-xs font-bold text-[#0F1B3E]">
               <span className="inline-block w-2 h-2 rounded-full bg-[#137333] animate-pulse"></span>
@@ -94,7 +94,7 @@ export function MezmurLyricCard({ item }: Props) {
 
       <Link
         href={`/mezmur/${item.id}`}
-        className="mx-auto flex items-center gap-2.5 rounded-full border-[1.5px] border-[#dcc08a] bg-[#fffbf1] px-8 py-2.5 font-['Crimson_Text',serif] text-[15px] font-semibold text-[#b9852a] transition hover:bg-[#fff4d9]"
+        className="mz-btn mx-auto flex items-center gap-2.5 rounded-full border-[1.5px] border-[#dcc08a] bg-[#fffbf1] px-8 py-2.5 font-['Crimson_Text',serif] text-[15px] font-semibold text-[#b9852a] hover:bg-[#fff4d9]"
       >
         <BookIcon className="h-[18px] w-[18px]" />
         {am ? 'ሙሉ ግጥም ይመልከቱ' : 'View Full Lyrics'}

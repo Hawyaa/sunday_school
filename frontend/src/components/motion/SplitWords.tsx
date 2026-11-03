@@ -1,29 +1,41 @@
 import React from 'react';
 
 /**
- * SplitWords: wraps every word in a masked span so a parent animation can slide
- * the words up from behind the mask. Works for Latin and Amharic (splits on spaces).
+ * SplitWords.tsx — splits a heading into words, each inside a mask, so GSAP can slide them up.
  *
- * Contract: each word's inner span carries `data-split-word`. Animate those.
- * Before the animation runs, the words sit below the mask (motion-safe only).
+ * Visible by default: the words are NOT hidden by CSS, so the heading always shows (server render,
+ * no JS, reduced motion). GSAP hides them (yPercent 110) only when the entrance animation actually starts.
+ *
+ * Every word is a  <span data-split-word>  (the hero hooks animate these).
+ * The mask has a little padding so descenders and italic letters are never clipped.
  */
+
 export function SplitWords({ text }: { text: string }) {
-  const words = text.split(' ');
+  const words = text.split(' ').filter(Boolean);
+
   return (
     <>
-      {words.map((word, i) => (
-        <React.Fragment key={`${word}-${i}`}>
-          <span className="-mb-[0.14em] -mr-[0.06em] -mt-[0.08em] inline-block overflow-hidden pb-[0.14em] pr-[0.06em] pt-[0.08em] align-top">
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        {words.map((word, i) => (
+          <React.Fragment key={`${word}-${i}`}>
             <span
-              data-split-word
-              className="inline-block will-change-transform motion-safe:[transform:translateY(110%)]"
+              style={{
+                display: 'inline-block',
+                overflow: 'hidden',
+                verticalAlign: 'bottom',
+                padding: '0.12em 0.08em',
+                margin: '-0.12em -0.08em',
+              }}
             >
-              {word}
+              <span data-split-word style={{ display: 'inline-block', willChange: 'transform' }}>
+                {word}
+              </span>
             </span>
-          </span>
-          {i < words.length - 1 && ' '}
-        </React.Fragment>
-      ))}
+            {i < words.length - 1 ? ' ' : null}
+          </React.Fragment>
+        ))}
+      </span>
     </>
   );
 }

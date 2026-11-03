@@ -10,13 +10,17 @@
  * - Events & Gatherings
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
+import { SplitWords } from '@/components/motion/SplitWords';
+import { useServeMotion } from './useAboutMotion';
 
 export function ServicesContentSection() {
   const { locale } = useAppStore();
   const am = locale === 'am';
+  const root = useRef<HTMLElement>(null);
+  useServeMotion(root);
 
   const ways = [
     {
@@ -113,17 +117,19 @@ export function ServicesContentSection() {
   ];
 
   return (
-    <section className="about-serve" aria-label="Our ministries">
+    <section ref={root} className="about-serve" aria-label="Our ministries">
       <div className="c">
         <div className="shead">
           <div>
-            <div className="eyebrow">
+            <div className="eyebrow" data-a="eyebrow">
               <i />
               {am ? 'አገልግሎቶቻችን' : 'Our ministries'}
             </div>
-            <h2>{am ? 'ተጨማሪ የአገልግሎት መንገዶች' : 'More Ways to Serve'}</h2>
+            <h2>
+              <SplitWords text={am ? 'ተጨማሪ የአገልግሎት መንገዶች' : 'More Ways to Serve'} />
+            </h2>
           </div>
-          <p>
+          <p data-a="desc">
             {am
               ? 'በአገልግሎቶቻችን፣ በትምህርትና በማኅበረሰብ መርሐ ግብሮቻችን ለእያንዳንዱ አባል የሚሰጥበትና የሚያድግበት ስፍራ አለ።'
               : 'Through our ministries, education and community programs, there is a place for every member to give and to grow.'}
@@ -132,11 +138,13 @@ export function ServicesContentSection() {
 
         <div className="ways">
           {ways.map((w) => (
-            <Link key={w.titleEn} href={w.href} className="way">
-              <span className="n">{w.icon}</span>
-              <h3>{am ? w.titleAm : w.titleEn}</h3>
-              <p>{am ? w.descAm : w.descEn}</p>
-              <span className="m">
+            <Link key={w.titleEn} href={w.href} className="way" data-a="card">
+              <span className="n" data-a="icon">
+                {w.icon}
+              </span>
+              <h3 data-a="title">{am ? w.titleAm : w.titleEn}</h3>
+              <p data-a="desc">{am ? w.descAm : w.descEn}</p>
+              <span className="m" data-a="desc">
                 {am ? 'ተጨማሪ ይመልከቱ →' : 'Learn more →'}
               </span>
             </Link>
