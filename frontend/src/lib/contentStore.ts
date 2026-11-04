@@ -13,6 +13,18 @@ import { Teaching, TeachingCategory, INITIAL_TEACHING_CATEGORIES } from '@/types
 // --- REPORTS SEED DATA ---
 export const INITIAL_REPORTS: ChurchReport[] = [
   {
+    id: '0',
+    title: 'mariaym',
+    titleAm: 'የማርያም ዓመታዊ በዓል',
+    category: 'Spiritual',
+    dateStr: 'April 2026',
+    description: 'mariyam ametawi beal',
+    descriptionAm: 'የማርያም ዓመታዊ ክብረ በዓል አከባበር ሪፖርት።',
+    fileSize: '0.0 MB',
+    fileUrl: '#',
+    isRestricted: false,
+  },
+  {
     id: '1',
     title: 'Clergy Service Report',
     titleAm: 'የካህናትና አገልጋዮች የሥራ ሪፖርት',

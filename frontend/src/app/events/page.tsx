@@ -1,518 +1,449 @@
 'use client';
 
 /**
- * app/events/page.tsx: Church Events page.
+ * app/events/page.tsx — Church Events Page
  *
- * Composition only. The pieces live elsewhere:
- *   EventsHero       components/events/EventsHero.tsx      (video + its own motion)
- *   EventsCalendar   components/events/EventsCalendar.tsx  (own state)
- *   EventsSprite     components/events/EventsSprite.tsx    (SVG icons)
- *   useEventsMotion  ./useEventsMotion.ts                  (scroll animations, driven by data-attributes)
- *   styles           ./events.css  +  ./events.motion.css
+ * Implements the editorial layout from the master HTML design:
+ *   1. Header
+ *   2. Hero with animated typography ("Church Events.") + Next-up Slab
+ *   3. Interactive Date Ribbon / Timeline (with milestone ticks & selectable dates)
+ *   4. Category Filter Tabs & Underline Search Bar
+ *   5. Programme List with Outline-Stroke Numeral Accordions
+ *   6. Help / Volunteer Band ("Want to help?")
+ *   7. Full Brand Footer
  */
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import './events.css';
-import './events.motion.css';
+import { useAppStore } from '@/lib/store';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { EventModal } from '@/components/events/EventModal';
 import { EventItem } from '@/components/events/EventCard';
-import { EventsHero } from '@/components/events/EventsHero';
-import { EventsCalendar } from '@/components/events/EventsCalendar';
-import { EventsSprite } from '@/components/events/EventsSprite';
-import { useAppStore } from '@/lib/store';
-import { getStoredEvents } from '@/lib/contentStore';
-import { useEventsMotion } from './useEventsMotion';
 import './events.css';
-import './events.motion.css';
-import './events.size.css';
-interface FullEvent extends EventItem {
-  titleAm?: string;
-  catAm?: string;
-  placeAm?: string;
-  descriptionAm?: string;
-  isFeatured?: boolean;
+
+export interface ChurchEvent extends EventItem {
+  d: number; // Day of the month
+  monthStr: string;
+  monthStrAm: string;
+  titleAm: string;
+  catAm: string;
+  placeAm: string;
+  descriptionAm: string;
 }
 
-const FALLBACK_IMG = '/images/events/event-1.jpg';
-const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-
-const DEFAULT_EVENTS: FullEvent[] = [
-  {
-    id: 'feat-1',
-    title: 'Annual Church Gathering',
-    titleAm: 'ዓመታዊ የቤተክርስቲያን ጉባኤና ኅብረት',
-    cat: 'Church programs',
-    catAm: 'የቤተክርስቲያን መርሐ ግብር',
-    icon: 'church',
-    date: '2026-11-22',
-    time: '9:00 AM – 2:00 PM',
-    place: 'St. Gabriel Church, Addis Ababa',
-    placeAm: 'ቅዱስ ገብርኤል ቤተክርስቲያን፣ አዲስ አበባ',
-    description:
-      'A full day of liturgy, fellowship and a shared meal for every family in the parish, with music from the church choir.',
-    descriptionAm:
-      'ለእያንዳንዱ የምእመናን ቤተሰብ የተዘጋጀ የቅዳሴ፣ የኅብረትና የጋራ ማዕድ ቀን ከመዘምራን ያሬዳዊ ዜማ ጋር።',
-    img: '/images/events/featured.jpg',
-    isFeatured: true,
-  },
-  {
-    id: 'ev-1',
-    title: 'Bible Study Series',
-    titleAm: 'የመጽሐፍ ቅዱስ ጥናት መርሐ ግብር',
-    cat: 'Teaching',
-    catAm: 'ትምህርት',
-    icon: 'book',
-    date: '2026-11-05',
-    time: '6:00 PM',
-    place: 'Online, open to all',
-    placeAm: 'በበይነመረብ (Online) ለሁሉም ክፍት',
-    description: 'Weekly study of the Gospel of John, open to every member of the community.',
-    descriptionAm: 'የዮሐንስ ወንጌል ሳምንታዊ ጥናት፤ ለማኅበረሰቡ አባላት በሙሉ ክፍት ነው።',
-    img: '/images/events/event-1.jpg',
-  },
-  {
-    id: 'ev-2',
-    title: 'Food Donation Drive',
-    titleAm: 'የምግብና አልባሳት ልገሳ ዘመቻ',
-    cat: 'Community service',
-    catAm: 'የማኅበረሰብ አገልግሎት',
-    icon: 'heart',
-    date: '2026-11-07',
-    time: '8:00 AM',
-    place: 'Addis Ababa City',
-    placeAm: 'አዲስ አበባ ከተማ',
-    description: 'Collecting and packing food for families in need across the city.',
-    descriptionAm: 'በከተማዋ ለሚገኙ የተቸገሩ ወገኖችና ቤተሰቦች ምግብና ድጋፍ የማሰባሰብ መርሐ ግብር።',
-    img: '/images/events/hero.jpg',
-  },
-  {
-    id: 'ev-3',
-    title: 'Mezmur Evening',
-    titleAm: 'የያሬዳዊ ዜማና መዝሙር ምሽት',
-    cat: 'Worship',
-    catAm: 'አምልኮና ጸሎት',
-    icon: 'star',
-    date: '2026-11-12',
-    time: '5:30 PM',
-    place: 'St. Gabriel Church',
-    placeAm: 'ቅዱስ ገብርኤል ቤተክርስቲያን',
-    description: 'An evening of hymns with the church choir, the kebero and the tsenatsel.',
-    descriptionAm: 'በከበሮ፣ በጸናጽልና በመዘምራን ማኅሌት የታጀበ መንፈሳዊ የበረከት ምሽት።',
-    img: '/images/events/featured.jpg',
-  },
-  {
-    id: 'ev-4',
-    title: 'Youth Fellowship Night',
-    titleAm: 'የወጣቶች ኅብረትና ውይይት ምሽት',
-    cat: 'Church programs',
-    catAm: 'የቤተክርስቲያን መርሐ ግብር',
-    icon: 'users',
-    date: '2026-11-14',
-    time: '6:30 PM',
-    place: 'St. Gabriel Church Hall',
-    placeAm: 'ቅዱስ ገብርኤል አዳራሽ',
-    description: 'Teaching, discussion and games for young adults between 15 and 25.',
-    descriptionAm: 'ዕድሜያቸው ከ15 እስከ 25 ለሆኑ ወጣቶች የተዘጋጀ መንፈሳዊ ትምህርትና የውይይት መድረክ።',
-    img: '/images/events/event-1.jpg',
-  },
+const ALL_EVENTS: ChurchEvent[] = [
   {
     id: 'ev-5',
+    d: 5,
+    monthStr: 'NOV',
+    monthStrAm: 'ኅዳር',
+    date: '2026-11-05',
     title: 'Church Renovation Fundraising',
     titleAm: 'የቤተክርስቲያን እድሳት የገቢ ማሰባሰቢያ',
-    cat: 'Fundraising',
-    catAm: 'የገቢ ማሰባሰቢያ',
+    cat: 'Church Building',
+    catAm: 'የሕንፃ ግንባታ',
+    time: '3:00 PM',
+    place: 'St. Gabriel Church',
+    placeAm: 'ቅዱስ ገብርኤል ቤተክርስቲያን',
+    description: 'A special parish gathering dedicated to supporting the restoration and beautification of the church sanctuary.',
+    descriptionAm: 'የቤተ መቅደሱን እድሳትና ማስዋብ ሥራ ለመደገፍ የተዘጋጀ ልዩ የገቢ ማሰባሰቢያ መርሐ ግብር።',
+    img: '/images/events/hero.jpg',
     icon: 'church',
-    date: '2026-11-19',
+  },
+  {
+    id: 'ev-8',
+    d: 8,
+    monthStr: 'NOV',
+    monthStrAm: 'ኅዳር',
+    date: '2026-11-08',
+    title: 'Spiritual Growth Seminar',
+    titleAm: 'የመንፈሳዊ ዕድገት ሲምፖዚየም',
+    cat: 'Teaching',
+    catAm: 'ትምህርት',
+    time: '10:00 AM',
+    place: 'Seminar Center',
+    placeAm: 'የመሰብሰቢያ አዳራሽ',
+    description: 'An insightful theological seminar with clergy exploring spiritual growth and Christian living in the modern world.',
+    descriptionAm: 'በአበው ካህናት የሚመራ መንፈሳዊ ዕድገትና ክርስቲያናዊ የሕይወት ጎዳናን የሚያስረዳ ጥልቅ የትምህርት መድረክ።',
+    img: '/images/events/event-1.jpg',
+    icon: 'book',
+  },
+  {
+    id: 'ev-15',
+    d: 15,
+    monthStr: 'NOV',
+    monthStrAm: 'ኅዳር',
+    date: '2026-11-15',
+    title: 'Youth Fellowship Gathering',
+    titleAm: 'የወጣቶች መንፈሳዊ ኅብረት ጉባኤ',
+    cat: 'Church Programs',
+    catAm: 'የቤተክርስቲያን መርሐ ግብር',
     time: '2:00 PM',
     place: 'St. Gabriel Church Hall',
     placeAm: 'ቅዱስ ገብርኤል አዳራሽ',
-    description: 'Help restore the church hall and courtyard for the next generation.',
-    descriptionAm: 'ለቀጣዩ ትውልድ የሚተላለፈውን የታሪክና የቤተክርስቲያን ቅርስ ለማደስ የበኩላችሁን አስተዋጽኦ ያድርጉ።',
-    img: '/images/events/hero.jpg',
+    description: 'Connecting youth and young adults through prayer, sacred hymn learning, and spiritual brotherhood.',
+    descriptionAm: 'ወጣቶችን በጸሎት፣ በያሬዳዊ ዜማና በመንፈሳዊ ወንድማማችነት የሚያስተሳስር ልዩ የወጣቶች ጉባኤ።',
+    img: '/images/events/featured.jpg',
+    icon: 'users',
   },
   {
-    id: 'ev-6',
-    title: 'Sunday School Annual Day',
-    titleAm: 'የሰንበት ትምህርት ቤት ዓመታዊ ቀን',
-    cat: 'Church programs',
+    id: 'ev-22-1',
+    d: 22,
+    monthStr: 'NOV',
+    monthStrAm: 'ኅዳር',
+    date: '2026-11-22',
+    title: 'Annual Church Gathering',
+    titleAm: 'ዓመታዊ የቤተክርስቲያን ጉባኤና ኅብረት',
+    cat: 'Church Programs',
     catAm: 'የቤተክርስቲያን መርሐ ግብር',
-    icon: 'users',
-    date: '2026-11-28',
-    time: '9:00 AM',
-    place: 'St. Gabriel Church Hall',
-    placeAm: 'ቅዱስ ገብርኤል አዳራሽ',
-    description: 'Students present hymns, recitations and scripture lessons for their families.',
-    descriptionAm: 'ተማሪዎች ለመላው ቤተሰብ ዝማሬዎችን፣ ቲያትርና የጥናት ትምህርቶችን የሚያቀርቡበት ዓመታዊ በዓል።',
+    time: '9:00 AM – 2:00 PM',
+    place: 'St. Gabriel Church, Addis Ababa',
+    placeAm: 'ቅዱስ ገብርኤል ቤተክርስቲያን፣ አዲስ አበባ',
+    description: 'A full day of divine liturgy, community fellowship, and a shared blessing table for the entire parish family.',
+    descriptionAm: 'ለእያንዳንዱ የምእመናን ቤተሰብ የተዘጋጀ የቅዳሴ፣ የኅብረትና የጋራ የበረከት ማዕድ ቀን ከመዘምራን ያሬዳዊ ዜማ ጋር።',
     img: '/images/events/featured.jpg',
+    icon: 'church',
+  },
+  {
+    id: 'ev-22-2',
+    d: 22,
+    monthStr: 'NOV',
+    monthStrAm: 'ኅዳር',
+    date: '2026-11-22',
+    title: 'Charity & Support Program',
+    titleAm: 'የበጎ አድራጎትና ድጋፍ መርሐ ግብር',
+    cat: 'Community Service',
+    catAm: 'የማኅበረሰብ አገልግሎት',
+    time: '9:00 AM',
+    place: 'Community Center',
+    placeAm: 'የማኅበረሰብ ማዕከል',
+    description: 'Providing food, clothing, and essential support to elderly and vulnerable families in our diocese.',
+    descriptionAm: 'በአካባቢያችን ለሚገኙ አቅመ ደካሞችና አረጋውያን ወገኖች ምግብና አልባሳትን የማዳረስ የፍቅር ማዕድ።',
+    img: '/images/events/hero.jpg',
+    icon: 'heart',
+  },
+  {
+    id: 'ev-28',
+    d: 28,
+    monthStr: 'NOV',
+    monthStrAm: 'ኅዳር',
+    date: '2026-11-28',
+    title: 'Feast Day Liturgy & Hymns',
+    titleAm: 'የበዓለ ንግሥ ቅዳሴና ዝማሬ',
+    cat: 'Feast Celebration',
+    catAm: 'በዓላትና አምልኮ',
+    time: '6:00 AM – 11:30 AM',
+    place: 'Main Sanctuary',
+    placeAm: 'ዋናው ቤተ መቅደስ',
+    description: 'Solemn liturgical worship, deacons choir procession, and spiritual blessing for the feast day.',
+    descriptionAm: 'በካህናትና ዲያቆናት ማኅሌትና ቅዳሴ የሚከናወን ታላቅ የበዓለ ንግሥ መንፈሳዊ ሥርዓት።',
+    img: '/images/events/event-1.jpg',
+    icon: 'star',
   },
 ];
 
-/** Admin-store events + the default featured event (shown if the store has none). */
-function loadEvents(): FullEvent[] {
-  const stored = getStoredEvents();
-  if (!stored || stored.length === 0) return DEFAULT_EVENTS;
-
-  const mapped: FullEvent[] = stored.map((s) => ({
-    id: String(s.id),
-    title: s.title,
-    cat: s.cat === 'Church Program' ? 'Church programs' : s.cat,
-    icon: s.icon || 'cal',
-    date: s.date,
-    time: s.time,
-    place: s.place,
-    description: s.description,
-    img: s.img || FALLBACK_IMG,
-  }));
-
-  return mapped.some((e) => e.isFeatured) ? mapped : [DEFAULT_EVENTS[0], ...mapped];
-}
-
-function getDateBadge(dateStr: string) {
-  const [year = '2026', month = '11', day = '01'] = dateStr.split('-');
-  return { day, month: MONTH_NAMES[parseInt(month, 10) - 1] ?? 'NOV', year };
-}
-
-function matchesFilters(e: FullEvent, term: string, category: string): boolean {
-  const matchCat = !category || e.cat.toLowerCase() === category.toLowerCase();
-  if (!matchCat) return false;
-  if (!term) return true;
-  return [e.title, e.titleAm, e.place, e.placeAm, e.cat, e.description].some((v) =>
-    v?.toLowerCase().includes(term),
-  );
-}
+const CATEGORIES = [
+  'Church Programs',
+  'Teaching',
+  'Community Service',
+  'Church Building',
+  'Feast Celebration',
+];
 
 export default function EventsPage() {
   const { locale } = useAppStore();
-  const am = locale === 'am';
-  const rootRef = useRef<HTMLDivElement>(null);
+  const isAm = locale === 'am';
 
-  // Start with the defaults so server and client render the same; load the admin store after mount.
-  const [allEvents, setAllEvents] = useState<FullEvent[]>(DEFAULT_EVENTS);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<FullEvent | null>(null);
+  // Filter state
+  const [selectedCat, setSelectedCat] = useState<string>('');
+  const [selectedDay, setSelectedDay] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [openIndex, setOpenIndex] = useState<number>(0); // First item expanded by default
+  const [modalEvent, setModalEvent] = useState<EventItem | null>(null);
 
-  useEffect(() => {
-    const sync = () => setAllEvents(loadEvents());
-    sync();
-    window.addEventListener('abune_content_store_updated', sync);
-    return () => window.removeEventListener('abune_content_store_updated', sync);
+  // Today reference
+  const todayDate = 22; // Mid-month reference for sample
+
+  // Next gathering slab event (e.g. Nov 22 Annual Church Gathering or earliest event >= today)
+  const nextEvent = useMemo(() => {
+    return ALL_EVENTS.find((e) => e.d >= todayDate) || ALL_EVENTS[0];
   }, []);
 
-  const featuredEvent = useMemo(() => allEvents.find((e) => e.isFeatured) ?? allEvents[0], [allEvents]);
-  const regularEvents = useMemo(() => allEvents.filter((e) => e !== featuredEvent), [allEvents, featuredEvent]);
+  // Unique event days for the date ribbon
+  const uniqueDays = useMemo(() => {
+    return Array.from(new Set(ALL_EVENTS.map((e) => e.d))).sort((a, b) => a - b);
+  }, []);
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    allEvents.forEach((e) => {
-      counts[e.cat] = (counts[e.cat] || 0) + 1;
+  // Filtered events
+  const filteredEvents = useMemo(() => {
+    return ALL_EVENTS.filter((e) => {
+      const matchCat = !selectedCat || e.cat === selectedCat;
+      const matchDay = !selectedDay || e.d === selectedDay;
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        e.title.toLowerCase().includes(q) ||
+        e.titleAm.toLowerCase().includes(q) ||
+        e.cat.toLowerCase().includes(q) ||
+        e.place.toLowerCase().includes(q) ||
+        (e.description || '').toLowerCase().includes(q);
+
+      return matchCat && matchDay && matchSearch;
     });
-    return counts;
-  }, [allEvents]);
+  }, [selectedCat, selectedDay, searchQuery]);
 
-  const term = searchQuery.trim().toLowerCase();
-  const filteredEvents = useMemo(
-    () => regularEvents.filter((e) => matchesFilters(e, term, selectedCategory)),
-    [regularEvents, term, selectedCategory],
-  );
-  const isFeaturedVisible = !!featuredEvent && matchesFilters(featuredEvent, term, selectedCategory);
+  const hasActiveFilters = Boolean(selectedCat || selectedDay || searchQuery);
 
-  const eventDates = useMemo(() => allEvents.map((e) => e.date), [allEvents]);
-
-  useEventsMotion(rootRef, {
-    featuredId: isFeaturedVisible ? String(featuredEvent?.id) : '',
-    cardsKey: filteredEvents.map((e) => e.id).join('|'),
-    catsKey: Object.keys(categoryCounts).join('|'),
-  });
-
-  const resetFilters = () => {
+  const clearFilters = () => {
+    setSelectedCat('');
+    setSelectedDay(0);
     setSearchQuery('');
-    setSelectedCategory('');
-  };
-
-  const toggleCategory = (name: string) =>
-    setSelectedCategory((cur) => (cur.toLowerCase() === name.toLowerCase() ? '' : name));
-
-  const openByDate = (iso: string) => {
-    const ev = allEvents.find((e) => e.date === iso);
-    if (ev) setSelectedEvent(ev);
+    setOpenIndex(-1);
   };
 
   return (
-    <div className="events-page" ref={rootRef}>
-      <EventsSprite />
+    <div className="events-page">
       <Header />
 
       <main>
-        <EventsHero />
-
-        {/* ================= SEARCH + FILTER BAR ================= */}
-        <div className="ev-wrap">
-          <form className="ev-filters" role="search" onSubmit={(e) => e.preventDefault()} autoComplete="off">
-            <label className="ev-field ev-field--grow">
-              <svg width="20" height="20" aria-hidden="true">
-                <use href="#i-search" />
-              </svg>
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={
-                  am ? 'ሁነቶችን በስም፣ በቦታ ወይም በዓይነት ይፈልጉ' : 'Search events by name, place or category'
-                }
-                aria-label="Search events"
-              />
-            </label>
-
-            <label className="ev-field ev-field--sel">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                aria-label="Filter by category"
-              >
-                <option value="">{am ? 'ሁሉም ክፍሎች' : 'All categories'}</option>
-                <option value="Church programs">{am ? 'የቤተክርስቲያን መርሐ ግብር' : 'Church programs'}</option>
-                <option value="Worship">{am ? 'አምልኮና ጸሎት' : 'Worship'}</option>
-                <option value="Teaching">{am ? 'ትምህርት' : 'Teaching'}</option>
-                <option value="Community service">{am ? 'የማኅበረሰብ አገልግሎት' : 'Community service'}</option>
-                <option value="Fundraising">{am ? 'የገቢ ማሰባሰቢያ' : 'Fundraising'}</option>
-              </select>
-            </label>
-
-            <button
-              className="ev-btn ev-btn--dark"
-              type="button"
-              onClick={resetFilters}
-              style={{ height: '52px', paddingInline: '28px' }}
-            >
-              {am ? 'ዳግም ጀምር' : 'Reset'}
-            </button>
-          </form>
-        </div>
-
-        {/* ================= MAIN LAYOUT ================= */}
-        <div className="ev-wrap ev-layout" id="events">
-          <div>
-            {/* ---------- Featured event ---------- */}
-            {isFeaturedVisible && featuredEvent && (
-              <section id="featured-sec" aria-labelledby="feat-label">
-                <h2
-                  className="ev-eyebrow ev-section-title"
-                  id="feat-label"
-                  style={{ fontFamily: 'var(--sans)', letterSpacing: '.2em' }}
-                >
-                  {am ? 'ተለይቶ የቀረበ ሁነት' : 'Featured event'}
-                </h2>
-
-                <article
-                  className="ev-featured"
-                  data-featured
-                  onClick={() => setSelectedEvent(featuredEvent)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="ev-featured__img ev-ph" role="img" aria-label={featuredEvent.title}>
-                    <div
-                      className="ev-media"
-                      data-reveal="media"
-                      style={{ backgroundImage: `url("${featuredEvent.img ?? FALLBACK_IMG}")` }}
-                    />
-                    <div className="ev-date">
-                      <b>{getDateBadge(featuredEvent.date).day}</b>
-                      <span>{getDateBadge(featuredEvent.date).month}</span>
-                    </div>
-                  </div>
-
-                  <div className="ev-featured__body">
-                    <span className="ev-pill" data-reveal="text">
-                      {am ? featuredEvent.catAm || featuredEvent.cat : featuredEvent.cat}
-                    </span>
-                    <h2 data-reveal="text">
-                      {am ? featuredEvent.titleAm || featuredEvent.title : featuredEvent.title}
-                    </h2>
-                    <p data-reveal="text">
-                      {am ? featuredEvent.descriptionAm || featuredEvent.description : featuredEvent.description}
-                    </p>
-                    <div className="ev-meta">
-                      <span data-reveal="fade">
-                        <svg width="18" height="18" aria-hidden="true">
-                          <use href="#i-cal" />
-                        </svg>
-                        <time dateTime={featuredEvent.date}>{featuredEvent.date}</time>
-                      </span>
-                      <span data-reveal="fade">
-                        <svg width="18" height="18" aria-hidden="true">
-                          <use href="#i-clock" />
-                        </svg>
-                        {featuredEvent.time}
-                      </span>
-                      <span data-reveal="fade">
-                        <svg width="18" height="18" aria-hidden="true">
-                          <use href="#i-pin" />
-                        </svg>
-                        {am ? featuredEvent.placeAm || featuredEvent.place : featuredEvent.place}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="ev-btn"
-                      data-reveal="scale"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEvent(featuredEvent);
-                      }}
-                    >
-                      {am ? 'ዝርዝር ይመልከቱ' : 'View details'}{' '}
-                      <svg width="18" height="18" aria-hidden="true">
-                        <use href="#i-arrow" />
-                      </svg>
-                    </button>
-                  </div>
-                </article>
-              </section>
-            )}
-
-            {/* ---------- Upcoming events ---------- */}
-            <div className="ev-listhead">
-              <h2
-                className="ev-eyebrow ev-section-title"
-                style={{ fontFamily: 'var(--sans)', letterSpacing: '.2em' }}
-              >
-                {am ? 'መጪ ሁነቶች' : 'Upcoming events'}
-              </h2>
-              <p className="ev-count" aria-live="polite">
-                {am
-                  ? `ከ ${regularEvents.length} ውስጥ ${filteredEvents.length} እየታዩ ነው`
-                  : `Showing ${filteredEvents.length} of ${regularEvents.length}`}
+        {/* ── 1. Hero Section: Type + Next-Up Slab ── */}
+        <section className="hero">
+          <div className="w hg">
+            <div>
+              <p className="eb">{isAm ? 'መሰባሰብ • አምልኮ • አገልግሎት' : 'Gather · Worship · Serve'}</p>
+              <h1>
+                <span>
+                  <em>{isAm ? 'የቤተክርስቲያን' : 'Church'}</em>
+                </span>
+                <span>
+                  <em>{isAm ? 'መርሐ ግብራት' : 'Events.'}</em>
+                </span>
+              </h1>
+              <p className="tag">
+                {isAm
+                  ? 'በኅብረት እንሰብሰብ፤ በአንድነት እናምልክ፤ በፍቅር እናገልግል።'
+                  : 'Gather. Worship. Serve together.'}
               </p>
             </div>
 
-            <div className="ev-list" id="list">
-              {filteredEvents.map((evt) => {
-                const badge = getDateBadge(evt.date);
+            {/* Next Gathering Slab */}
+            <div className="slab">
+              <div className="big">
+                {nextEvent.d}
+                <small>{isAm ? nextEvent.monthStrAm : nextEvent.monthStr}</small>
+              </div>
+              <span className="ch" style={{ color: 'var(--gold)' }}>
+                {isAm ? 'ቀጣይ መርሐ ግብር' : 'Next gathering'}
+              </span>
+              <h2>{isAm ? nextEvent.titleAm : nextEvent.title}</h2>
+              <p>
+                🕘 {nextEvent.time}
+                <br />
+                📍 {isAm ? nextEvent.placeAm : nextEvent.place}
+              </p>
+              <button
+                type="button"
+                className="btn bg"
+                onClick={() => setModalEvent(nextEvent)}
+              >
+                {isAm ? 'ዝርዝር ይመልከቱ' : 'View details'}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div className="w">
+          {/* ── 2. Interactive Date Ribbon / Timeline ── */}
+          <div className="rib">
+            <div className="rh">
+              <h2>{isAm ? 'ኅዳር 2019' : 'November 2026'}</h2>
+              <span style={{ fontSize: 13, color: 'var(--slate)' }}>
+                {isAm ? 'በዕለቱ የሚከናወነውን ለማየት ቀኑን ይጫኑ።' : 'Tap a date to see what’s on.'}
+              </span>
+            </div>
+
+            <div className="rl" tabIndex={0} aria-label="Date timeline">
+              {/* Milestone ticks for 1, 8, 15, 22, 29 */}
+              {[1, 8, 15, 22, 29].map((tick) => (
+                <span
+                  key={`tick-${tick}`}
+                  className="tk"
+                  style={{ left: `${((tick - 1) / 29) * 100}%` }}
+                >
+                  {tick}
+                </span>
+              ))}
+
+              {/* Interactive Date Nodes */}
+              {uniqueDays.map((day) => {
+                const isSelected = selectedDay === day;
+                const isToday = day === todayDate;
+                const eventsOnDay = ALL_EVENTS.filter((e) => e.d === day).length;
+
                 return (
-                  <article
-                    key={evt.id}
-                    className="ev-row"
-                    data-reveal="card"
-                    onClick={() => setSelectedEvent(evt)}
-                    style={{ cursor: 'pointer' }}
+                  <button
+                    key={`node-${day}`}
+                    type="button"
+                    className={`nd ${isSelected ? 'sel' : ''} ${isToday ? 'today' : ''}`}
+                    style={{ left: `${((day - 1) / 29) * 100}%` }}
+                    onClick={() => setSelectedDay(isSelected ? 0 : day)}
+                    aria-label={`November ${day}: ${eventsOnDay} event(s)`}
                   >
-                    <div className="ev-row__img ev-ph" role="img" aria-label={evt.title}>
-                      <div className="ev-media" style={{ backgroundImage: `url("${evt.img ?? FALLBACK_IMG}")` }} />
-                      <div className="ev-date">
-                        <b>{badge.day}</b>
-                        <span>{badge.month}</span>
-                      </div>
-                    </div>
-                    <div className="ev-row__body">
-                      <div className="ev-row__tag">
-                        <span className="ev-cat">{am ? evt.catAm || evt.cat : evt.cat}</span>
-                        <time dateTime={evt.date}>{badge.year}</time>
-                      </div>
-                      <h3>
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setSelectedEvent(evt);
-                          }}
-                        >
-                          {am ? evt.titleAm || evt.title : evt.title}
-                        </a>
-                      </h3>
-                      <p>{am ? evt.descriptionAm || evt.description : evt.description}</p>
-                      <div className="ev-meta">
-                        <span>
-                          <svg width="16" height="16" aria-hidden="true">
-                            <use href="#i-clock" />
-                          </svg>
-                          {evt.time}
-                        </span>
-                        <span>
-                          <svg width="16" height="16" aria-hidden="true">
-                            <use href="#i-pin" />
-                          </svg>
-                          {am ? evt.placeAm || evt.place : evt.place}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="ev-row__go" aria-hidden="true">
-                      <svg width="20" height="20">
-                        <use href="#i-arrow" />
-                      </svg>
-                    </span>
-                  </article>
+                    <b>{day}</b>
+                    <i />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── 3. Toolbar: Category Tabs & Live Search ── */}
+          <div className="bar">
+            <div className="tabs" role="group" aria-label="Categories">
+              <button
+                type="button"
+                className={selectedCat === '' ? 'sel' : ''}
+                onClick={() => setSelectedCat('')}
+              >
+                {isAm ? 'ሁሉም' : 'All'}
+                <i>{ALL_EVENTS.length}</i>
+              </button>
+
+              {CATEGORIES.map((cat) => {
+                const count = ALL_EVENTS.filter((e) => e.cat === cat).length;
+                const isCatSel = selectedCat === cat;
+
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    className={isCatSel ? 'sel' : ''}
+                    onClick={() => setSelectedCat(isCatSel ? '' : cat)}
+                  >
+                    {isAm
+                      ? ALL_EVENTS.find((e) => e.cat === cat)?.catAm || cat
+                      : cat}
+                    <i>{count}</i>
+                  </button>
                 );
               })}
             </div>
 
-            {filteredEvents.length === 0 && !isFeaturedVisible && (
-              <div className="ev-empty">
-                <b>{am ? 'ምንም ሁነቶች አልተገኙም' : 'No events found'}</b>
-                {am
-                  ? 'እባክዎ የተለየ ቃል ይፈልጉ ወይም "ሁሉም ክፍሎች" የሚለውን ይምረጡ።'
-                  : 'Try a different search or choose "All categories".'}
-              </div>
+            <input
+              className="sr"
+              type="search"
+              placeholder={isAm ? 'መርሐ ግብር ይፈልጉ...' : 'Search events...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search events"
+            />
+          </div>
+
+          {/* Results count & Clear button */}
+          <div style={{ fontSize: 13, marginTop: 12, color: 'var(--slate)' }}>
+            {isAm
+              ? `ከ${ALL_EVENTS.length} ውስጥ ${filteredEvents.length} መርሐ ግብራት ታይተዋል`
+              : `Showing ${filteredEvents.length} of ${ALL_EVENTS.length} events`}
+            {hasActiveFilters && (
+              <button type="button" className="clear" onClick={clearFilters}>
+                {isAm ? 'ሁሉንም አጽዳ' : 'Clear filters'}
+              </button>
             )}
           </div>
 
-          {/* ================= SIDEBAR ================= */}
-          <aside className="ev-side" aria-label="Event tools">
-            <EventsCalendar
-              eventDates={eventDates}
-              featuredDate={featuredEvent?.date}
-              initialMonth={new Date(2026, 10, 1)}
-              am={am}
-              onSelectDate={openByDate}
-            />
+          {/* ── 4. Programme List (Accordion Items with Stroke Numerals) ── */}
+          <div className="pg" aria-live="polite">
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((event, idx) => {
+                const isOpen = openIndex === idx;
 
-            <section className="ev-panel" aria-labelledby="cats-title" data-reveal="side">
-              <h2 id="cats-title">{am ? 'በክፍል ይመልከቱ' : 'Browse by category'}</h2>
-              <ul className="ev-cats">
-                {Object.entries(categoryCounts).map(([name, count]) => (
-                  <li key={name} data-reveal="cat">
+                return (
+                  <article
+                    key={event.id}
+                    className={`it ${isOpen ? 'open' : ''}`}
+                    style={{ '--i': idx } as React.CSSProperties}
+                  >
                     <button
                       type="button"
-                      aria-pressed={selectedCategory.toLowerCase() === name.toLowerCase()}
-                      onClick={() => toggleCategory(name)}
+                      className="hd"
+                      aria-expanded={isOpen}
+                      onClick={() => setOpenIndex(isOpen ? -1 : idx)}
                     >
-                      <span className="ev-cats__label">
-                        <svg className="ev-cats__icon" width="14" height="14" aria-hidden="true">
-                          <use href="#i-next" />
-                        </svg>
-                        {name}
+                      <span className="dn">
+                        {event.d}
+                        <small>{isAm ? event.monthStrAm : event.monthStr}</small>
                       </span>
-                      <b>{count}</b>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
 
-            <section className="ev-cta" data-reveal="side">
-              <svg width="40" height="40" aria-hidden="true" style={{ color: 'var(--gold-soft)' }}>
-                <use href="#i-cross" />
-              </svg>
-              <h2>{am ? 'ማገልገል ይፈልጋሉ?' : 'Want to help?'}</h2>
-              <p>
-                {am
-                  ? 'ፈቃደኛ አገልጋዮች ለእያንዳንዱ ጉባኤ መሳካት መሠረት ናቸው። አገልግሎት ይቀላቀሉና አብረውን ያገልግሉ።'
-                  : 'Volunteers make every gathering possible. Join a ministry and serve with us.'}
+                      <span>
+                        <span className="ch">{isAm ? event.catAm : event.cat}</span>
+                        <h3>{isAm ? event.titleAm : event.title}</h3>
+                      </span>
+
+                      <span className="pl" aria-hidden="true">
+                        +
+                      </span>
+                    </button>
+
+                    <div className="dt">
+                      <div>
+                        <div className="dtin">
+                          <span>
+                            <b>{isAm ? 'ሰዓት' : 'Time'}</b>
+                            {event.time}
+                          </span>
+                          <span>
+                            <b>{isAm ? 'ቦታ' : 'Place'}</b>
+                            {isAm ? event.placeAm : event.place}
+                          </span>
+                          <p style={{ width: '100%', maxWidth: 540, color: 'var(--slate)', fontSize: 14 }}>
+                            {isAm ? event.descriptionAm : event.description}
+                          </p>
+                          <button
+                            type="button"
+                            className="btn bn"
+                            style={{ height: 42, fontSize: 14 }}
+                            onClick={() => setModalEvent(event)}
+                          >
+                            {isAm ? 'ሙሉ ዝርዝር' : 'View details'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            ) : (
+              <p className="empty">
+                {isAm ? 'ምንም መርሐ ግብር አልተገኘም።' : 'No events match your search.'}
               </p>
-              <Link className="ev-btn" href="/contact">
-                {am ? 'አገልግሎት ይቀላቀሉ' : 'Join a ministry'}
-              </Link>
-            </section>
-          </aside>
+            )}
+          </div>
         </div>
+
+        {/* ── 5. Help / Volunteer Band ("Want to help?") ── */}
+        <section className="hb">
+          <div className="w hbg">
+            <h2>{isAm ? 'ማገልገል ይፈልጋሉ?' : 'Want to help?'}</h2>
+            <div>
+              <p>
+                {isAm
+                  ? 'በሚመጡ መርሐ ግብሮች ወይም በአገልግሎት ዘርፎች በፈቃደኝነት ይሳተፉ።'
+                  : 'Volunteer or support an upcoming event or ministry.'}
+              </p>
+              <Link className="btn bg" href="/contact">
+                {isAm ? 'ይሳተፉ' : 'Get involved'}
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <Footer />
+      {/* ── 6. Full Brand Footer ── */}
+      <Footer compact={false} />
 
-      {selectedEvent && <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {/* ── 7. Interactive Event Modal ── */}
+      <EventModal event={modalEvent} onClose={() => setModalEvent(null)} />
     </div>
   );
 }
