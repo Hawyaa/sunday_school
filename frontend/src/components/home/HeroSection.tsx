@@ -82,7 +82,7 @@ export function HeroSection({ slides = HERO_SLIDES, intervalMs = HERO_INTERVAL_M
       aria-label="Hero banner"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="hero-banner relative flex flex-col min-h-[520px] sm:min-h-[580px] md:min-h-[620px] pt-[116px] justify-between overflow-hidden bg-black text-white"
+      className="hero-banner relative flex flex-col min-h-[480px] sm:min-h-[540px] md:min-h-[580px] justify-between overflow-hidden bg-black text-white"
     >
       {/* Background slides: parallax + crossfade + slow zoom (keyed so the zoom replays) */}
       <div className="absolute inset-0 z-0">

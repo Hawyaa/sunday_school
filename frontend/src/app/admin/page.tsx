@@ -63,7 +63,7 @@ type NavEntry = NavGroup | (NavItem & { type?: never });
 
 const NAV_STRUCTURE: NavEntry[] = [
   { type: 'G', title: 'Overview' },
-  { id: 'ov', icon: '📊', label: 'Overview' },
+  { id: 'ov', icon: '📊', label: 'Admin overview' },
   { id: 'pov', icon: '🛡', label: 'Platform overview', superOnly: true },
 
   { type: 'G', title: 'Members' },
@@ -119,35 +119,38 @@ export default function AdminPage() {
   // Initialize session from login
   useEffect(() => {
     const session = getSession();
+    if (!session || session.role !== 'admin') {
+      router.push('/login?next=/admin');
+      return;
+    }
     if (session?.user) {
       if (session.user.name) setUserName(session.user.name);
       if (session.user.email) setUserEmail(session.user.email);
+      // Strictly determine role from session:
+      // Only SUPER_ADMIN backendRole or explicit superadmin email gives Super Admin access.
       const isSuperUser = Boolean(
         session.user.backendRole === 'SUPER_ADMIN' ||
-        session.user.name.toLowerCase().includes('super') ||
-        session.user.email?.toLowerCase().includes('admin')
+        (session.user.email && session.user.email.toLowerCase().startsWith('super'))
       );
       setIsSuper(isSuperUser);
       setActiveView(isSuperUser ? 'pov' : 'ov');
     }
-  }, []);
+  }, [router]);
 
-  // Switch role handler
-  const switchRole = (toSuper: boolean) => {
-    setIsSuper(toSuper);
-    if (toSuper) {
-      if (activeView === 'ov') setActiveView('pov');
-    } else {
-      if (SUPER_ONLY_VIEWS.includes(activeView)) setActiveView('ov');
+  // Ensure non-super admin cannot remain on any super-only view
+  useEffect(() => {
+    if (!isSuper && SUPER_ONLY_VIEWS.includes(activeView)) {
+      setActiveView('ov');
     }
-  };
+  }, [isSuper, activeView]);
 
   const handleNavClick = (view: ViewKey) => {
     if (!isSuper && SUPER_ONLY_VIEWS.includes(view)) {
       setActiveView('ov');
-    } else {
-      setActiveView(view);
+      ask('Access Denied', 'Super Administrator privileges are required to access this platform module.');
+      return;
     }
+    setActiveView(view);
     setMobileOpen(false);
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -187,11 +190,11 @@ export default function AdminPage() {
           <b className="am">አ</b>
           <div>
             <span>Abune Media</span>
-            <small>CONTENT STUDIO</small>
+            <small>{isSuper ? 'PLATFORM STUDIO' : 'CONTENT STUDIO'}</small>
           </div>
         </Link>
 
-        <div className="badge">{isSuper ? 'SUPER ADMIN' : 'ADMIN'}</div>
+        <div className="badge">{isSuper ? '🛡 SUPER ADMIN' : '📊 ADMIN'}</div>
 
         <nav style={{ flex: 1 }}>
           {NAV_STRUCTURE.map((item, idx) => {
@@ -207,9 +210,9 @@ export default function AdminPage() {
             const navItem = item as NavItem;
             if (navItem.superOnly && !isSuper) return null;
             if (!isSuper && navItem.id === 'pov') return null;
-            if (isSuper && navItem.id === 'ov') return null;
 
             const isCurrent = activeView === navItem.id;
+            const displayLabel = !isSuper && navItem.id === 'ov' ? 'Overview' : navItem.label;
 
             return (
               <button
@@ -219,7 +222,7 @@ export default function AdminPage() {
                 onClick={() => handleNavClick(navItem.id)}
               >
                 <u>{navItem.icon}</u>
-                <span>{navItem.label}</span>
+                <span>{displayLabel}</span>
                 {navItem.badge && (
                   navItem.badge === 'SOON' ? (
                     <em>{navItem.badge}</em>
@@ -290,22 +293,9 @@ export default function AdminPage() {
             aria-label="Search across portal"
           />
 
-          {/* Role Switcher Segmented Control */}
-          <div className="seg" id="role" role="group" aria-label="Role selector">
-            <button
-              type="button"
-              className={!isSuper ? 'on' : ''}
-              onClick={() => switchRole(false)}
-            >
-              Admin
-            </button>
-            <button
-              type="button"
-              className={isSuper ? 'on' : ''}
-              onClick={() => switchRole(true)}
-            >
-              Super Admin
-            </button>
+          {/* Role Status Badge (determined strictly from authenticated session) */}
+          <div className={`hdr-role-badge ${isSuper ? 'super' : 'admin'}`}>
+            <span>{isSuper ? '🛡 Super Admin' : '📊 Admin'}</span>
           </div>
 
           {/* Notification Bell */}

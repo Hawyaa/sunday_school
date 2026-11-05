@@ -147,17 +147,16 @@ export function Header({ transparent = false }: HeaderProps) {
     router.refresh();
   };
 
-  // Determine user role
+  // Determine user role strictly from authenticated session
   const isSuperAdmin = Boolean(
     currentUser?.backendRole === 'SUPER_ADMIN' ||
-    currentUser?.name?.toLowerCase().includes('super') ||
-    currentUser?.email?.toLowerCase().includes('super')
+    (currentUser?.email && currentUser.email.toLowerCase().startsWith('super'))
   );
   const isAdmin = Boolean(
     isSuperAdmin ||
     currentUser?.backendRole === 'ADMIN' ||
     currentUser?.backendRole === 'EDITOR' ||
-    currentUser?.email?.toLowerCase().includes('admin')
+    (currentUser?.email && currentUser.email.toLowerCase().startsWith('admin'))
   );
 
   // Handle Login submission

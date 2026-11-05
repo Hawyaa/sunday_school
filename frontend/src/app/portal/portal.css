@@ -1,0 +1,883 @@
+/* ==========================================================================
+   Abune Media – Member Portal (Design v3) Styles
+   ========================================================================== */
+
+.portal-root {
+  --navy: #1E2A5E;
+  --blue: #2F5D9E;
+  --gold: #C99A3B;
+  --ochre: #8A6414;
+  --bg: #FBF7F0;
+  --sky: #E3EEF8;
+  --slate: #44506B;
+  --card: #fff;
+  --line: #eadfc8;
+  --red: #b3262e;
+  --ok: #2e7d4f;
+  --text: #1E2A5E;
+
+  font: 15px/1.5 Inter, system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .portal-root:not([data-theme="light"]) {
+    --bg: #121830;
+    --card: #1b2347;
+    --line: #2c3764;
+    --sky: #222c58;
+    --slate: #a9b3d0;
+    --text: #f1ecdf;
+    --ochre: #e0b765;
+  }
+}
+
+.portal-root[data-theme="dark"] {
+  --bg: #121830;
+  --card: #1b2347;
+  --line: #2c3764;
+  --sky: #222c58;
+  --slate: #a9b3d0;
+  --text: #f1ecdf;
+  --ochre: #e0b765;
+}
+
+.portal-root h1,
+.portal-root h2,
+.portal-root h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.portal-root .am {
+  font-family: 'Noto Serif Ethiopic', serif;
+}
+
+.portal-root svg.i {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.portal-root aside {
+  width: 250px;
+  background: var(--card);
+  border-right: 1px solid var(--line);
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 30;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.portal-root .logo {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 0 8px 18px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.portal-root .logo b {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--ochre));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: 'Noto Serif Ethiopic', serif;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+.portal-root .logo span {
+  font: 700 21px 'Cormorant Garamond', serif;
+  display: block;
+}
+
+.portal-root .logo small {
+  display: block;
+  font: 500 10px Inter, sans-serif;
+  color: var(--slate);
+  letter-spacing: 0.1em;
+}
+
+.portal-root .nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.portal-root .nv {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: none;
+  border: 0;
+  color: var(--slate);
+  font: 500 14px Inter, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.portal-root .nv:hover {
+  background: var(--sky);
+  color: var(--text);
+}
+
+.portal-root .nv.on {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(30, 42, 94, 0.2);
+}
+
+.portal-root .nv em {
+  margin-left: auto;
+  font: 600 11px Inter, sans-serif;
+  font-style: normal;
+  background: var(--gold);
+  color: #1E2A5E;
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+
+.portal-root .verse {
+  margin-top: auto;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--sky);
+  font: italic 600 15px 'Cormorant Garamond', Georgia, serif;
+  color: var(--text);
+  border-left: 3px solid var(--gold);
+}
+
+.portal-root .verse small {
+  display: block;
+  font: 500 10px Inter, sans-serif;
+  letter-spacing: 0.1em;
+  color: var(--ochre);
+  margin-top: 4px;
+  font-style: normal;
+}
+
+/* ── Main Content Area ───────────────────────────────────────────────── */
+.portal-root .wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-root header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 28px;
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+}
+
+.portal-root .back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(180deg, #d3a03c, #b9852a);
+  color: #1E2A5E;
+  text-decoration: none;
+  font: 600 13px Inter, sans-serif;
+  padding: 9px 16px 9px 12px;
+  border-radius: 22px;
+  box-shadow: 0 3px 10px rgba(185, 133, 42, 0.25);
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.portal-root .back:hover {
+  transform: translateX(-2px);
+  box-shadow: 0 5px 14px rgba(185, 133, 42, 0.35);
+}
+
+.portal-root .back svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.4;
+}
+
+.portal-root .hi {
+  font-size: 13px;
+  color: var(--slate);
+  margin-left: 8px;
+  line-height: 1.2;
+}
+
+.portal-root .hi b {
+  display: block;
+  color: var(--text);
+  font: 700 20px 'Cormorant Garamond', Georgia, serif;
+}
+
+.portal-root .sp {
+  flex: 1;
+}
+
+.portal-root .ib {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.portal-root .ib:hover {
+  background: var(--sky);
+}
+
+.portal-root .ib i {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--red);
+  color: #fff;
+  font: 600 10px Inter, sans-serif;
+  border-radius: 9px;
+  padding: 1px 6px;
+  font-style: normal;
+}
+
+.portal-root .av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--navy));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font: 700 16px 'Cormorant Garamond', Georgia, serif;
+  cursor: pointer;
+  border: 2px solid var(--card);
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
+.portal-root .dd {
+  position: relative;
+}
+
+.portal-root .menu {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 8px;
+  min-width: 210px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  display: none;
+  z-index: 30;
+}
+
+.portal-root .menu.on {
+  display: block;
+}
+
+.portal-root .menu button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  background: none;
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.portal-root .menu button:hover {
+  background: var(--sky);
+}
+
+.portal-root .menu hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 6px 0;
+}
+
+.portal-root .menu .who {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--slate);
+}
+
+.portal-root .mob {
+  display: none;
+}
+
+.portal-root main {
+  padding: 26px 28px;
+  max-width: 1080px;
+  width: 100%;
+  animation: portalIn 0.3s ease;
+}
+
+@keyframes portalIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Content Elements ────────────────────────────────────────────────── */
+.portal-root .pt {
+  margin-bottom: 18px;
+}
+
+.portal-root .pt h1 {
+  font-size: 40px;
+}
+
+.portal-root .pt p {
+  color: var(--slate);
+  margin-top: 4px;
+}
+
+.portal-root .hero {
+  background: linear-gradient(135deg, var(--navy) 30%, var(--blue));
+  color: #fff;
+  border-radius: 24px;
+  padding: 28px 30px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 18px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.portal-root .hero:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 90% 10%, rgba(201, 154, 59, 0.33), transparent 45%);
+}
+
+.portal-root .hero > * {
+  position: relative;
+}
+
+.portal-root .hero small {
+  color: var(--gold);
+  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.portal-root .hero h1 {
+  font-size: 42px;
+  margin: 6px 0;
+  color: #fff;
+}
+
+.portal-root .hero p {
+  color: #d6dcf2;
+  max-width: 480px;
+}
+
+.portal-root .hero .av {
+  width: 72px;
+  height: 72px;
+  font-size: 28px;
+  border-color: var(--navy);
+}
+
+.portal-root .grid {
+  display: grid;
+  gap: 16px;
+}
+
+.portal-root .g4 {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.portal-root .g2 {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.portal-root .card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.portal-root .sh {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 12px;
+}
+
+.portal-root .sh h2 {
+  font-size: 28px;
+}
+
+.portal-root .sh a {
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.portal-root .sh a:hover {
+  text-decoration: underline;
+}
+
+.portal-root .info small,
+.portal-root .kv small {
+  display: block;
+  color: var(--slate);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portal-root .info b {
+  font: 700 22px 'Cormorant Garamond', Georgia, serif;
+  display: block;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.portal-root .info {
+  border-top: 3px solid var(--gold);
+}
+
+.portal-root .tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.portal-root .pub {
+  background: #dff1e6;
+  color: #1f6b40;
+}
+
+.portal-root .dr {
+  background: #fbeccb;
+  color: #8A6414;
+}
+
+.portal-root .bl {
+  background: #dbe8f7;
+  color: #1E2A5E;
+}
+
+.portal-root .rd2 {
+  background: #f8dcdc;
+  color: #a02028;
+}
+
+.portal-root .btn {
+  background: var(--navy);
+  color: #fff;
+  border: 0;
+  border-radius: 22px;
+  padding: 10px 20px;
+  font: 600 13px Inter, sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-root .btn:hover {
+  transform: translateY(-1px);
+}
+
+.portal-root .btn.g {
+  background: var(--gold);
+  color: #1E2A5E;
+}
+
+.portal-root .btn.g:hover {
+  background: #d8a846;
+}
+
+.portal-root .btn.o {
+  background: none;
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.portal-root .btn.o:hover {
+  background: var(--sky);
+}
+
+.portal-root .btn.s {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.portal-root .nt {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+
+.portal-root .nt:last-child {
+  border: 0;
+}
+
+.portal-root .nt i.d {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+.portal-root .nt.rd i.d {
+  background: var(--line);
+}
+
+.portal-root .nt.rd b {
+  font-weight: 500;
+}
+
+.portal-root .nt small {
+  display: block;
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.portal-root .notice {
+  border-left: 4px solid var(--gold);
+}
+
+.portal-root .notice.rd {
+  border-left-color: var(--line);
+}
+
+.portal-root label {
+  display: block;
+  font: 600 11px Inter, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin: 14px 0 5px;
+}
+
+.portal-root input,
+.portal-root select,
+.portal-root textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.portal-root input:focus,
+.portal-root select:focus,
+.portal-root textarea:focus {
+  border-color: var(--gold);
+}
+
+.portal-root .kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.portal-root .lk {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--slate);
+}
+
+.portal-root .empty {
+  text-align: center;
+  padding: 36px 16px;
+  border: 2px dashed var(--line);
+  border-radius: 20px;
+  color: var(--slate);
+}
+
+.portal-root .empty b {
+  display: block;
+  color: var(--text);
+  font: 700 24px 'Cormorant Garamond', Georgia, serif;
+  margin: 6px 0;
+}
+
+.portal-root .ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.portal-root .ring div {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--card);
+  display: grid;
+  place-items: center;
+  font: 700 24px 'Cormorant Garamond', Georgia, serif;
+  color: var(--text);
+}
+
+.portal-root .sw {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: #c9ccd6;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.portal-root .sw:after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+}
+
+.portal-root .sw.on {
+  background: var(--ok);
+}
+
+.portal-root .sw.on:after {
+  left: 20px;
+}
+
+.portal-root .row {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.portal-root .row:last-child {
+  border: 0;
+}
+
+.portal-root table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.portal-root th {
+  font: 600 11px Inter, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.portal-root td {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+}
+
+.portal-root .tw {
+  overflow-x: auto;
+}
+
+.portal-root .toast {
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  display: none;
+  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.portal-root .toast.on {
+  display: block;
+  animation: toastFade 0.25s ease;
+}
+
+@keyframes toastFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ── Interactive Preview Toolbar (Bottom-Right) ───────────────────────── */
+.portal-root .pv {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: #C99A3B;
+  color: #1E2A5E;
+  border-radius: 14px;
+  padding: 8px 12px;
+  font: 600 11px Inter, sans-serif;
+  z-index: 40;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: calc(100vw - 24px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.portal-root .pv select {
+  width: auto;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 0;
+  font: 600 11px Inter, sans-serif;
+  background: #fff;
+  color: #1E2A5E;
+}
+
+.portal-root .pv label {
+  margin: 0;
+  font: 600 11px Inter, sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #1E2A5E;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+/* ── Mobile Sidebar Drawer ───────────────────────────────────────────── */
+.portal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 25;
+  display: none;
+}
+
+.portal-backdrop.open {
+  display: block;
+}
+
+@media (max-width: 860px) {
+  .portal-root aside {
+    position: fixed;
+    left: -270px;
+    transition: left 0.25s ease;
+  }
+  .portal-root aside.open {
+    left: 0;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+  }
+  .portal-root .mob {
+    display: grid;
+  }
+  .portal-root main {
+    padding: 18px 16px;
+  }
+  .portal-root header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .portal-root .hi {
+    display: none;
+  }
+  .portal-root .hero h1,
+  .portal-root .pt h1 {
+    font-size: 34px;
+  }
+  .portal-root .back {
+    padding: 9px 12px 9px 9px;
+  }
+  .portal-root .back .lg {
+    display: none;
+  }
+}
+
+@media (min-width: 861px) {
+  .portal-root .back .sm {
+    display: none;
+  }
+}
