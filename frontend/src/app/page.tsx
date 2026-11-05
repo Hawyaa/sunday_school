@@ -23,8 +23,9 @@ import { useAppStore } from '@/lib/store';
 import { useHomeReveal } from './useHomeReveal';
 import './home.css';
 
-// Layout (untouched)
+// Layout
 import { UrgentBanner } from '@/components/layout/UrgentBanner';
+import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { HeroSection } from '@/components/home/HeroSection';
 
@@ -82,9 +83,11 @@ export default function HomePage() {
   return (
     <div ref={rootRef} className="home-page min-h-screen flex flex-col">
       <UrgentBanner />
+      <Header />
 
-      {/* ── 1. Hero (existing, untouched) ── */}
-      <HeroSection />
+      <main className="flex-1">
+        {/* ── 1. Hero ── */}
+        <HeroSection />
 
       {/* ── 2. Next Session (overlaps hero) ── */}
       <div className="relative z-20" style={{ marginTop: '-64px' }}>
@@ -261,6 +264,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ── 8. Footer (existing, full variant) ── */}
       <Footer compact={false} />

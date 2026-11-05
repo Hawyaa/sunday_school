@@ -49,6 +49,9 @@
 .home-page section {
   padding: var(--pad) 0;
 }
+.home-page section.hero-banner {
+  padding: 0;
+}
 .home-page .head {
   display: flex;
   justify-content: space-between;

@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
-import { Header } from '@/components/layout/Header';
 import { Parallax } from '@/components/motion/Parallax';
 import { HERO_SLIDES, HERO_INTERVAL_MS, type HeroSlide } from '@/lib/heroSlides';
 
@@ -83,10 +82,8 @@ export function HeroSection({ slides = HERO_SLIDES, intervalMs = HERO_INTERVAL_M
       aria-label="Hero banner"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative flex flex-col min-h-[580px] sm:min-h-[640px] md:min-h-[680px] justify-between overflow-hidden bg-black text-white"
+      className="hero-banner relative flex flex-col min-h-[520px] sm:min-h-[580px] md:min-h-[620px] pt-[116px] justify-between overflow-hidden bg-black text-white"
     >
-      <Header transparent={true} />
-
       {/* Background slides: parallax + crossfade + slow zoom (keyed so the zoom replays) */}
       <div className="absolute inset-0 z-0">
         <Parallax key={`bg-${playKey}`} speed={0.1} className="absolute inset-x-0 -top-[15%] h-[130%]">
@@ -114,7 +111,7 @@ export function HeroSection({ slides = HERO_SLIDES, intervalMs = HERO_INTERVAL_M
       {/* Hero content (keyed: remounting restarts all entrance animations) */}
       <div
         key={`content-${playKey}`}
-        className="relative z-10 mx-auto flex w-full max-w-[920px] flex-col items-center px-6 pt-32 sm:pt-36 md:pt-40 pb-24 sm:pb-28 text-center my-auto"
+        className="relative z-10 mx-auto flex w-full max-w-[920px] flex-col items-center px-6 py-20 sm:py-24 md:py-28 text-center my-auto"
       >
         {/* Gentle floating motion on the whole text block, starts after the entrance */}
         <div className="hero-float flex flex-col items-center">

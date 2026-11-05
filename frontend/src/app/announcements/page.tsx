@@ -1,344 +1,471 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { fetchLatestAnnouncements, fetchAnnouncementById } from '@/services/announcements';
+import type { Announcement } from '@/types/announcement';
+import { UrgentBanner } from '@/components/layout/UrgentBanner';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { useAppStore } from '@/lib/store';
-import { getStoredAnnouncements, AnnouncementItem } from '@/lib/contentStore';
-import { apiClient } from '@/lib/api';
 
-export default function AnnouncementsPage() {
-  const { locale } = useAppStore();
-  const isAm = locale === 'am';
+/* ───────── view model + adapter (the ONLY place that knows your API field names) ───────── */
+type Item = {
+  id: string;
+  title: string;
+  summary: string;
+  body: string;
+  category: string;
+  ts: number;
+  pinned: boolean;
+  image: string;
+  g: 0 | 1 | 2;
+  /** optional ready-made date text (used by the preview data) */
+  label?: string;
+};
 
-  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(() =>
-    getStoredAnnouncements()
-  );
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementItem | null>(null);
-
-  // Fetch from backend API on mount, fallback to contentStore
-  useEffect(() => {
-    async function fetchFromBackend() {
-      try {
-        const res = await apiClient.get('/announcements');
-        if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-          const mapped: AnnouncementItem[] = res.data.data.map((item: any) => ({
-            id: item.id,
-            title: item.title,
-            titleAm: item.title,
-            summary: item.summary || item.content?.slice(0, 120),
-            content: item.content,
-            category: item.category || 'Parish Notices',
-            categoryAm: item.category || 'ጠቅላላ ማስታወቂያ',
-            priority: item.isPinned ? 'Urgent' : 'General',
-            dateStr: item.publishedAt
-              ? new Date(item.publishedAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Oct 2026',
-            author: item.createdBy?.name || 'Church Administration',
-            imageUrl: item.imageUrl || undefined,
-            isPinned: !!item.isPinned,
-            publishedAt: item.publishedAt || new Date().toISOString(),
-          }));
-          setAnnouncements(mapped);
-        }
-      } catch (err) {
-        // Fallback to local persistent store
-        setAnnouncements(getStoredAnnouncements());
-      }
+function pickStr(r: Record<string, unknown>, keys: string[]): string {
+  for (const k of keys) {
+    const v = r[k];
+    if (typeof v === 'string' && v.trim()) return v.trim();
+    if (v && typeof v === 'object') {
+      const o = v as Record<string, unknown>;
+      const n = o.name ?? o.title ?? o.label;
+      if (typeof n === 'string' && n.trim()) return n.trim();
     }
+  }
+  return '';
+}
 
-    fetchFromBackend();
+function toItem(a: Announcement, i: number): Item {
+  const r = a as unknown as Record<string, unknown>;
+  const body = pickStr(r, ['content', 'body', 'description', 'details']);
+  const summary =
+    pickStr(r, ['summary', 'excerpt', 'shortDescription']) ||
+    (body.length > 140 ? body.slice(0, 140).trimEnd() + '…' : body);
+  const ts = Date.parse(pickStr(r, ['publishedAt', 'publishDate', 'createdAt', 'date']));
+  return {
+    id: String(r.id ?? r._id ?? i),
+    title: pickStr(r, ['title', 'titleEn', 'name']) || 'Untitled announcement',
+    summary,
+    body,
+    category: pickStr(r, ['category', 'type']) || 'General',
+    ts: Number.isNaN(ts) ? 0 : ts,
+    pinned: Boolean(r.isPinned ?? r.pinned ?? r.featured),
+    image: pickStr(r, ['imageUrl', 'image', 'coverImage', 'thumbnail']),
+    g: (i % 3) as 0 | 1 | 2,
+  };
+}
 
-    const handleUpdate = () => {
-      setAnnouncements(getStoredAnnouncements());
-    };
-    window.addEventListener('abune_content_store_updated', handleUpdate);
-    return () => {
-      window.removeEventListener('abune_content_store_updated', handleUpdate);
-    };
-  }, []);
+/** Swap this for your Ethiopian-calendar formatter (lib/calendar.ts) if you want "Meskerem 12" style dates. */
+const fmtDate = (ts: number) =>
+  ts ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(ts) : '';
 
-  const categories = [
-    { key: 'All', en: 'All Notices', am: 'ሁሉም ማስታወቂያዎች' },
-    { key: 'Feasts & Holidays', en: 'Feasts & Holidays', am: 'የበዓላት ማስታወቂያ' },
-    { key: 'Sunday School', en: 'Sunday School', am: 'የሰንበት ት/ቤት' },
-    { key: 'Parish Notices', en: 'Parish Notices', am: 'ጠቅላላ ማስታወቂያ' },
-    { key: 'Urgent Calls', en: 'Urgent Calls', am: 'አስቸኳይ ጥሪ' },
+const dateText = (i: Item) => i.label ?? fmtDate(i.ts);
+
+/** Development-only preview data (the same sample content as the HTML design). */
+function makeSample(): Item[] {
+  const cats = ['Church', 'Education', 'Community'];
+  const titles = [
+    'Feast of the Holy Cross preparation',
+    'New Sunday school registration',
+    'Community charity and outreach',
   ];
+  const first = [12, 15, 22, 25, 27, 29];
+  const day = 86400000;
+  return Array.from({ length: 30 }, (_, i) => {
+    const label =
+      i < 6
+        ? `Meskerem ${first[i]}`
+        : `${['Meskerem', 'Tikimt', 'Hidar'][Math.floor((i - 6) / 8)]} ${((i - 6) % 8) * 3 + 1}`;
+    return {
+      id: `sample-${i}`,
+      title: titles[i] ?? `Announcement title ${i + 1}`,
+      summary: 'A short summary of this announcement goes here.',
+      body: 'The full text of this announcement goes here.\nAdd the date, time and place if they apply.',
+      category: cats[i % 3],
+      ts: Date.now() - i * 3 * day,
+      pinned: i < 3,
+      image: '',
+      g: (i % 3) as 0 | 1 | 2,
+      label,
+    };
+  });
+}
 
-  const filteredAnnouncements = useMemo(() => {
-    return announcements.filter((a) => {
-      const q = search.trim().toLowerCase();
-      const matchesSearch =
-        !q ||
-        a.title.toLowerCase().includes(q) ||
-        (a.titleAm && a.titleAm.toLowerCase().includes(q)) ||
-        a.summary.toLowerCase().includes(q) ||
-        a.content.toLowerCase().includes(q);
+/* ───────── small pieces ───────── */
+function Thumb({ item }: { item: Item }) {
+  return (
+    <div className={`an-img g${item.g}`}>
+      <i
+        style={
+          item.image
+            ? { backgroundImage: `url(${item.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+            : undefined
+        }
+      />
+    </div>
+  );
+}
 
-      const matchesCat =
-        selectedCategory === 'All' ||
-        a.category === selectedCategory ||
-        (selectedCategory === 'Urgent Calls' && (a.priority === 'Urgent' || a.isPinned));
+function Meta({ item }: { item: Item }) {
+  return (
+    <div>
+      {(item.label || item.ts > 0) && <span className="an-dt">{dateText(item)}</span>}
+      <span className="an-ct">{item.category}</span>
+      {item.pinned && <span className="an-pt">PINNED</span>}
+    </div>
+  );
+}
 
-      return matchesSearch && matchesCat;
-    });
-  }, [announcements, search, selectedCategory]);
+const ROT = [-1.6, 0.9, -0.7];
+const ROT0 = [-8, 6, -5];
+const FIRST_PAGE = 10;
 
-  const pinned = filteredAnnouncements.find((a) => a.isPinned || a.priority === 'Urgent');
-  const regularList = filteredAnnouncements.filter((a) => a.id !== pinned?.id);
+/* ───────── page ───────── */
+export default function AnnouncementsPage() {
+  const [items, setItems] = useState<Item[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [isSample, setIsSample] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [q, setQ] = useState('');
+  const [cat, setCat] = useState('');
+  const [lim, setLim] = useState(FIRST_PAGE);
+  const [open, setOpen] = useState<Item | null>(null);
+  const [bodies, setBodies] = useState<Record<string, string>>({});
+
+  const lastFocus = useRef<HTMLElement | null>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  /* load list */
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      let list: Item[] | null = null;
+      for (const limit of [100, 20, 4]) {
+        try {
+          const data = await fetchLatestAnnouncements(limit);
+          list = data.map(toItem).sort((a, b) => b.ts - a.ts);
+          break;
+        } catch (err) {
+          console.warn(`[announcements] fetch failed (limit=${limit})`, err);
+        }
+      }
+      if (!alive) return;
+      if (list && list.length) {
+        setItems(list);
+        setIsSample(false);
+        setStatus('ready');
+      } else if (process.env.NODE_ENV !== 'production') {
+        setItems(makeSample());
+        setIsSample(true);
+        setStatus('ready');
+      } else {
+        setItems(list ?? []);
+        setStatus(list ? 'ready' : 'error');
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [attempt]);
+
+  const retry = () => {
+    setStatus('loading');
+    setAttempt((n) => n + 1);
+  };
+
+  /* derived */
+  const categories = useMemo(() => Array.from(new Set(items.map((i) => i.category))), [items]);
+  const board = useMemo(() => {
+    const pinned = items.filter((i) => i.pinned);
+    return (pinned.length ? pinned : items).slice(0, 3);
+  }, [items]);
+  const boardIds = useMemo(() => new Set(board.map((b) => b.id)), [board]);
+
+  const act = Boolean(q || cat);
+  const feed = useMemo(() => {
+    const term = q.toLowerCase();
+    return items.filter(
+      (i) =>
+        (!cat || i.category === cat) &&
+        (!term || (i.title + i.category + i.summary).toLowerCase().includes(term)) &&
+        (act || !boardIds.has(i.id))
+    );
+  }, [items, q, cat, act, boardIds]);
+
+  const lead = feed[0];
+  const side = feed.slice(1, 3);
+  const rows = feed.slice(3, 3 + lim);
+  const left = feed.length - 3 - lim;
+
+  /* reader drawer */
+  const openItem = (item: Item, el: HTMLElement) => {
+    lastFocus.current = el;
+    setOpen(item);
+    if (bodies[item.id] === undefined && !item.id.startsWith('sample-')) {
+      fetchAnnouncementById(item.id).then((full) => {
+        if (!full) return;
+        const body = pickStr(full as unknown as Record<string, unknown>, ['content', 'body', 'description', 'details']);
+        if (body) setBodies((b) => ({ ...b, [item.id]: body }));
+      });
+    }
+  };
+  const closeReader = () => setOpen(null);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(null);
+        return;
+      }
+      if (e.key === 'Tab' && drawerRef.current) {
+        const f = Array.from(drawerRef.current.querySelectorAll<HTMLElement>('a[href], button'));
+        if (!f.length) return;
+        const first = f[0];
+        const last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    const back = lastFocus.current;
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+      if (back && back.isConnected) back.focus();
+    };
+  }, [open]);
+
+  const clear = () => {
+    setQ('');
+    setCat('');
+    setLim(FIRST_PAGE);
+  };
+
+  const readerBody = open ? bodies[open.id] ?? open.body ?? open.summary : '';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF6EF] text-[#2A354F]">
+    <div className="min-h-screen flex flex-col">
+      <UrgentBanner />
       <Header />
-
-      <main className="flex-1 pb-20">
-        {/* Hero Banner with Orthodox Gold Corner Styling */}
-        <section className="relative bg-gradient-to-b from-[#0F1B3E] to-[#162344] text-white py-16 px-6 sm:px-12 border-b-2 border-[#C99A3B] shadow-md overflow-hidden">
-          {/* Subtle Church Arch Overlay */}
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-amber-200 via-transparent to-transparent pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto relative z-10 text-center">
-            <span className="inline-block text-xs font-serif tracking-widest text-[#E2B258] uppercase mb-2">
-              {isAm ? 'አቡነ ሚዲያ · ይፋዊ ማስታወቂያዎች' : 'Abune Media · Official Notices'}
+      <main id="main" className="an-page flex-1">
+      {/* ===== HERO + pinned notes ===== */}
+      <section className="an-hero">
+        <div className="an-w">
+          <nav className="an-crumb" aria-label="Breadcrumb">
+            <Link href="/">Home</Link> › <b>Announcements</b>
+          </nav>
+          <span className="an-kick">NEWS &amp; NOTICES</span>
+          <h1 className="an-h1">
+            <span className="an-mk">
+              <em>Announcements</em>
             </span>
-            <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-white mb-4">
-              {isAm ? 'የሰንበት ትምህርት ቤት ማስታወቂያዎች' : 'Announcements & Parish Notices'}
-            </h1>
-            <p className="text-xs sm:text-sm text-[#E8EEF5]/80 max-w-2xl mx-auto leading-relaxed">
-              {isAm
-                ? 'የበዓላት መርሐግብራት፣ የጉባኤ ጥሪዎች፣ የትምህርት ምዝገባና ማኅበራዊ አገልግሎት መረጃዎችን እዚህ ያግኙ።'
-                : 'Stay informed with upcoming feast celebrations, spiritual assemblies, Sunday School updates, and community notices.'}
-            </p>
-          </div>
-        </section>
+          </h1>
+          <span className="an-am an-sub">ማስታወቂያዎች</span>
+          <p className="an-lead an-fi">News and notices from the church community.</p>
 
-        {/* Search & Filter Controls */}
-        <section className="max-w-6xl mx-auto px-6 sm:px-12 -mt-7 relative z-20">
-          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-[0_8px_30px_rgba(15,27,62,0.08)] border border-[#E8EEF5] flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Search Input */}
-            <div className="relative w-full md:w-80">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#7C88A8]">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                  <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                placeholder={isAm ? 'ማስታወቂያዎችን ይፈልጉ...' : 'Search notices...'}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-[#D5D0C7] focus:outline-none focus:border-[#C99A3B] bg-[#FCFAF7]"
-              />
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-              {categories.map((c) => {
-                const isActive = selectedCategory === c.key;
-                return (
-                  <button
-                    key={c.key}
-                    onClick={() => setSelectedCategory(c.key)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-                      isActive
-                        ? 'bg-[#0F1B3E] text-[#E2B258] shadow-sm'
-                        : 'bg-[#FAF6EF] text-[#505E7B] hover:bg-[#F0EAE1]'
-                    }`}
-                  >
-                    {isAm ? c.am : c.en}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Main Content Area */}
-        <section className="max-w-6xl mx-auto px-6 sm:px-12 mt-10 space-y-8">
-          {/* Featured / Pinned Announcement */}
-          {pinned && (
-            <div className="relative rounded-2xl overflow-hidden bg-white border-2 border-[#C99A3B] shadow-[0_4px_20px_rgba(201,154,59,0.12)] p-6 sm:p-8">
-              <div className="absolute top-0 right-0 bg-[#C99A3B] text-[#0F1B3E] text-[11px] font-bold tracking-wider uppercase px-4 py-1 rounded-bl-xl shadow-xs">
-                {isAm ? 'አስቸኳይ ማስታወቂያ' : 'Featured Announcement'}
-              </div>
-
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                {pinned.imageUrl && (
-                  <div className="w-full md:w-64 h-44 rounded-xl overflow-hidden flex-shrink-0 bg-[#EAE6DF] border border-[#E8EEF5]">
-                    <img
-                      src={pinned.imageUrl}
-                      alt={pinned.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center gap-3 text-xs text-[#7C88A8]">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-[#FAF4E6] text-[#A27B2C] border border-[#E9D9B2]">
-                      {isAm ? pinned.categoryAm || pinned.category : pinned.category}
-                    </span>
-                    <span>•</span>
-                    <span>📅 {pinned.dateStr}</span>
-                    <span>•</span>
-                    <span>👤 {pinned.author}</span>
-                  </div>
-
-                  <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#0F1B3E]">
-                    {isAm && pinned.titleAm ? pinned.titleAm : pinned.title}
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-[#505E7B] leading-relaxed">
-                    {pinned.summary || pinned.content}
-                  </p>
-
-                  <button
-                    onClick={() => setSelectedAnnouncement(pinned)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors"
-                  >
-                    <span>{isAm ? 'ሙሉውን አንብብ' : 'Read Full Notice'}</span>
-                    <span>→</span>
-                  </button>
-                </div>
-              </div>
+          {status === 'ready' && board.length > 0 && (
+            <div className="an-board">
+              {board.map((a, n) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  className="an-note"
+                  style={{ '--r': `${ROT[n % 3]}deg`, '--r0': `${ROT0[n % 3]}deg`, '--i': n } as React.CSSProperties}
+                  onClick={(e) => openItem(a, e.currentTarget)}
+                >
+                  <span className="an-dt">{(a.label || a.ts ? dateText(a) : a.category).toUpperCase()}</span>
+                  <h3>{a.title}</h3>
+                  <u>Read →</u>
+                </button>
+              ))}
             </div>
           )}
+        </div>
+      </section>
 
-          {/* Regular Announcements Grid */}
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-serif text-xl font-bold text-[#0F1B3E]">
-                {isAm ? 'የቅርብ ጊዜ ማስታወቂያዎች' : 'Recent Announcements'}
-              </h3>
-              <span className="text-xs text-[#7C88A8]">
-                {filteredAnnouncements.length} {isAm ? 'ማስታወቂያዎች ተገኝተዋል' : 'notices posted'}
-              </span>
-            </div>
+      {/* ===== toolbar + feed ===== */}
+      <div className="an-w" id="list">
+        {isSample && (
+          <p className="an-dev">Preview data: your API returned nothing. Shown in development only.</p>
+        )}
 
-            {filteredAnnouncements.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 text-center border border-[#E8EEF5] text-[#7C88A8] text-sm">
-                {isAm
-                  ? 'ምንም ማስታወቂያ አልተገኘም። እባክዎ ፍለጋዎን ይቀይሩ።'
-                  : 'No announcements found matching your criteria.'}
+        <div className="an-bar">
+          <div className="an-tabs" role="group" aria-label="Categories">
+            <button type="button" className={!cat ? 'sel' : ''} onClick={() => { setCat(''); setLim(FIRST_PAGE); }}>
+              All<i>{items.length}</i>
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={cat === c ? 'sel' : ''}
+                onClick={() => { setCat(c); setLim(FIRST_PAGE); }}
+              >
+                {c}
+                <i>{items.filter((i) => i.category === c).length}</i>
+              </button>
+            ))}
+          </div>
+          <input
+            className="an-search"
+            type="search"
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setLim(FIRST_PAGE); }}
+            placeholder="Search announcements"
+            aria-label="Search announcements"
+          />
+        </div>
+
+        <div aria-live="polite">
+          {status === 'loading' && <p className="an-empty">Loading announcements…</p>}
+
+          {status === 'error' && (
+            <p className="an-empty">
+              We couldn’t load announcements.{' '}
+              <button type="button" className="an-clr" onClick={retry}>
+                Try again
+              </button>
+            </p>
+          )}
+
+          {status === 'ready' && items.length === 0 && <p className="an-empty">No announcements yet.</p>}
+
+          {status === 'ready' && items.length > 0 && (
+            <>
+              <div className="an-cnt">
+                Showing {Math.min(feed.length, 3 + lim)} of {feed.length} announcements
+                {act && (
+                  <button type="button" className="an-clr" onClick={clear}>
+                    Clear filters
+                  </button>
+                )}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(pinned ? regularList : filteredAnnouncements).map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-2xl border border-[#E8EEF5] hover:border-[#C99A3B] transition-all shadow-xs hover:shadow-md overflow-hidden flex flex-col justify-between"
-                  >
-                    <div>
-                      {item.imageUrl && (
-                        <div className="h-40 w-full overflow-hidden bg-[#FAF6EF] border-b border-[#E8EEF5]">
-                          <img
-                            src={item.imageUrl}
-                            alt={item.title}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
 
-                      <div className="p-5 space-y-2.5">
-                        <div className="flex items-center justify-between gap-2 text-[11px] text-[#7C88A8]">
-                          <span className="px-2 py-0.5 rounded-md font-semibold bg-[#FAF4E6] text-[#A27B2C] border border-[#E9D9B2]">
-                            {isAm ? item.categoryAm || item.category : item.category}
-                          </span>
-                          <span>{item.dateStr}</span>
-                        </div>
-
-                        <h4 className="font-serif text-base font-bold text-[#0F1B3E] line-clamp-2 leading-snug">
-                          {isAm && item.titleAm ? item.titleAm : item.title}
-                        </h4>
-
-                        <p className="text-xs text-[#505E7B] line-clamp-3 leading-relaxed">
-                          {item.summary || item.content}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-5 pt-0 border-t border-[#FAF6EF] flex items-center justify-between text-xs font-semibold">
-                      <span className="text-[11px] text-[#7C88A8] truncate max-w-[140px]">
-                        {item.author}
-                      </span>
+              {feed.length === 0 ? (
+                <p className="an-empty">No announcements match your search.</p>
+              ) : (
+                <>
+                  <div className="an-fd">
+                    {lead && (
                       <button
-                        onClick={() => setSelectedAnnouncement(item)}
-                        className="text-[#C99A3B] hover:text-[#0F1B3E] transition-colors"
+                        type="button"
+                        className="an-st an-leadst"
+                        onClick={(e) => openItem(lead, e.currentTarget)}
                       >
-                        {isAm ? 'ዝርዝር እይ →' : 'Details →'}
+                        <Thumb item={lead} />
+                        <Meta item={lead} />
+                        <h3>{lead.title}</h3>
+                        <p>{lead.summary}</p>
                       </button>
+                    )}
+                    <div className="an-side">
+                      {side.map((a, n) => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          className="an-st an-sdst"
+                          style={{ '--n': n + 1 } as React.CSSProperties}
+                          onClick={(e) => openItem(a, e.currentTarget)}
+                        >
+                          <Thumb item={a} />
+                          <div>
+                            <Meta item={a} />
+                            <h3>{a.title}</h3>
+                            <p>{a.summary}</p>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {rows.length > 0 && (
+                    <div className="an-rows">
+                      {rows.map((a, n) => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          className="an-st an-rw"
+                          style={{ '--n': Math.min(n + 3, 8) } as React.CSSProperties}
+                          onClick={(e) => openItem(a, e.currentTarget)}
+                        >
+                          <span className="an-dt">{a.label || a.ts ? dateText(a) : ''}</span>
+                          <div>
+                            <h3>{a.title}</h3>
+                            <span className="an-ct" style={{ margin: 0 }}>{a.category}</span>
+                          </div>
+                          <u>Read →</u>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {left > 0 && (
+                    <div style={{ textAlign: 'center', marginTop: 30 }}>
+                      <button type="button" className="an-btn" onClick={() => setLim((n) => n + FIRST_PAGE)}>
+                        Show more announcements · {left} left
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ===== Telegram band ===== */}
+      <section className="an-tg">
+        <div className="an-w">
+          <div>
+            <h2>Never miss a notice.</h2>
+            <p>Follow our Telegram channel for the latest announcements.</p>
           </div>
-        </section>
+          <a className="an-btn" href="https://t.me/abune_media" target="_blank" rel="noopener noreferrer">
+            Follow on Telegram →
+          </a>
+        </div>
+      </section>
+
+      {/* ===== reader drawer ===== */}
+      <div className={`an-ov ${open ? 'on' : ''}`} onClick={closeReader} />
+      <aside
+        ref={drawerRef}
+        className={`an-dr ${open ? 'on' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="an-dt-title"
+        aria-hidden={!open}
+      >
+        <button ref={closeRef} type="button" className="an-x" aria-label="Close" onClick={closeReader}>
+          ✕
+        </button>
+        {open && (
+          <>
+            <Meta item={open} />
+            <h2 id="an-dt-title">{open.title}</h2>
+            <Thumb item={open} />
+            {(readerBody || '').split(/\n+/).filter(Boolean).map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+            <div className="an-nt">
+              Questions? <Link href="/contact">Contact the church administration</Link>.
+            </div>
+          </>
+        )}
+      </aside>
       </main>
 
-      {/* Read Notice Modal */}
-      {selectedAnnouncement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#E8EEF5] max-h-[85vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-[#FAF6EF] mb-4">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-[#FAF4E6] text-[#A27B2C] border border-[#E9D9B2]">
-                {isAm
-                  ? selectedAnnouncement.categoryAm || selectedAnnouncement.category
-                  : selectedAnnouncement.category}
-              </span>
-              <button
-                onClick={() => setSelectedAnnouncement(null)}
-                className="text-[#7C88A8] hover:text-[#0F1B3E] text-lg font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            {selectedAnnouncement.imageUrl && (
-              <img
-                src={selectedAnnouncement.imageUrl}
-                alt={selectedAnnouncement.title}
-                className="w-full h-48 object-cover rounded-xl mb-4 border border-[#E8EEF5]"
-              />
-            )}
-
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0F1B3E] mb-2 leading-snug">
-              {isAm && selectedAnnouncement.titleAm
-                ? selectedAnnouncement.titleAm
-                : selectedAnnouncement.title}
-            </h3>
-
-            <div className="text-xs text-[#7C88A8] mb-4 flex items-center gap-3">
-              <span>📅 {selectedAnnouncement.dateStr}</span>
-              <span>•</span>
-              <span>👤 {selectedAnnouncement.author}</span>
-            </div>
-
-            <div className="text-xs sm:text-sm text-[#2A354F] leading-relaxed whitespace-pre-line py-3 border-t border-b border-[#FAF6EF]">
-              {selectedAnnouncement.content || selectedAnnouncement.summary}
-            </div>
-
-            <div className="pt-4 flex justify-end">
-              <button
-                onClick={() => setSelectedAnnouncement(null)}
-                className="px-5 py-2 rounded-xl bg-[#0F1B3E] text-white text-xs font-semibold hover:bg-[#1A2D66] transition-colors"
-              >
-                {isAm ? 'ዝጋ' : 'Close'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Footer />
+      <Footer compact={false} />
     </div>
   );
 }
