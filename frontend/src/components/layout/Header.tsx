@@ -22,7 +22,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { SiteLogo } from '@/components/layout/SiteLogo';
-import { getSession, saveSession, clearSession, loginAdmin, loginMember, type Session } from '@/lib/auth';
+import { getSession, saveSession, clearSession, loginAdmin, loginMember, getLoginRedirectUrl, type Session } from '@/lib/auth';
 import './header.css';
 
 interface HeaderProps {
@@ -296,7 +296,7 @@ export function Header({ transparent = false }: HeaderProps) {
   };
 
   // Quick Demo Login Handler
-  const quickDemoLogin = (roleType: 'super' | 'admin' | 'member') => {
+  const quickDemoLogin = (roleType: 'super' | 'admin' | 'teacher' | 'member') => {
     let demoSession: Session;
     if (roleType === 'super') {
       demoSession = {
@@ -314,6 +314,20 @@ export function Header({ transparent = false }: HeaderProps) {
       };
       setSuccessTitle('Welcome back, Selam (Admin).');
       setSuccessMessage('Logged in with Admin privileges. You have access to content, registrations, and member directories.');
+    } else if (roleType === 'teacher') {
+      demoSession = {
+        role: 'teacher',
+        accessToken: 'demo-teacher-token',
+        user: {
+          name: 'Kidist Mengistu',
+          email: 'kidist@abunemedia.org',
+          backendRole: 'TEACHER',
+          canTakeAttendance: true,
+          assignedClasses: ['Grade 3', 'Grade 7'],
+        },
+      };
+      setSuccessTitle('Welcome, Kidist (Authorized Teacher).');
+      setSuccessMessage('Authorized to take student attendance for assigned classes (Grade 3 & Grade 7).');
     } else {
       demoSession = {
         role: 'member',
@@ -330,11 +344,8 @@ export function Header({ transparent = false }: HeaderProps) {
 
   const handleContinueAfterAuth = () => {
     closeAuth();
-    if (isSuperAdmin || isAdmin) {
-      router.push('/admin');
-    } else {
-      router.push('/portal');
-    }
+    const s = getSession();
+    router.push(getLoginRedirectUrl(s));
   };
 
   return (
@@ -512,15 +523,25 @@ export function Header({ transparent = false }: HeaderProps) {
                         ? 'Super Admin'
                         : isAdmin
                         ? 'Admin'
+                        : currentUser?.canTakeAttendance
+                        ? 'Teacher · Attendance Taker'
                         : 'Member'}
                     </small>
                   </div>
 
                   {/* Role-Specific Shortcuts */}
+                  {currentUser?.canTakeAttendance && (
+                    <Link href="/attendance" onClick={() => setUserMenuOpen(false)}>
+                      📋 Take Attendance
+                    </Link>
+                  )}
                   {isAdmin ? (
                     <>
                       <Link href="/admin" onClick={() => setUserMenuOpen(false)}>
                         {isSuperAdmin ? '🛡 Super Admin Studio' : '📊 Admin Studio'}
+                      </Link>
+                      <Link href="/attendance" onClick={() => setUserMenuOpen(false)}>
+                        📋 Attendance Management
                       </Link>
                       {isSuperAdmin && (
                         <>
@@ -536,11 +557,11 @@ export function Header({ transparent = false }: HeaderProps) {
                         📝 Registrations (5)
                       </Link>
                     </>
-                  ) : (
+                  ) : !currentUser?.canTakeAttendance ? (
                     <Link href="/portal" onClick={() => setUserMenuOpen(false)}>
                       🎓 Student Portal
                     </Link>
-                  )}
+                  ) : null}
 
                   <button
                     type="button"
@@ -804,8 +825,11 @@ export function Header({ transparent = false }: HeaderProps) {
                   <button type="button" onClick={() => quickDemoLogin('admin')}>
                     ⚡ Admin
                   </button>
+                  <button type="button" onClick={() => quickDemoLogin('teacher')}>
+                    ⚡ Teacher / Attendance
+                  </button>
                   <button type="button" onClick={() => quickDemoLogin('member')}>
-                    ⚡ Member
+                    ⚡ Student
                   </button>
                 </div>
               </form>

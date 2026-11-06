@@ -8,7 +8,7 @@
  *   POST /api/auth/logout         -> revoke refresh token
  */
 
-export type Role = 'admin' | 'member';
+export type Role = 'admin' | 'member' | 'teacher';
 
 export interface Session {
   role: Role;
@@ -21,7 +21,34 @@ export interface Session {
     registrationNumber?: string;
     division?: string;
     status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+    canTakeAttendance?: boolean;
+    assignedClasses?: string[];
   };
+}
+
+/**
+ * Determine the exact destination URL based on user role and attendance permissions:
+ * - Super Admin -> /admin
+ * - Admin -> /admin
+ * - Authorized Attendance Taker (Teacher / Staff with attendance permission) -> /attendance
+ * - Student / Member -> /portal
+ */
+export function getLoginRedirectUrl(session: Session | null): string {
+  if (!session) return '/login';
+  const role = session.user.backendRole;
+
+  // Super Admin & standard Admin go to the Admin Studio
+  if (role === 'SUPER_ADMIN' || role === 'ADMIN') {
+    return '/admin';
+  }
+
+  // Teacher or user with attendance permission goes directly to attendance taking
+  if (session.role === 'teacher' || role === 'TEACHER' || session.user.canTakeAttendance) {
+    return '/attendance';
+  }
+
+  // Registered Sunday School students / members go to student portal
+  return '/portal';
 }
 
 const KEY = 'abune_session';

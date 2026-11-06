@@ -27,6 +27,7 @@ type ViewKey =
   | 'pov'
   | 'reg'
   | 'mem'
+  | 'att'
   | 'dep'
   | 'imp'
   | 'pag'
@@ -69,6 +70,7 @@ const NAV_STRUCTURE: NavEntry[] = [
   { type: 'G', title: 'Members' },
   { id: 'reg', icon: '📝', label: 'Registrations', badge: '5' },
   { id: 'mem', icon: '👥', label: 'Students & members' },
+  { id: 'att', icon: '📋', label: 'Attendance & roll call' },
   { id: 'dep', icon: '🏛', label: 'Departments & classes', badge: 'SOON' },
   { id: 'imp', icon: '📥', label: 'Import / Export' },
 
@@ -115,6 +117,32 @@ export default function AdminPage() {
   const [modalTitle, setModalTitle] = useState<string>('Confirm');
   const [modalPrompt, setModalPrompt] = useState<string>('');
   const [modalAction, setModalAction] = useState<(() => void) | null>(null);
+
+  // Attendance Permissions & Authorizations State (Controlled exclusively by Super Admin)
+  const [attendanceStaff, setAttendanceStaff] = useState([
+    { id: '1', name: 'Kidist Mengistu', role: 'Teacher', email: 'kidist@abunemedia.org', authorized: true, assignedClasses: 'Grade 3, Grade 7', group: 'Sunday School' },
+    { id: '2', name: 'Tsion Kebede', role: 'Teacher', email: 'tsion@abunemedia.org', authorized: true, assignedClasses: 'Mezmur A', group: 'Choir' },
+    { id: '3', name: 'Abel Tsegaye', role: 'Teacher', email: 'abel@abunemedia.org', authorized: false, assignedClasses: 'Not assigned', group: 'Sunday School' },
+    { id: '4', name: 'Selam K.', role: 'Admin', email: 'selam@abunemedia.org', authorized: true, assignedClasses: 'All Sunday School', group: 'Sunday School' },
+    { id: '5', name: 'Yohannes Bekele', role: 'Teacher', email: 'yohannes@abunemedia.org', authorized: false, assignedClasses: 'Not assigned', group: 'Sunday School' },
+  ]);
+
+  const toggleAttendancePermission = (id: string) => {
+    const target = attendanceStaff.find((s) => s.id === id);
+    if (!target) return;
+    const nextAuth = !target.authorized;
+    ask(
+      nextAuth ? 'Grant Attendance Permission' : 'Revoke Attendance Permission',
+      nextAuth
+        ? `Authorize ${target.name} (${target.role}) to take student attendance? They will immediately receive access to the roll-call workspace.`
+        : `Revoke attendance taking permission from ${target.name}? They will immediately lose access to the Attendance Workspace.`,
+      () => {
+        setAttendanceStaff((current) =>
+          current.map((item) => (item.id === id ? { ...item, authorized: nextAuth } : item))
+        );
+      }
+    );
+  };
 
   // Initialize session from login
   useEffect(() => {
@@ -735,6 +763,127 @@ export default function AdminPage() {
               <p style={{ color: 'var(--slate)', marginTop: 10, fontSize: 13 }}>
                 Sortable columns · 1–3 of 303 members · ‹ 1 2 3 ›. Bulk bar appears on selection.
               </p>
+            </div>
+          )}
+
+          {/* 4B. ATTENDANCE & ROLL CALL (att) */}
+          {activeView === 'att' && (
+            <div>
+              <div className="top-heading">
+                <div>
+                  <h1>Attendance management</h1>
+                  <p>Sunday School and Choir physical roll calls, verified attendance records, and teacher authorization.</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Link
+                    href="/attendance"
+                    className="btn g"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Open Roll-Call Workspace ↗
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid g4">
+                <div className="card stat">
+                  <small>Recorded Sessions</small>
+                  <b>10</b>
+                </div>
+                <div className="card stat">
+                  <small>Sunday School Attendance</small>
+                  <b style={{ color: 'var(--ok)' }}>86%</b>
+                </div>
+                <div className="card stat">
+                  <small>Choir Attendance</small>
+                  <b style={{ color: 'var(--ok)' }}>81%</b>
+                </div>
+                <div className="card stat">
+                  <small>Authorized Takers</small>
+                  <b>{attendanceStaff.filter((s) => s.authorized).length}</b>
+                </div>
+              </div>
+
+              <div className="card" style={{ marginTop: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <h3 style={{ margin: 0 }}>Recent Roll Calls</h3>
+                  <Link href="/attendance" style={{ color: 'var(--blue)', fontWeight: 600, fontSize: 13 }}>
+                    View All History →
+                  </Link>
+                </div>
+                <div className="wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Session Type</th>
+                        <th>Class</th>
+                        <th>Recorded By</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="hv">
+                        <td><b>2026-10-25</b></td>
+                        <td>Sunday School session</td>
+                        <td>Grade 7</td>
+                        <td>Kidist M.</td>
+                        <td>{renderTag('pub', 'Verified')}</td>
+                        <td>
+                          <Link href="/attendance" className="btn o s" style={{ textDecoration: 'none' }}>
+                            View Roll Call
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr className="hv">
+                        <td><b>2026-10-25</b></td>
+                        <td>Sunday School session</td>
+                        <td>Grade 3</td>
+                        <td>Kidist M.</td>
+                        <td>{renderTag('pub', 'Verified')}</td>
+                        <td>
+                          <Link href="/attendance" className="btn o s" style={{ textDecoration: 'none' }}>
+                            View Roll Call
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr className="hv">
+                        <td><b>2026-10-24</b></td>
+                        <td>Choir practice</td>
+                        <td>Mezmur A</td>
+                        <td>Tsion K.</td>
+                        <td>{renderTag('pub', 'Verified')}</td>
+                        <td>
+                          <Link href="/attendance" className="btn o s" style={{ textDecoration: 'none' }}>
+                            View Roll Call
+                          </Link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {isSuper && (
+                <div className="card" style={{ marginTop: 16, borderLeft: '4px solid var(--gold)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3 style={{ margin: 0 }}>Teacher Attendance Authorizations</h3>
+                      <p style={{ color: 'var(--slate)', fontSize: 13, marginTop: 4 }}>
+                        Only the Super Admin is authorized to grant or revoke roll-call permissions.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn o s"
+                      onClick={() => handleNavClick('rol')}
+                    >
+                      Manage Staff Permissions →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1564,6 +1713,70 @@ export default function AdminPage() {
               <p style={{ color: 'var(--slate)', marginTop: 10, fontSize: 13 }}>
                 Super Admin permissions are locked. The “Users” permission is restricted exclusively to Super Admins.
               </p>
+
+              {/* Attendance Authorization Section (Super Admin Only) */}
+              <div className="card" style={{ marginTop: 24, borderTop: '4px solid var(--gold)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+                  <div>
+                    <h2 style={{ fontSize: 24, margin: 0 }}>Attendance Taking Permissions &amp; Delegations</h2>
+                    <p style={{ color: 'var(--slate)', fontSize: 13, marginTop: 4 }}>
+                      Only the Super Admin can grant or revoke permission to take attendance. Authorized staff are granted direct access to the roll-call workspace.
+                    </p>
+                  </div>
+                  <span className="tag bl">
+                    {attendanceStaff.filter((s) => s.authorized).length} of {attendanceStaff.length} Authorized
+                  </span>
+                </div>
+
+                <div className="wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Staff Member</th>
+                        <th>Email</th>
+                        <th>Platform Role</th>
+                        <th>Assigned Classes</th>
+                        <th>Status</th>
+                        <th style={{ textAlign: 'right' }}>Authorization Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceStaff.map((staff) => (
+                        <tr key={staff.id} className="hv">
+                          <td><b>{staff.name}</b></td>
+                          <td style={{ color: 'var(--slate)' }}>{staff.email}</td>
+                          <td>
+                            <span className="tag un">{staff.role}</span>
+                          </td>
+                          <td>
+                            <b>{staff.assignedClasses}</b>
+                          </td>
+                          <td>
+                            {staff.authorized ? (
+                              <span className="tag pub">✓ Authorized</span>
+                            ) : (
+                              <span className="tag rdt">✕ Revoked</span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              className={`btn ${staff.authorized ? 'o' : 'g'} s`}
+                              onClick={() => toggleAttendancePermission(staff.id)}
+                            >
+                              {staff.authorized ? 'Revoke Permission' : 'Grant Permission'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{ marginTop: 14, background: 'var(--sky)', padding: '10px 14px', borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
+                  <b>Security Notice:</b> Revoking attendance permission immediately revokes the teacher’s access to the Attendance Taking page and prevents roll-call submissions.
+                </div>
+              </div>
             </div>
           )}
 
