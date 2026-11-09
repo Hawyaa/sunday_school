@@ -1,0 +1,224 @@
+/* ==========================================================================
+   gallery-animations.css
+   Motion for the Church Gallery page (hero, mosaic grid, album card, lightbox).
+   - transform / opacity / clip-path only, so no layout shifts
+   - entrance animations use `backwards` fill so hover states work afterwards
+   - disabled under prefers-reduced-motion
+   Easing = GSAP power2.out equivalent.
+   ========================================================================== */
+
+:root {
+  --gl-ease: cubic-bezier(0.5, 1, 0.89, 1);
+}
+
+@keyframes gl-fade       { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gl-fade-out   { from { opacity: 1; } to { opacity: 0; } }
+@keyframes gl-fade-up    { from { opacity: 0; transform: translate3d(0, 28px, 0); } to { opacity: 1; transform: none; } }
+@keyframes gl-slide-tall { from { opacity: 0; transform: translate3d(0, 64px, 0); } to { opacity: 1; transform: none; } }
+@keyframes gl-wipe       { from { opacity: 1; clip-path: inset(0 100% 0 0 round 14px); } to { opacity: 1; clip-path: inset(0 0 0 0 round 14px); } }
+@keyframes gl-zoom-reveal{ from { transform: scale(1.3); } to { transform: none; } }
+@keyframes gl-scale-in   { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+@keyframes gl-char-up    { from { transform: translate3d(0, 110%, 0); } to { transform: none; } }
+@keyframes gl-zoom-slow  { from { transform: scale(1); } to { transform: scale(1.08); } }
+@keyframes gl-line-draw  { from { transform: scaleY(0); } to { transform: none; } }
+@keyframes gl-corner     { from { transform: scale(0); } to { transform: none; } }
+
+/* ==========================================================================
+   1. HERO (replayed by toggling .gl-play from useHeroReplay)
+   ========================================================================== */
+.gl-hero-bg  { transform-origin: 80% 50%; }
+.gl-line     { transform-origin: top center; }
+.gl-corner-tl{ transform-origin: 0 0; }
+.gl-corner-br{ transform-origin: 100% 100%; }
+
+.gl-char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding: 0.06em 0 0.14em;
+  margin: -0.06em 0 -0.14em;
+}
+.gl-char { display: inline-block; }
+
+.gl-play .gl-hero-bg   { animation: gl-zoom-slow 16s var(--gl-ease) both; }
+.gl-play .gl-crumb     { animation: gl-fade 0.8s var(--gl-ease) 0.05s both; }
+.gl-play .gl-line      { animation: gl-line-draw 0.9s var(--gl-ease) 0.3s both; }
+.gl-play .gl-char      { animation: gl-char-up 0.85s var(--gl-ease) calc(0.2s + var(--i, 0) * 0.08s) both; }
+.gl-play .gl-desc      { animation: gl-fade 0.9s var(--gl-ease) 0.8s both; }
+.gl-play .gl-corner-tl { animation: gl-corner 0.9s var(--gl-ease) 0.2s both; }
+.gl-play .gl-corner-br { animation: gl-corner 0.9s var(--gl-ease) 0.35s both; }
+
+/* ==========================================================================
+   Scroll reveal: hidden until IntersectionObserver adds .gl-in (once only)
+   --gl-d is the per-batch stagger delay set by useScrollReveal
+   ========================================================================== */
+[data-gl-reveal]:not(.gl-in) { opacity: 0; }
+
+/* ==========================================================================
+   2. MOSAIC TILES
+   ========================================================================== */
+.gl-par { position: absolute; inset: 0; }
+
+/* small -> staggered fade up */
+.gl-t-up.gl-in    { animation: gl-fade-up 0.8s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+/* tall -> slide up + fade */
+.gl-t-slide.gl-in { animation: gl-slide-tall 1s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+/* wide -> left-to-right reveal */
+.gl-t-wipe.gl-in  { animation: gl-wipe 1s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+.gl-t-wipe.gl-in .gl-img { animation: gl-zoom-reveal 1.1s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+/* large -> smooth zoom reveal */
+.gl-t-zoom.gl-in  { animation: gl-fade 0.8s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+.gl-t-zoom.gl-in .gl-img { animation: gl-zoom-reveal 1.1s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+
+/* parallax-enabled images get extra height so they have room to move (desktop only) */
+@media (min-width: 1024px) {
+  .gl-par[data-gl-parallax] { top: -8%; bottom: -8%; will-change: transform; }
+}
+
+/* ==========================================================================
+   3. TILE HOVER
+   ========================================================================== */
+.gl-tile {
+  transition: transform 0.5s var(--gl-ease), box-shadow 0.5s ease;
+}
+.gl-img { transition: scale 0.7s var(--gl-ease); }
+
+.gl-overlay {
+  background: linear-gradient(to top, rgba(8, 14, 34, 0.62) 0%, rgba(15, 27, 62, 0.18) 45%, rgba(15, 27, 62, 0.22) 100%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.gl-view {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  color: #fff;
+  background: rgba(15, 27, 62, 0.55);
+  border: 1px solid rgba(201, 154, 59, 0.85);
+  opacity: 0;
+  transform: scale(0.88);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s var(--gl-ease);
+}
+.gl-brackets {
+  --g: #c99a3b;
+  position: absolute;
+  inset: 18px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease, inset 0.45s var(--gl-ease);
+  background:
+    linear-gradient(var(--g), var(--g)) left top / 20px 2px no-repeat,
+    linear-gradient(var(--g), var(--g)) left top / 2px 20px no-repeat,
+    linear-gradient(var(--g), var(--g)) right top / 20px 2px no-repeat,
+    linear-gradient(var(--g), var(--g)) right top / 2px 20px no-repeat,
+    linear-gradient(var(--g), var(--g)) left bottom / 20px 2px no-repeat,
+    linear-gradient(var(--g), var(--g)) left bottom / 2px 20px no-repeat,
+    linear-gradient(var(--g), var(--g)) right bottom / 20px 2px no-repeat,
+    linear-gradient(var(--g), var(--g)) right bottom / 2px 20px no-repeat;
+}
+
+.gl-tile:focus-visible {
+  outline: 2px solid #c99a3b;
+  outline-offset: 3px;
+}
+.gl-tile:focus-visible .gl-overlay  { opacity: 1; }
+.gl-tile:focus-visible .gl-view     { opacity: 1; transform: none; }
+.gl-tile:focus-visible .gl-brackets { opacity: 1; inset: 10px; }
+
+@media (hover: hover) {
+  .gl-tile:hover {
+    transform: translate3d(0, -4px, 0);
+    box-shadow: 0 10px 28px rgba(15, 27, 62, 0.16);
+  }
+  .gl-tile:hover .gl-img      { scale: 1.05; }
+  .gl-tile:hover .gl-overlay  { opacity: 1; }
+  .gl-tile:hover .gl-view     { opacity: 1; transform: none; }
+  .gl-tile:hover .gl-brackets { opacity: 1; inset: 10px; }
+}
+
+/* ==========================================================================
+   4. ALBUM CARD
+   ========================================================================== */
+.gl-card { transition: transform 0.45s var(--gl-ease), box-shadow 0.45s ease; }
+.gl-card.gl-in { animation: gl-fade-up 0.8s var(--gl-ease) var(--gl-d, 0ms) backwards; }
+
+/* slow zoom runs on `transform`; hover zoom uses the separate `scale` property so they combine */
+.gl-cover { transition: scale 0.7s var(--gl-ease); }
+.gl-card.gl-in .gl-cover       { animation: gl-zoom-slow 9s var(--gl-ease) calc(var(--gl-d, 0ms) + 0.2s) both; }
+.gl-card.gl-in .gl-album-title { animation: gl-fade 0.8s var(--gl-ease) calc(var(--gl-d, 0ms) + 0.45s) backwards; }
+.gl-card.gl-in .gl-thumb       { animation: gl-scale-in 0.5s var(--gl-ease) calc(var(--gl-d, 0ms) + 0.6s + var(--k, 0) * 0.1s) backwards; }
+
+.gl-link { position: relative; }
+.gl-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s var(--gl-ease);
+}
+.gl-link:focus-visible::after { transform: scaleX(1); }
+
+@media (hover: hover) {
+  .gl-card:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: 0 12px 30px rgba(15, 27, 62, 0.13);
+  }
+  .gl-cover-wrap:hover .gl-cover { scale: 1.05; }
+  .gl-link:hover::after { transform: scaleX(1); }
+}
+
+/* ==========================================================================
+   5. LIGHTBOX
+   ========================================================================== */
+.gl-lb-backdrop { animation: gl-fade 0.45s ease both; }
+.gl-lb-stage    { animation: gl-lb-in 0.5s var(--gl-ease) both; }
+.gl-lb-ctrl     { animation: gl-fade 0.5s ease 0.15s both; }
+
+.gl-lb[data-closing='true'] .gl-lb-backdrop { animation: gl-fade-out 0.28s ease both; }
+.gl-lb[data-closing='true'] .gl-lb-stage    { animation: gl-lb-out 0.28s ease both; }
+.gl-lb[data-closing='true'] .gl-lb-ctrl     { animation: gl-fade-out 0.2s ease both; }
+
+@keyframes gl-lb-in  { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes gl-lb-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.94); } }
+@keyframes gl-lb-from-right { from { transform: translate3d(28px, 0, 0); } to { transform: none; } }
+@keyframes gl-lb-from-left  { from { transform: translate3d(-28px, 0, 0); } to { transform: none; } }
+
+.gl-lb-img { opacity: 0; transition: opacity 0.35s ease; }
+.gl-lb-img[data-loaded='true'] { opacity: 1; }
+.gl-lb-img.gl-lb-next { animation: gl-lb-from-right 0.45s var(--gl-ease) backwards; }
+.gl-lb-img.gl-lb-prev { animation: gl-lb-from-left 0.45s var(--gl-ease) backwards; }
+.gl-lb-caption { animation: gl-fade 0.5s ease backwards; }
+
+.gl-lb-btn {
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s var(--gl-ease);
+}
+@media (hover: hover) {
+  .gl-lb-btn:hover { background-color: #c99a3b; color: #0f1b3e; }
+}
+.gl-lb-btn:active { transform: scale(0.94); }
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  [data-gl-reveal]:not(.gl-in) { opacity: 1; }
+  [class^='gl-'], [class*=' gl-'] {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+  .gl-tile:hover, .gl-card:hover { transform: none; }
+  .gl-tile:hover .gl-img, .gl-cover-wrap:hover .gl-cover { scale: 1; }
+}

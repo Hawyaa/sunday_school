@@ -1,0 +1,194 @@
+/* ==========================================================================
+   mezmur-animations.css
+   Entrance + interaction motion for the Mezmur page.
+   - transform / opacity only (no layout shifts)
+   - animations use `backwards` fill so hover transforms still work afterwards
+   - fully disabled under prefers-reduced-motion
+   Easing = GSAP power2.out equivalent.
+   ========================================================================== */
+
+:root {
+  --mz-ease: cubic-bezier(0.5, 1, 0.89, 1);
+}
+
+/* ---------- keyframes ---------- */
+@keyframes mz-fade        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mz-fade-up     { from { opacity: 0; transform: translate3d(0, 18px, 0); } to { opacity: 1; transform: none; } }
+@keyframes mz-slide-up    { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+@keyframes mz-from-right  { from { opacity: 0; transform: translate3d(24px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes mz-from-right-s{ from { opacity: 0; transform: translate3d(12px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes mz-arrow-in    { from { opacity: 0; transform: translate3d(-8px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes mz-scale-in    { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: none; } }
+@keyframes mz-scale-soft  { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes mz-char-up     { from { transform: translate3d(0, 110%, 0); } to { transform: none; } }
+@keyframes mz-zoom        { from { transform: scale(1); } to { transform: scale(1.08); } }
+@keyframes mz-draw        { from { clip-path: inset(-6px 100% -6px 0); } to { clip-path: inset(-6px 0 -6px 0); } }
+@keyframes mz-selected {
+  from { background-color: #f8ebc9; border-color: rgba(200, 149, 47, 0.6); box-shadow: 0 4px 14px rgba(185, 133, 42, 0.16); }
+  to   { background-color: transparent; border-color: transparent; box-shadow: 0 0 0 rgba(185, 133, 42, 0); }
+}
+
+/* ==========================================================================
+   1. HERO  (replayed by toggling .mz-play from useHeroReplay)
+   ========================================================================== */
+.mz-hero-bg { transform-origin: 75% 50%; }
+
+.mz-char-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding: 0.06em 0 0.14em;
+  margin: -0.06em 0 -0.14em;
+}
+.mz-char { display: inline-block; }
+
+.mz-play .mz-hero-bg { animation: mz-zoom 16s var(--mz-ease) both; }
+.mz-play .mz-crumb   { animation: mz-fade 0.8s var(--mz-ease) 0.05s both; }
+.mz-play .mz-char    { animation: mz-char-up 0.85s var(--mz-ease) calc(0.15s + var(--i, 0) * 0.08s) both; }
+.mz-play .mz-desc    { animation: mz-fade 0.9s var(--mz-ease) 0.7s both; }
+.mz-play .mz-cross   { animation: mz-scale-in 0.9s var(--mz-ease) 0.1s both; }
+.mz-play .mz-draw    { animation: mz-draw 0.95s var(--mz-ease) 0.85s both; }
+.mz-play .mz-quote   { animation: mz-fade 0.9s var(--mz-ease) 0.95s both; }
+
+/* ==========================================================================
+   Scroll-triggered elements: hidden until IntersectionObserver adds .mz-in
+   ========================================================================== */
+[data-mz-reveal]:not(.mz-in) { opacity: 0; }
+
+/* ---------- 2. SEARCH + FILTERS ---------- */
+.mz-filter.mz-in .mz-search      { animation: mz-fade-up 0.7s var(--mz-ease) 0.3s backwards; }
+.mz-filter.mz-in .mz-search-icon { animation: mz-scale-in 0.6s var(--mz-ease) 0.55s backwards; transform-origin: 50% 50%; }
+.mz-filter.mz-in .mz-cat         { animation: mz-from-right 0.7s var(--mz-ease) 0.4s backwards; }
+.mz-filter.mz-in .mz-sort        { animation: mz-fade 0.8s var(--mz-ease) 0.55s backwards; }
+
+/* custom dropdown (native <select> popups can't be animated) */
+.mz-dd-chevron { transition: transform 0.25s var(--mz-ease); }
+.mz-dd[data-open="true"] .mz-dd-chevron { transform: rotate(180deg); }
+
+.mz-dd-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 30;
+  min-width: 100%;
+  width: max-content;
+  max-width: min(320px, 90vw);
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+  background: #fffdf9;
+  border: 1px solid #ecdcb8;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(15, 35, 82, 0.12);
+  transform-origin: top center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, -6px, 0) scale(0.98);
+  transition: opacity 0.22s var(--mz-ease), transform 0.22s var(--mz-ease), visibility 0s linear 0.22s;
+}
+.mz-dd-panel[data-align="left"]  { left: 0; }
+.mz-dd-panel[data-align="right"] { right: 0; }
+.mz-dd[data-open="true"] .mz-dd-panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  transition: opacity 0.22s var(--mz-ease), transform 0.22s var(--mz-ease), visibility 0s;
+}
+.mz-dd-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #1c2740;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.mz-dd-option[data-active="true"]      { background: #faf4e6; color: #8b6414; }
+.mz-dd-option[aria-selected="true"]    { font-weight: 600; color: #b9852a; }
+
+/* ---------- 3. ALL MEZMURS CONTAINER ---------- */
+.mz-card.mz-in                  { animation: mz-fade-up 0.9s var(--mz-ease) 0.45s backwards; }
+.mz-card.mz-in .mz-card-icon    { animation: mz-scale-in 0.6s var(--mz-ease) 0.9s backwards; }
+.mz-card.mz-in .mz-card-h       { animation: mz-slide-up 0.7s var(--mz-ease) 0.95s backwards; }
+.mz-card.mz-in .mz-card-badge   { animation: mz-scale-in 0.6s var(--mz-ease) 1.1s backwards; }
+.mz-card.mz-in .mz-card-desc    { animation: mz-fade 0.8s var(--mz-ease) 1.15s backwards; }
+.mz-card.mz-in .mz-corner,
+.mz-enter-card .mz-corner       { animation: mz-fade 1s var(--mz-ease) 0.8s backwards; }
+
+/* ---------- 4. ROWS  (--mz-d is set per batch by useScrollReveal) ---------- */
+.mz-row.mz-in                 { animation: mz-fade-up 0.6s var(--mz-ease) var(--mz-d, 0ms) backwards; }
+.mz-row.mz-in .mz-row-icon    { animation: mz-scale-in 0.5s var(--mz-ease) calc(var(--mz-d, 0ms) + 0.1s) backwards; }
+.mz-row.mz-in .mz-row-title   { animation: mz-slide-up 0.6s var(--mz-ease) calc(var(--mz-d, 0ms) + 0.12s) backwards; }
+.mz-row.mz-in .mz-row-en      { animation: mz-fade 0.6s var(--mz-ease) calc(var(--mz-d, 0ms) + 0.3s) backwards; }
+.mz-row.mz-in .mz-row-date    { animation: mz-from-right-s 0.6s var(--mz-ease) calc(var(--mz-d, 0ms) + 0.25s) backwards; }
+.mz-row.mz-in .mz-row-arrow   { animation: mz-arrow-in 0.5s var(--mz-ease) calc(var(--mz-d, 0ms) + 0.35s) backwards; }
+
+/* ---------- 5. ROW HOVER ---------- */
+.mz-row-btn {
+  border: 1px solid transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.mz-row-icon  { transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+.mz-row-arrow { transition: transform 0.3s var(--mz-ease), color 0.3s ease; }
+
+.mz-row-btn:focus-visible {
+  outline: none;
+  background-color: #fbf4e4;
+  border-color: rgba(200, 149, 47, 0.55);
+  box-shadow: 0 0 0 3px rgba(200, 149, 47, 0.14);
+}
+.mz-row-btn:active { background-color: #f8ebc9; }
+
+@media (hover: hover) {
+  .mz-row-btn:hover {
+    background-color: #fbf4e4;
+    border-color: rgba(200, 149, 47, 0.45);
+    box-shadow: 0 4px 14px rgba(185, 133, 42, 0.1);
+  }
+  .mz-row-btn:hover .mz-row-icon {
+    background-color: #f6e6bd;
+    border-color: #d3a03c;
+    box-shadow: 0 0 0 3px rgba(211, 160, 60, 0.14);
+  }
+  .mz-row-btn:hover .mz-row-arrow { transform: translate3d(4px, 0, 0); }
+}
+
+/* last-opened row gets a gold highlight that fades out when you come back to the list */
+.mz-row.mz-in .mz-row-btn[data-selected="true"] { animation: mz-selected 2.4s ease-out 0.7s backwards; }
+
+/* ---------- 6. DETAIL VIEW / PLAYER ---------- */
+.mz-enter-bar         { animation: mz-fade 0.6s var(--mz-ease) backwards; }
+.mz-enter-art-card    { animation: mz-fade-up 0.8s var(--mz-ease) 0.05s backwards; }
+.mz-enter-lyric-card  { animation: mz-fade-up 0.8s var(--mz-ease) 0.15s backwards; }
+.mz-enter-art         { animation: mz-scale-soft 0.9s var(--mz-ease) 0.25s backwards; }
+.mz-enter-title       { animation: mz-fade 0.8s var(--mz-ease) 0.35s backwards; }
+.mz-enter-player      { animation: mz-fade-up 0.8s var(--mz-ease) 0.45s backwards; }
+
+.mz-btn {
+  transition: transform 0.25s var(--mz-ease), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+@media (hover: hover) {
+  .mz-btn:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(185, 133, 42, 0.18); }
+}
+.mz-btn:active { transform: scale(0.97); }
+
+/* ==========================================================================
+   Reduced motion: no movement, content simply visible
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  [data-mz-reveal]:not(.mz-in) { opacity: 1; }
+  [class*="mz-"] {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+  .mz-row-btn:hover .mz-row-arrow,
+  .mz-btn:hover,
+  .mz-btn:active { transform: none; }
+}

@@ -14,17 +14,19 @@ enum AdminRole {
 }
 
 model Admin {
-  id           String         @id @default(uuid())
-  email        String         @unique
-  passwordHash String
-  name         String
-  role         AdminRole      @default(ADMIN)
-  isActive     Boolean        @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  refreshTokens RefreshToken[]
-  announcements Announcement[]
+  id                    String                 @id @default(uuid())
+  email                 String                 @unique
+  passwordHash          String
+  name                  String
+  role                  AdminRole              @default(ADMIN)
+  isActive              Boolean                @default(true)
+  lastLoginAt           DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  refreshTokens         RefreshToken[]
+  announcements         Announcement[]
+  attendanceSessions    AttendanceSession[]
+  attendanceCorrections AttendanceCorrection[]
 
   @@map("admins")
 }
@@ -200,39 +202,39 @@ enum MemberStatus {
 }
 
 model MemberRegistration {
-  id                    String           @id @default(uuid())
-  registrationNumber    String           @unique
-  registrationType      RegistrationType @default(LONG_TERM)
-  division              AgeDivision
-  status                MemberStatus     @default(PENDING)
+  id                 String           @id @default(uuid())
+  registrationNumber String           @unique
+  registrationType   RegistrationType @default(LONG_TERM)
+  division           AgeDivision
+  status             MemberStatus     @default(PENDING)
 
   // መሰረታዊ የአባሉ መረጃ (Member Personal Info)
-  fullName              String
-  christianName         String
-  gender                Gender
-  age                   Int
-  dateOfBirth           DateTime?
-  motherName            String?
-  phoneNumber           String?
-  photoUrl              String?
-  schoolOrOccupation    String?
-  passwordHash          String?
+  fullName           String
+  christianName      String
+  gender             Gender
+  age                Int
+  dateOfBirth        DateTime?
+  motherName         String?
+  phoneNumber        String?
+  photoUrl           String?
+  schoolOrOccupation String?
+  passwordHash       String?
 
   // የንስሐ አባት መረጃ (Confession Father Info)
-  confessionFather      String
-  confessionChurch      String?
-  confessionAddress     String?
+  confessionFather  String
+  confessionChurch  String?
+  confessionAddress String?
 
   // አድራሻ (Residential Address)
-  address               String
-  kebele                String?
-  houseNumber           String?
+  address     String
+  kebele      String?
+  houseNumber String?
 
   // የአገልግሎት እና የሰንበት ት/ቤት መረጃ (Service & Church Info)
-  admissionDate         DateTime?
-  formFilledDate        DateTime         @default(now())
-  preferredDepartment   String?
-  talentSkills          String?          @db.Text
+  admissionDate       DateTime?
+  formFilledDate      DateTime  @default(now())
+  preferredDepartment String?
+  talentSkills        String?   @db.Text
 
   // የቅርብ ተጠሪ መረጃ (Emergency Contact / Guardian)
   emergencyContactName  String
@@ -240,25 +242,80 @@ model MemberRegistration {
   emergencyContactPhone String
 
   // የፈቃደኝነት እና ማረጋገጫ (Consent & Declarations)
-  parentName            String?
-  parentConsent         Boolean          @default(false)
-  parentSignatureDate   DateTime?
+  parentName          String?
+  parentConsent       Boolean   @default(false)
+  parentSignatureDate DateTime?
 
-  youthCovenantAccepted Boolean          @default(false)
+  youthCovenantAccepted Boolean   @default(false)
   youthSignatureDate    DateTime?
 
   // የአስተዳደር ማጽደቂያ (Official Approval Section)
-  approvedByName        String?
-  approverRole          String?
-  approvalDate          DateTime?
-  chairmanName          String?
-  chairmanApprovalDate  DateTime?
-  adminNotes            String?          @db.Text
+  approvedByName       String?
+  approverRole         String?
+  approvalDate         DateTime?
+  chairmanName         String?
+  chairmanApprovalDate DateTime?
+  adminNotes           String?   @db.Text
 
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  attendanceRecords AttendanceRecord[]
 
   @@index([status, division, registrationType])
   @@index([registrationNumber])
   @@map("member_registrations")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+model AttendanceSession {
+  id          String             @id @default(uuid())
+  sessionDate DateTime           @db.Date
+  division    AgeDivision
+  groupName   String
+  department  String
+  className   String
+  sessionType String
+  createdById String
+  createdBy   Admin              @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  records     AttendanceRecord[]
+  createdAt   DateTime           @default(now())
+
+  @@unique([sessionDate, division, groupName, className, sessionType], map: "att_session_identity_key")
+  @@index([division, sessionDate])
+  @@index([className, sessionDate])
+  @@map("attendance_sessions")
+}
+
+model AttendanceRecord {
+  id          String                 @id @default(uuid())
+  sessionId   String
+  session     AttendanceSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  memberId    String
+  member      MemberRegistration     @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  status      AttendanceStatus
+  updatedAt   DateTime               @updatedAt
+  corrections AttendanceCorrection[]
+
+  @@unique([sessionId, memberId])
+  @@index([memberId, status])
+  @@map("attendance_records")
+}
+
+model AttendanceCorrection {
+  id                 String           @id @default(uuid())
+  attendanceRecordId String
+  attendanceRecord   AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Cascade)
+  previousStatus     AttendanceStatus
+  newStatus          AttendanceStatus
+  reason             String           @db.Text
+  correctedById      String
+  correctedBy        Admin            @relation(fields: [correctedById], references: [id], onDelete: Restrict)
+  createdAt          DateTime         @default(now())
+
+  @@index([attendanceRecordId, createdAt])
+  @@map("attendance_corrections")
 }

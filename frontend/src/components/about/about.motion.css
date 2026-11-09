@@ -1,0 +1,40 @@
+/* =====================================================================
+   about.motion.css: motion layer for the About page.
+   Imported by useAboutMotion.ts. Delete the import and this file and the
+   page is simply static; no section depends on it to display.
+   ===================================================================== */
+
+/* ---------- Hidden until revealed (nothing flashes before JS runs) ----------
+   GSAP's inline styles override these as soon as an element animates. */
+   @media (prefers-reduced-motion: no-preference) {
+    [data-a]:not([data-in]) { opacity: 0; }
+  
+    /* gold ribbon under the hero draws in from the left */
+    .about-ribbon[data-line] { transform: scaleX(0); }
+  
+    /* timeline line starts undrawn; scrolling draws it */
+    .about-journey .tl { --tl-progress: 0; }
+  }
+  .about-ribbon[data-line] { transform-origin: left center; }
+  
+  /* ---------- Decorative layers drift, so give them a little extra size ---------- */
+  .about-school .pat,
+  .about-cta-section .pat { scale: 1.12; }
+  [data-parallax] { will-change: transform; }
+  
+  /* ---------- Counters: fixed-width digits so numbers don't jitter while counting ---------- */
+  .about-school .stats b { font-variant-numeric: tabular-nums; }
+  
+  /* ---------- Animated underline on "Learn more" ---------- */
+  .about-serve .way .m {
+    background: linear-gradient(currentColor, currentColor) left bottom / 0 1.5px no-repeat;
+    padding-bottom: 2px;
+    transition: background-size 0.35s ease;
+  }
+  .about-serve .way:hover .m,
+  .about-serve .way:focus-visible .m { background-size: 100% 1.5px; }
+  
+  /* ---------- Reduced motion: switch every rule above off ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .about-serve .way .m { transition: none; }
+  }
