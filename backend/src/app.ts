@@ -39,6 +39,7 @@ import {
   adminScheduleRouter,
 } from './modules/schedule/schedule.routes';
 import uploadRoutes from './modules/upload/upload.routes';
+import attendanceRoutes from './modules/attendance/attendance.routes';
 import {
   publicRegistrationRouter,
   adminMembersRouter,
@@ -113,6 +114,7 @@ export function createApp(): Application {
   app.use('/api/registration', publicRegistrationRouter);
   app.use('/api/members', publicRegistrationRouter);
   app.use('/api/admin/members', adminMembersRouter);
+  app.use('/api/admin/attendance', attendanceRoutes);
 
   // 404 handler for unknown routes
   app.use((_req: Request, res: Response) => {

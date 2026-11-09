@@ -24,6 +24,18 @@ describe('Swagger API Documentation (OpenAPI 3.0+)', () => {
     expect(res.body.paths['/api/upload']).toBeDefined();
     expect(res.body.paths['/api/registration']).toBeDefined();
     expect(res.body.paths['/api/admin/members']).toBeDefined();
+    expect(res.body.paths['/api/admin/attendance/roster']).toBeDefined();
+    expect(res.body.paths['/api/admin/attendance/sessions'].get).toBeDefined();
+    expect(res.body.paths['/api/admin/attendance/sessions'].post).toBeDefined();
+    expect(res.body.paths['/api/admin/attendance/sessions/{id}/records/{recordId}'].patch).toBeDefined();
+    expect(res.body.paths['/api/admin/attendance/reports']).toBeDefined();
+  });
+
+  test('attendance endpoints require administrator authentication', async () => {
+    const res = await request(app).get('/api/admin/attendance/roster');
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
   });
 
   test('GET /api/docs/ loads Swagger UI HTML successfully', async () => {
