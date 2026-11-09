@@ -14,64 +14,40 @@
  * - Top header with "Back to Main Website" navigation arrow
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { startTransition, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSession, clearSession } from '@/lib/auth';
+import {
+  AttendanceDivision,
+  AttendanceMember,
+  AttendanceRecord,
+  AttendanceReport,
+  AttendanceSession,
+  correctAttendanceRecord,
+  createAttendanceSession,
+  fetchAttendanceReport,
+  fetchAttendanceRoster,
+  fetchAttendanceSession,
+  fetchAttendanceSessions,
+} from '@/services/attendance';
 import './attendance.css';
 
-/* ── Centralized Student & Class Data ──────────────────────────────────── */
 interface StudentRecord {
-  id: number;
+  id: string;
   regNo: string;
   name: string;
 }
 
 interface ClassInfo {
-  g: string; // Group: 'Sunday School' | 'Choir'
-  d: string; // Department: 'Timhirt' | 'Mezmur'
-  stu: StudentRecord[];
+  g: string;
+  d: string;
 }
 
 const CLASS_ROSTER: Record<string, ClassInfo> = {
-  'Grade 3': {
-    g: 'Sunday School',
-    d: 'Timhirt',
-    stu: [
-      { id: 101, regNo: 'ABN-2026-0101', name: 'Ruth Tadesse' },
-      { id: 102, regNo: 'ABN-2026-0102', name: 'Biruk Alemu' },
-      { id: 103, regNo: 'ABN-2026-0103', name: 'Eden Solomon' },
-      { id: 104, regNo: 'ABN-2026-0104', name: 'Nahom Girma' },
-      { id: 105, regNo: 'ABN-2026-0105', name: 'Mekdes Lemma' },
-      { id: 106, regNo: 'ABN-2026-0106', name: 'Tomas Bekele' },
-    ],
-  },
-  'Grade 7': {
-    g: 'Sunday School',
-    d: 'Timhirt',
-    stu: [
-      { id: 201, regNo: 'ABN-2026-0133', name: 'Samuel Girma' },
-      { id: 202, regNo: 'ABN-2026-0141', name: 'Dawit Alemu' },
-      { id: 203, regNo: 'ABN-2026-0145', name: 'Abel Hailu' },
-      { id: 204, regNo: 'ABN-2026-0148', name: 'Hana Bekele' },
-      { id: 205, regNo: 'ABN-2026-0150', name: 'Kidus Worku' },
-      { id: 206, regNo: 'ABN-2026-0152', name: 'Liya Mekonnen' },
-      { id: 207, regNo: 'ABN-2026-0155', name: 'Selam Tadesse' },
-      { id: 208, regNo: 'ABN-2026-0158', name: 'Yonas Mulu' },
-    ],
-  },
-  'Mezmur A': {
-    g: 'Choir',
-    d: 'Mezmur',
-    stu: [
-      { id: 301, regNo: 'ABN-2026-0142', name: 'Meron Tesfaye' },
-      { id: 302, regNo: 'ABN-2026-0139', name: 'Hana Bekele' },
-      { id: 303, regNo: 'ABN-2025-0098', name: 'Liya Mekonnen' },
-      { id: 304, regNo: 'ABN-2026-0160', name: 'Rahel Bekele' },
-      { id: 305, regNo: 'ABN-2026-0161', name: 'Yared Alem' },
-      { id: 306, regNo: 'ABN-2026-0163', name: 'Tsion Kebede' },
-    ],
-  },
+  'Grade 3': { g: 'Sunday School', d: 'Timhirt' },
+  'Grade 7': { g: 'Sunday School', d: 'Timhirt' },
+  'Mezmur A': { g: 'Choir', d: 'Mezmur' },
 };
 
 interface AuditLogEntry {
@@ -82,44 +58,55 @@ interface AuditLogEntry {
 }
 
 interface SavedSession {
-  id: number;
+  id: string;
   date: string;
   type: string;
   cls: string;
   by: string;
-  abs: number[]; // student IDs who were absent
-  hist: AuditLogEntry[];
+  division: AttendanceDivision;
+  groupName: string;
+  department: string;
+  totalMembers: number;
+  presentCount: number;
+  absentCount: number;
+  records: AttendanceRecord[];
 }
 
-const INITIAL_SESSIONS: SavedSession[] = [
-  {
-    id: 0,
-    date: '2026-10-25',
-    type: 'Sunday School session',
-    cls: 'Grade 7',
-    by: 'Kidist M.',
-    abs: [203],
-    hist: [
-      {
-        who: 'Hawi',
-        what: 'Abel Hailu: Absent → Present',
-        why: 'Arrived late, verified by class teacher',
-        when: '27 Oct 2026, 10:12',
-      },
-    ],
-  },
-  { id: 1, date: '2026-10-18', type: 'Sunday School session', cls: 'Grade 7', by: 'Kidist M.', abs: [], hist: [] },
-  { id: 2, date: '2026-10-11', type: 'Sunday School session', cls: 'Grade 7', by: 'Kidist M.', abs: [203, 207], hist: [] },
-  { id: 3, date: '2026-10-04', type: 'Sunday School session', cls: 'Grade 7', by: 'Kidist M.', abs: [205], hist: [] },
-  { id: 4, date: '2026-09-27', type: 'Sunday School session', cls: 'Grade 7', by: 'Hawi', abs: [203, 208], hist: [] },
-  { id: 5, date: '2026-09-20', type: 'Sunday School session', cls: 'Grade 7', by: 'Kidist M.', abs: [], hist: [] },
-  { id: 6, date: '2026-10-25', type: 'Sunday School session', cls: 'Grade 3', by: 'Kidist M.', abs: [102], hist: [] },
-  { id: 7, date: '2026-10-18', type: 'Sunday School session', cls: 'Grade 3', by: 'Kidist M.', abs: [], hist: [] },
-  { id: 8, date: '2026-10-24', type: 'Choir practice', cls: 'Mezmur A', by: 'Tsion K.', abs: [304], hist: [] },
-  { id: 9, date: '2026-10-17', type: 'Choir practice', cls: 'Mezmur A', by: 'Tsion K.', abs: [], hist: [] },
-];
-
 const TEACHER_ASSIGNED_CLASSES = ['Grade 3', 'Grade 7'];
+
+const EMPTY_REPORT: AttendanceReport = {
+  sessions: 0,
+  present: 0,
+  absent: 0,
+  markedRecords: 0,
+  attendancePercent: 0,
+  byGroup: [],
+  byClass: [],
+  byMember: [],
+};
+
+function normalizeSession(session: AttendanceSession): SavedSession {
+  const records = session.records || [];
+  return {
+    id: session.id,
+    date: session.sessionDate.slice(0, 10),
+    type: session.sessionType,
+    cls: session.className,
+    by: session.createdBy?.name || 'Unknown',
+    division: session.division,
+    groupName: session.groupName,
+    department: session.department,
+    totalMembers: session.totalMembers ?? records.length,
+    presentCount: session.presentCount ?? records.filter((record) => record.status === 'PRESENT').length,
+    absentCount: session.absentCount ?? records.filter((record) => record.status === 'ABSENT').length,
+    records,
+  };
+}
+
+function apiErrorMessage(error: unknown): string {
+  const responseMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+  return responseMessage || (error instanceof Error ? error.message : 'Attendance request failed. Please try again.');
+}
 
 export default function AttendancePage() {
   const router = useRouter();
@@ -135,17 +122,27 @@ export default function AttendancePage() {
   // Roll call taking state
   const [selectedGroup, setSelectedGroup] = useState('Sunday School');
   const [selectedClass, setSelectedClass] = useState('Grade 7');
+  const [selectedDivision, setSelectedDivision] = useState<AttendanceDivision>('YOUTH');
   const [sessionType, setSessionType] = useState('Sunday School session');
-  const [sessionDate, setSessionDate] = useState('2026-11-01');
+  const [sessionDate, setSessionDate] = useState('');
   const [listLoaded, setListLoaded] = useState(false);
-  const [marks, setMarks] = useState<Record<number, 'P' | 'A'>>({});
+  const [roster, setRoster] = useState<StudentRecord[]>([]);
+  const [rosterLoading, setRosterLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [marks, setMarks] = useState<Record<string, 'P' | 'A'>>({});
   const [searchFilter, setSearchFilter] = useState('');
-  const [currentFocusId, setCurrentFocusId] = useState<number | null>(null);
+  const [currentFocusId, setCurrentFocusId] = useState<string | null>(null);
 
-  // Sessions store
-  const [sessions, setSessions] = useState<SavedSession[]>(INITIAL_SESSIONS);
-  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
+  const [sessions, setSessions] = useState<SavedSession[]>([]);
+  const [historySessions, setHistorySessions] = useState<SavedSession[]>([]);
+  const [reportData, setReportData] = useState<AttendanceReport>(EMPTY_REPORT);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [sessionDetail, setSessionDetail] = useState<SavedSession | null>(null);
   const [historyTab, setHistoryTab] = useState<'date' | 'member' | 'class'>('date');
+  const [historyFrom, setHistoryFrom] = useState('');
+  const [historyTo, setHistoryTo] = useState('');
+  const [historyType, setHistoryType] = useState('all');
+  const [historyClass, setHistoryClass] = useState('all');
   const [isEditingCorrection, setIsEditingCorrection] = useState(false);
 
   // Modal & Toast states
@@ -155,25 +152,108 @@ export default function AttendancePage() {
   const [modalTitle, setModalTitle] = useState('');
   const [modalPrompt, setModalPrompt] = useState('');
   const [modalReasonInput, setModalReasonInput] = useState('');
-  const [modalAction, setModalAction] = useState<(() => void) | null>(null);
-  const [correctionTarget, setCorrectionTarget] = useState<{ student: StudentRecord; currentStatus: 'P' | 'A' } | null>(null);
-
-  // Sync authenticated session
-  useEffect(() => {
-    const session = getSession();
-    if (session?.user) {
-      if (session.user.name) setUserName(session.user.name);
-      if (session.user.backendRole === 'SUPER_ADMIN') setRoleScope('s');
-      else if (session.user.backendRole === 'ADMIN') setRoleScope('a');
-      else setRoleScope('t');
-    }
-  }, []);
+  const [modalAction, setModalAction] = useState<(() => void | Promise<void>) | null>(null);
+  const [correctionTarget, setCorrectionTarget] = useState<{
+    student: StudentRecord;
+    recordId: string;
+    currentStatus: 'P' | 'A';
+  } | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setToastActive(true);
     setTimeout(() => setToastActive(false), 2400);
   };
+
+  const handleApiError = (error: unknown) => {
+    const status = (error as { response?: { status?: number } })?.response?.status;
+    if (status === 401) {
+      clearSession();
+      router.replace('/login');
+      return;
+    }
+    showToast(apiErrorMessage(error));
+  };
+
+  const loadSessions = async (filters: {
+    from?: string;
+    to?: string;
+    className?: string;
+    sessionType?: string;
+  } = {}) => {
+    try {
+      const data = await fetchAttendanceSessions(filters);
+      const normalized = data.map(normalizeSession);
+      setHistorySessions(normalized);
+      if (!filters.from && !filters.to && !filters.className && !filters.sessionType) {
+        setSessions(normalized);
+      }
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const loadReport = async (filters: {
+    from?: string;
+    to?: string;
+    className?: string;
+    sessionType?: string;
+  } = {}) => {
+    try {
+      setReportData(await fetchAttendanceReport(filters));
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    const reportLoadError = (error: unknown) => {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 401) {
+        clearSession();
+        router.replace('/login');
+        return;
+      }
+      setToastMessage(apiErrorMessage(error));
+      setToastActive(true);
+    };
+    const session = getSession();
+    if (!session?.accessToken || !localStorage.getItem('abune_access_token')) {
+      clearSession();
+      router.replace('/login');
+      return () => {
+        active = false;
+      };
+    }
+    if (session?.user) {
+      startTransition(() => {
+        setSessionDate(new Date().toISOString().slice(0, 10));
+        if (session.user.name) setUserName(session.user.name);
+        if (session.user.backendRole === 'SUPER_ADMIN') setRoleScope('s');
+        else if (session.user.backendRole === 'ADMIN') setRoleScope('a');
+        else setRoleScope('t');
+      });
+    }
+    void fetchAttendanceSessions().then((data) => {
+      if (!active) return;
+      const normalized = data.map(normalizeSession);
+      setSessions(normalized);
+      setHistorySessions(normalized);
+    }).catch((error: unknown) => {
+      if (!active) return;
+      reportLoadError(error);
+    });
+    void fetchAttendanceReport().then((report) => {
+      if (active) setReportData(report);
+    }).catch((error: unknown) => {
+      if (!active) return;
+      reportLoadError(error);
+    });
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   // Classes accessible to the current user
   const availableClasses = Object.keys(CLASS_ROSTER).filter((cls) => {
@@ -184,16 +264,37 @@ export default function AttendancePage() {
 
   // Duplicate session check
   const duplicateSession = sessions.find(
-    (s) => s.cls === selectedClass && s.date === sessionDate && s.type === sessionType
+    (s) => s.cls === selectedClass && s.date === sessionDate && s.type === sessionType && s.division === selectedDivision
   );
 
-  const currentStudents = CLASS_ROSTER[selectedClass]?.stu || [];
+  const currentStudents = roster;
   const presentCount = currentStudents.filter((x) => marks[x.id] === 'P').length;
   const absentCount = currentStudents.filter((x) => marks[x.id] === 'A').length;
   const unmarkedCount = currentStudents.length - presentCount - absentCount;
 
+  const loadRoster = async () => {
+    setRosterLoading(true);
+    setListLoaded(false);
+    setMarks({});
+    try {
+      const members: AttendanceMember[] = await fetchAttendanceRoster(selectedDivision);
+      setRoster(members.map((member) => ({
+        id: member.id,
+        name: member.fullName,
+        regNo: member.registrationNumber,
+      })));
+      setListLoaded(true);
+      setCurrentFocusId(members[0]?.id || null);
+    } catch (error) {
+      setRoster([]);
+      handleApiError(error);
+    } finally {
+      setRosterLoading(false);
+    }
+  };
+
   // Handle Mark click
-  const handleMark = (id: number, val: 'P' | 'A') => {
+  const handleMark = (id: string, val: 'P' | 'A') => {
     setMarks((prev) => ({ ...prev, [id]: val }));
     const nextUnmarked = currentStudents.find((x) => x.id !== id && !marks[x.id]);
     if (nextUnmarked) setCurrentFocusId(nextUnmarked.id);
@@ -215,28 +316,41 @@ export default function AttendancePage() {
     setModalPrompt(
       `${selectedClass} · ${sessionType} on ${sessionDate}. Total ${currentStudents.length} students: ${presentCount} present, ${absentCount} absent. Recorded under your authorized signature (${userName}).`
     );
-    setModalAction(() => () => {
-      const absentIds = currentStudents.filter((s) => marks[s.id] === 'A').map((s) => s.id);
-      const newSession: SavedSession = {
-        id: sessions.length,
-        date: sessionDate,
-        type: sessionType,
-        cls: selectedClass,
-        by: userName,
-        abs: absentIds,
-        hist: [],
-      };
-      setSessions([newSession, ...sessions]);
-      setListLoaded(false);
-      setMarks({});
-      showToast('Attendance saved to central database');
+    setModalAction(() => async () => {
+      setSaving(true);
+      try {
+        await createAttendanceSession({
+          sessionDate,
+          division: selectedDivision,
+          groupName: selectedGroup,
+          department: CLASS_ROSTER[selectedClass]?.d || selectedGroup,
+          className: selectedClass,
+          sessionType,
+          records: currentStudents.map((student) => ({
+            memberId: student.id,
+            status: marks[student.id] === 'P' ? 'PRESENT' : 'ABSENT',
+          })),
+        });
+        setListLoaded(false);
+        setRoster([]);
+        setMarks({});
+        await Promise.all([loadSessions(), loadReport()]);
+        showToast('Attendance saved to the database');
+      } catch (error) {
+        handleApiError(error);
+        if ((error as { response?: { status?: number } })?.response?.status === 409) {
+          await loadSessions();
+        }
+      } finally {
+        setSaving(false);
+      }
     });
     setModalOpen(true);
   };
 
   // Correction Handler
-  const askCorrection = (student: StudentRecord, currentVal: 'P' | 'A') => {
-    setCorrectionTarget({ student, currentStatus: currentVal });
+  const askCorrection = (student: StudentRecord, recordId: string, currentVal: 'P' | 'A') => {
+    setCorrectionTarget({ student, recordId, currentStatus: currentVal });
     setModalTitle('Correct Attendance Record?');
     setModalPrompt(
       `Switch ${student.name} (${student.regNo}) from ${
@@ -247,55 +361,71 @@ export default function AttendancePage() {
     setModalOpen(true);
   };
 
-  const confirmCorrection = () => {
+  const confirmCorrection = async () => {
     if (!modalReasonInput.trim()) {
       showToast('A reason is mandatory for audit compliance.');
       return;
     }
     if (selectedSessionId !== null && correctionTarget) {
-      const nextVal = correctionTarget.currentStatus === 'P' ? 'A' : 'P';
-      setSessions((prev) =>
-        prev.map((s) => {
-          if (s.id !== selectedSessionId) return s;
-          const nextAbs =
-            nextVal === 'A'
-              ? [...s.abs, correctionTarget.student.id]
-              : s.abs.filter((id) => id !== correctionTarget.student.id);
-          const auditEntry: AuditLogEntry = {
-            who: userName,
-            what: `${correctionTarget.student.name}: ${
-              correctionTarget.currentStatus === 'P' ? 'Present → Absent' : 'Absent → Present'
-            }`,
-            why: modalReasonInput.trim(),
-            when: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          };
-          return {
-            ...s,
-            abs: nextAbs,
-            hist: [auditEntry, ...s.hist],
-          };
-        })
-      );
-      setModalOpen(false);
-      setIsEditingCorrection(false);
-      showToast('Correction recorded with audit trail');
+      const nextStatus = correctionTarget.currentStatus === 'P' ? 'ABSENT' : 'PRESENT';
+      try {
+        await correctAttendanceRecord(
+          selectedSessionId,
+          correctionTarget.recordId,
+          nextStatus,
+          modalReasonInput.trim()
+        );
+        setSessionDetail(normalizeSession(await fetchAttendanceSession(selectedSessionId)));
+        await Promise.all([loadSessions(), loadReport()]);
+        setModalOpen(false);
+        setCorrectionTarget(null);
+        setIsEditingCorrection(false);
+        showToast('Correction recorded with audit trail');
+      } catch (error) {
+        handleApiError(error);
+      }
     }
   };
+
+  const openSession = async (id: string) => {
+    setSelectedSessionId(id);
+    setSessionDetail(null);
+    setIsEditingCorrection(false);
+    try {
+      setSessionDetail(normalizeSession(await fetchAttendanceSession(id)));
+    } catch (error) {
+      handleApiError(error);
+      setSelectedSessionId(null);
+    }
+  };
+
+  const departmentStats = Array.from(reportData.byClass.reduce((stats, item) => {
+    const current = stats.get(item.department) || { department: item.department, present: 0, absent: 0 };
+    current.present += item.present;
+    current.absent += item.absent;
+    stats.set(item.department, current);
+    return stats;
+  }, new Map<string, { department: string; present: number; absent: number }>()).values()).map((item) => ({
+    ...item,
+    attendancePercent: item.present + item.absent
+      ? Math.round((item.present / (item.present + item.absent)) * 100)
+      : 0,
+  }));
 
   // Export report to CSV
   const handleExportCSV = () => {
     const rows = [
-      ['Student Name', 'Registration No', 'Class', 'Total Sessions', 'Attended', 'Absences', 'Attendance %'],
+      ['Student Name', 'Registration No', 'Total Sessions', 'Attended', 'Absences', 'Attendance %'],
     ];
-    Object.entries(CLASS_ROSTER).forEach(([clsName, cInfo]) => {
-      const clsSessions = sessions.filter((s) => s.cls === clsName);
-      cInfo.stu.forEach((st) => {
-        const total = clsSessions.length;
-        const abs = clsSessions.filter((s) => s.abs.includes(st.id)).length;
-        const att = total - abs;
-        const pct = total ? Math.round((att / total) * 100) : 0;
-        rows.push([st.name, st.regNo, clsName, String(total), String(att), String(abs), `${pct}%`]);
-      });
+    reportData.byMember.forEach((member) => {
+      rows.push([
+        member.name,
+        member.registrationNumber,
+        String(member.sessions),
+        String(member.present),
+        String(member.absent),
+        `${member.attendancePercent}%`,
+      ]);
     });
 
     const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n');
@@ -311,14 +441,19 @@ export default function AttendancePage() {
 
   // Render detail view for a specific historical session
   const renderSessionDetail = () => {
-    const s = sessions.find((x) => x.id === selectedSessionId);
+    const s = sessionDetail;
     if (!s) return null;
-    const cInfo = CLASS_ROSTER[s.cls];
-    if (!cInfo) return null;
-
-    const presentStudents = cInfo.stu.filter((st) => !s.abs.includes(st.id));
-    const absentStudents = cInfo.stu.filter((st) => s.abs.includes(st.id));
-    const attPct = cInfo.stu.length ? Math.round((presentStudents.length / cInfo.stu.length) * 100) : 0;
+    const presentRecords = s.records.filter((record) => record.status === 'PRESENT');
+    const absentRecords = s.records.filter((record) => record.status === 'ABSENT');
+    const attPct = s.totalMembers ? Math.round((presentRecords.length / s.totalMembers) * 100) : 0;
+    const auditEntries: AuditLogEntry[] = s.records.flatMap((record) =>
+      record.corrections.map((correction) => ({
+        who: correction.correctedBy.name,
+        what: `${record.member.fullName}: ${correction.previousStatus === 'PRESENT' ? 'Present' : 'Absent'} → ${correction.newStatus === 'PRESENT' ? 'Present' : 'Absent'}`,
+        why: correction.reason,
+        when: new Date(correction.createdAt).toLocaleString(),
+      }))
+    );
 
     return (
       <div>
@@ -328,6 +463,7 @@ export default function AttendancePage() {
             className="btn o s"
             onClick={() => {
               setSelectedSessionId(null);
+              setSessionDetail(null);
               setIsEditingCorrection(false);
             }}
           >
@@ -358,11 +494,11 @@ export default function AttendancePage() {
         <div className="stats">
           <div className="stat p">
             <small>Present</small>
-            <b>{presentStudents.length}</b>
+            <b>{presentRecords.length}</b>
           </div>
           <div className="stat a">
             <small>Absent</small>
-            <b>{absentStudents.length}</b>
+            <b>{absentRecords.length}</b>
           </div>
           <div className="stat">
             <small>Attendance</small>
@@ -373,18 +509,22 @@ export default function AttendancePage() {
         <div className="grid g2">
           {/* Present List */}
           <div className="card">
-            <h3>Present ({presentStudents.length})</h3>
-            {presentStudents.map((st) => (
-              <div key={st.id} className="row">
+            <h3>Present ({presentRecords.length})</h3>
+            {presentRecords.map((record) => (
+              <div key={record.id} className="row">
                 <div>
-                  <b>{st.name}</b>
-                  <small>{st.regNo}</small>
+                  <b>{record.member.fullName}</b>
+                  <small>{record.member.registrationNumber}</small>
                 </div>
                 {isEditingCorrection && (
                   <button
                     type="button"
                     className="btn o s"
-                    onClick={() => askCorrection(st, 'P')}
+                    onClick={() => askCorrection(
+                      { id: record.member.id, name: record.member.fullName, regNo: record.member.registrationNumber },
+                      record.id,
+                      'P'
+                    )}
                   >
                     Switch to Absent
                   </button>
@@ -395,19 +535,23 @@ export default function AttendancePage() {
 
           {/* Absent List */}
           <div className="card">
-            <h3>Absent ({absentStudents.length})</h3>
-            {absentStudents.length > 0 ? (
-              absentStudents.map((st) => (
-                <div key={st.id} className="row">
+            <h3>Absent ({absentRecords.length})</h3>
+            {absentRecords.length > 0 ? (
+              absentRecords.map((record) => (
+                <div key={record.id} className="row">
                   <div>
-                    <b>{st.name}</b>
-                    <small>{st.regNo}</small>
+                    <b>{record.member.fullName}</b>
+                    <small>{record.member.registrationNumber}</small>
                   </div>
                   {isEditingCorrection && (
                     <button
                       type="button"
                       className="btn o s"
-                      onClick={() => askCorrection(st, 'A')}
+                      onClick={() => askCorrection(
+                        { id: record.member.id, name: record.member.fullName, regNo: record.member.registrationNumber },
+                        record.id,
+                        'A'
+                      )}
                     >
                       Switch to Present
                     </button>
@@ -430,9 +574,9 @@ export default function AttendancePage() {
             </div>
             <span className="tag bl">Original</span>
           </div>
-          {s.hist.length > 0 ? (
-            s.hist.map((h, i) => (
-              <div key={i} className="row">
+          {auditEntries.length > 0 ? (
+            auditEntries.map((h, i) => (
+              <div key={`${h.when}-${i}`} className="row">
                 <div>
                   <b style={{ color: 'var(--blue)' }}>{h.what}</b>
                   <small>
@@ -613,7 +757,7 @@ export default function AttendancePage() {
             <div>
               <div className="top">
                 <h1>Take attendance</h1>
-                <p>Physical roll call. Call each registered student's name, then record Present or Absent.</p>
+                <p>Physical roll call. Call each registered student&apos;s name, then record Present or Absent.</p>
               </div>
 
               {/* Class & Session Setup Card */}
@@ -640,6 +784,22 @@ export default function AttendancePage() {
                   <div>
                     <label>Department</label>
                     <input disabled value={CLASS_ROSTER[selectedClass]?.d || '—'} />
+                  </div>
+
+                  <div>
+                    <label>Registered division</label>
+                    <select
+                      value={selectedDivision}
+                      onChange={(e) => {
+                        setSelectedDivision(e.target.value as AttendanceDivision);
+                        setListLoaded(false);
+                        setRoster([]);
+                      }}
+                    >
+                      <option value="CHILDREN">Children</option>
+                      <option value="INTERMEDIATE">Intermediate</option>
+                      <option value="YOUTH">Youth</option>
+                    </select>
                   </div>
 
                   <div>
@@ -697,13 +857,10 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     className="btn g"
-                    disabled={Boolean(duplicateSession)}
-                    onClick={() => {
-                      setListLoaded(true);
-                      setMarks({});
-                    }}
+                    disabled={Boolean(duplicateSession) || rosterLoading}
+                    onClick={() => void loadRoster()}
                   >
-                    Load roster
+                    {rosterLoading ? 'Loading roster…' : 'Load roster'}
                   </button>
                 </div>
               </div>
@@ -717,7 +874,7 @@ export default function AttendancePage() {
                     type="button"
                     style={{ background: 'none', border: 0, color: 'var(--blue)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                     onClick={() => {
-                      setSelectedSessionId(duplicateSession.id);
+                      void openSession(duplicateSession.id);
                       setActiveTab('hist');
                     }}
                   >
@@ -729,7 +886,7 @@ export default function AttendancePage() {
               {/* Instructions Note before load */}
               {!listLoaded && !duplicateSession && (
                 <div className="note" style={{ marginTop: 14 }}>
-                  Select the group, class, and session date, then press <b>Load roster</b>. Only registered, approved students of {selectedClass} will appear. Nobody is pre-marked.
+                  Select the group, class, registered division, and session date, then press <b>Load roster</b>. Only approved members in that division will appear. Nobody is pre-marked.
                 </div>
               )}
 
@@ -780,6 +937,9 @@ export default function AttendancePage() {
 
                   {/* Student Roll-Call List */}
                   <div style={{ marginTop: 12 }}>
+                    {currentStudents.length === 0 && (
+                      <p className="note">No approved members were found in this division.</p>
+                    )}
                     {currentStudents
                       .filter((st) => {
                         if (!searchFilter.trim()) return true;
@@ -847,7 +1007,7 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     className="btn g"
-                    disabled={unmarkedCount > 0}
+                    disabled={unmarkedCount > 0 || currentStudents.length === 0 || saving}
                     onClick={askSaveAttendance}
                   >
                     {unmarkedCount > 0 ? `Mark ${unmarkedCount} more to save` : 'Save attendance record'}
@@ -861,7 +1021,7 @@ export default function AttendancePage() {
           {activeTab === 'hist' && (
             <div>
               {selectedSessionId !== null ? (
-                renderSessionDetail()
+                sessionDetail ? renderSessionDetail() : <p className="note">Loading attendance record…</p>
               ) : (
                 <div>
                   <div className="top">
@@ -895,14 +1055,14 @@ export default function AttendancePage() {
 
                   {/* Filter Toolbar */}
                   <div className="fl">
-                    <input type="date" defaultValue="2026-10-01" />
-                    <input type="date" defaultValue="2026-11-01" />
-                    <select defaultValue="all">
+                    <input type="date" value={historyFrom} onChange={(e) => setHistoryFrom(e.target.value)} />
+                    <input type="date" value={historyTo} onChange={(e) => setHistoryTo(e.target.value)} />
+                    <select value={historyType} onChange={(e) => setHistoryType(e.target.value)}>
                       <option value="all">All session types</option>
-                      <option value="ss">Sunday School sessions</option>
-                      <option value="ch">Choir practices</option>
+                      <option value="Sunday School">Sunday School sessions</option>
+                      <option value="Choir">Choir practices</option>
                     </select>
-                    <select defaultValue="all">
+                    <select value={historyClass} onChange={(e) => setHistoryClass(e.target.value)}>
                       <option value="all">All classes</option>
                       {availableClasses.map((c) => (
                         <option key={c} value={c}>
@@ -910,6 +1070,22 @@ export default function AttendancePage() {
                         </option>
                       ))}
                     </select>
+                    <button
+                      type="button"
+                      className="btn o s"
+                      onClick={() => {
+                        const filters = {
+                          from: historyFrom || undefined,
+                          to: historyTo || undefined,
+                          className: historyClass === 'all' ? undefined : historyClass || undefined,
+                          sessionType: historyType === 'all' ? undefined : historyType || undefined,
+                        };
+                        void loadSessions(filters);
+                        void loadReport(filters);
+                      }}
+                    >
+                      Apply filters
+                    </button>
                   </div>
 
                   {/* Table by Date */}
@@ -928,35 +1104,21 @@ export default function AttendancePage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {sessions.map((s) => {
-                            const cInfo = CLASS_ROSTER[s.cls];
-                            const total = cInfo?.stu.length || 0;
-                            const absCount = s.abs.length;
-                            const presCount = total - absCount;
-                            return (
-                              <tr key={s.id} className="hv">
-                                <td><b>{s.date}</b></td>
-                                <td>{s.type}</td>
-                                <td>{s.cls}</td>
-                                <td>{s.by}</td>
-                                <td>
-                                  <span className="tag pub">{presCount}</span>
-                                </td>
-                                <td>
-                                  <span className={`tag ${absCount > 0 ? 'rdt' : 'un'}`}>{absCount}</span>
-                                </td>
-                                <td>
-                                  <button
-                                    type="button"
-                                    className="btn o s"
-                                    onClick={() => setSelectedSessionId(s.id)}
-                                  >
-                                    Open
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {historySessions.map((s) => (
+                            <tr key={s.id} className="hv">
+                              <td><b>{s.date}</b></td>
+                              <td>{s.type}</td>
+                              <td>{s.cls}</td>
+                              <td>{s.by}</td>
+                              <td><span className="tag pub">{s.presentCount}</span></td>
+                              <td><span className={`tag ${s.absentCount > 0 ? 'rdt' : 'un'}`}>{s.absentCount}</span></td>
+                              <td>
+                                <button type="button" className="btn o s" onClick={() => void openSession(s.id)}>
+                                  Open
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -970,7 +1132,6 @@ export default function AttendancePage() {
                           <tr>
                             <th>Student</th>
                             <th>Reg. No.</th>
-                            <th>Class</th>
                             <th>Sessions</th>
                             <th>Present</th>
                             <th>Absent</th>
@@ -978,28 +1139,16 @@ export default function AttendancePage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {Object.entries(CLASS_ROSTER).flatMap(([clsName, cInfo]) => {
-                            const clsSessions = sessions.filter((s) => s.cls === clsName);
-                            return cInfo.stu.map((st) => {
-                              const total = clsSessions.length;
-                              const abs = clsSessions.filter((s) => s.abs.includes(st.id)).length;
-                              const pres = total - abs;
-                              const pct = total ? Math.round((pres / total) * 100) : 0;
-                              return (
-                                <tr key={st.id} className="hv">
-                                  <td><b>{st.name}</b></td>
-                                  <td>{st.regNo}</td>
-                                  <td>{clsName}</td>
-                                  <td>{total}</td>
-                                  <td>{pres}</td>
-                                  <td>{abs}</td>
-                                  <td>
-                                    <span className={`tag ${pct < 75 ? 'dr' : 'pub'}`}>{pct}%</span>
-                                  </td>
-                                </tr>
-                              );
-                            });
-                          })}
+                          {reportData.byMember.map((member) => (
+                            <tr key={member.memberId} className="hv">
+                              <td><b>{member.name}</b></td>
+                              <td>{member.registrationNumber}</td>
+                              <td>{member.sessions}</td>
+                              <td>{member.present}</td>
+                              <td>{member.absent}</td>
+                              <td><span className={`tag ${member.attendancePercent < 75 ? 'dr' : 'pub'}`}>{member.attendancePercent}%</span></td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1012,36 +1161,26 @@ export default function AttendancePage() {
                         <thead>
                           <tr>
                             <th>Class</th>
+                            <th>Division</th>
                             <th>Group</th>
                             <th>Department</th>
-                            <th>Total Students</th>
+                            <th>Total Marks</th>
                             <th>Sessions Held</th>
                             <th>Average Attendance</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {Object.entries(CLASS_ROSTER).map(([clsName, cInfo]) => {
-                            const clsSessions = sessions.filter((s) => s.cls === clsName);
-                            let totalPresent = 0;
-                            let totalMarks = 0;
-                            clsSessions.forEach((s) => {
-                              totalMarks += cInfo.stu.length;
-                              totalPresent += cInfo.stu.length - s.abs.length;
-                            });
-                            const avgPct = totalMarks ? Math.round((totalPresent / totalMarks) * 100) : 0;
-                            return (
-                              <tr key={clsName} className="hv">
-                                <td><b>{clsName}</b></td>
-                                <td>{cInfo.g}</td>
-                                <td>{cInfo.d}</td>
-                                <td>{cInfo.stu.length}</td>
-                                <td>{clsSessions.length}</td>
-                                <td>
-                                  <span className="tag pub">{avgPct}%</span>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {reportData.byClass.map((item) => (
+                            <tr key={`${item.division}-${item.className}`} className="hv">
+                              <td><b>{item.className}</b></td>
+                              <td>{item.division}</td>
+                              <td>{item.groupName}</td>
+                              <td>{item.department}</td>
+                              <td>{item.present + item.absent}</td>
+                              <td>{item.sessions}</td>
+                              <td><span className="tag pub">{item.attendancePercent}%</span></td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1069,25 +1208,25 @@ export default function AttendancePage() {
                 <div className="card">
                   <small style={{ color: 'var(--slate)', letterSpacing: '0.08em' }}>SESSIONS HELD</small>
                   <b style={{ font: "700 36px 'Cormorant Garamond', Georgia, serif", display: 'block', marginTop: 4 }}>
-                    {sessions.length}
+                    {reportData.sessions}
                   </b>
                 </div>
                 <div className="card">
                   <small style={{ color: 'var(--slate)', letterSpacing: '0.08em' }}>PRESENT MARKS</small>
                   <b style={{ font: "700 36px 'Cormorant Garamond', Georgia, serif", display: 'block', marginTop: 4, color: 'var(--ok)' }}>
-                    {sessions.reduce((acc, s) => acc + (CLASS_ROSTER[s.cls]?.stu.length || 0) - s.abs.length, 0)}
+                    {reportData.present}
                   </b>
                 </div>
                 <div className="card">
                   <small style={{ color: 'var(--slate)', letterSpacing: '0.08em' }}>ABSENT MARKS</small>
                   <b style={{ font: "700 36px 'Cormorant Garamond', Georgia, serif", display: 'block', marginTop: 4, color: 'var(--red)' }}>
-                    {sessions.reduce((acc, s) => acc + s.abs.length, 0)}
+                    {reportData.absent}
                   </b>
                 </div>
                 <div className="card">
                   <small style={{ color: 'var(--slate)', letterSpacing: '0.08em' }}>OVERALL ATTENDANCE</small>
                   <b style={{ font: "700 36px 'Cormorant Garamond', Georgia, serif", display: 'block', marginTop: 4 }}>
-                    84%
+                    {reportData.attendancePercent}%
                   </b>
                 </div>
               </div>
@@ -1096,66 +1235,33 @@ export default function AttendancePage() {
               <div className="grid g2" style={{ marginTop: 14 }}>
                 <div className="card">
                   <h3>By Group &amp; Department</h3>
-                  <div className="bars">
-                    <span>Sunday School</span>
-                    <div>
-                      <i style={{ width: '86%' }} />
-                    </div>
-                    <b>86%</b>
-                  </div>
-                  <div className="bars">
-                    <span>Choir</span>
-                    <div>
-                      <i style={{ width: '81%' }} />
-                    </div>
-                    <b>81%</b>
-                  </div>
-                  <div className="bars" style={{ marginTop: 18 }}>
-                    <span>Timhirt (Teaching)</span>
-                    <div>
-                      <i style={{ width: '86%' }} />
-                    </div>
-                    <b>86%</b>
-                  </div>
-                  <div className="bars">
-                    <span>Mezmur Department</span>
-                    <div>
-                      <i style={{ width: '81%' }} />
-                    </div>
-                    <b>81%</b>
-                  </div>
+                  {[...reportData.byGroup.map((item) => ({ name: item.groupName, percent: item.attendancePercent })),
+                    ...departmentStats.map((item) => ({ name: item.department, percent: item.attendancePercent }))]
+                    .map((item) => (
+                      <div className="bars" key={item.name}>
+                        <span>{item.name}</span>
+                        <div><i style={{ width: `${item.percent}%` }} /></div>
+                        <b>{item.percent}%</b>
+                      </div>
+                    ))}
                 </div>
 
                 <div className="card">
                   <h3>By Class</h3>
-                  <div className="bars">
-                    <span>Grade 3</span>
-                    <div>
-                      <i style={{ width: '92%' }} />
+                  {reportData.byClass.map((item, index) => (
+                    <div className="bars" key={`${item.division}-${item.department}-${index}`}>
+                      <span>{item.className}</span>
+                      <div><i style={{ width: `${item.attendancePercent}%` }} /></div>
+                      <b>{item.attendancePercent}%</b>
                     </div>
-                    <b>92%</b>
-                  </div>
-                  <div className="bars">
-                    <span>Grade 7</span>
-                    <div>
-                      <i style={{ width: '83%' }} />
-                    </div>
-                    <b>83%</b>
-                  </div>
-                  <div className="bars">
-                    <span>Mezmur A</span>
-                    <div>
-                      <i style={{ width: '81%' }} />
-                    </div>
-                    <b>81%</b>
-                  </div>
+                  ))}
                 </div>
               </div>
 
               {/* Per-Student Grade 7 Table with Low-Attendance Warning */}
               <div className="card wrap" style={{ marginTop: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <h3 style={{ margin: 0 }}>Per-Student Breakdown · Grade 7</h3>
+                  <h3 style={{ margin: 0 }}>Per-Student Breakdown</h3>
                   <span style={{ fontSize: 12, color: 'var(--slate)' }}>
                     <span className="tag dr">low</span> Indicates attendance below 75%
                   </span>
@@ -1172,30 +1278,23 @@ export default function AttendancePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {CLASS_ROSTER['Grade 7'].stu.map((st) => {
-                      const clsSessions = sessions.filter((s) => s.cls === 'Grade 7');
-                      const total = clsSessions.length;
-                      const abs = clsSessions.filter((s) => s.abs.includes(st.id)).length;
-                      const pres = total - abs;
-                      const pct = total ? Math.round((pres / total) * 100) : 0;
-                      return (
-                        <tr key={st.id} className="hv">
-                          <td><b>{st.name}</b></td>
-                          <td>{st.regNo}</td>
-                          <td>{total}</td>
-                          <td>{pres}</td>
-                          <td>{abs}</td>
-                          <td>
-                            <span className={`tag ${pct < 75 ? 'dr' : 'pub'}`}>{pct}%</span>
-                            {pct < 75 && (
-                              <small style={{ color: 'var(--ochre)', marginLeft: 6, fontWeight: 600 }}>
-                                Needs Attention
-                              </small>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {reportData.byMember.map((member) => (
+                      <tr key={member.memberId} className="hv">
+                        <td><b>{member.name}</b></td>
+                        <td>{member.registrationNumber}</td>
+                        <td>{member.sessions}</td>
+                        <td>{member.present}</td>
+                        <td>{member.absent}</td>
+                        <td>
+                          <span className={`tag ${member.attendancePercent < 75 ? 'dr' : 'pub'}`}>{member.attendancePercent}%</span>
+                          {member.attendancePercent < 75 && (
+                            <small style={{ color: 'var(--ochre)', marginLeft: 6, fontWeight: 600 }}>
+                              Needs Attention
+                            </small>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1261,16 +1360,17 @@ export default function AttendancePage() {
             <button
               type="button"
               className="btn g"
-              onClick={() => {
+              disabled={saving}
+              onClick={async () => {
                 if (correctionTarget) {
-                  confirmCorrection();
+                  await confirmCorrection();
                 } else if (modalAction) {
-                  modalAction();
+                  await modalAction();
                   setModalOpen(false);
                 }
               }}
             >
-              Confirm
+              {saving ? 'Saving…' : 'Confirm'}
             </button>
           </div>
         </div>

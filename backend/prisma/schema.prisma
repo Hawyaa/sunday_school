@@ -284,7 +284,7 @@ model AttendanceSession {
   records     AttendanceRecord[]
   createdAt   DateTime           @default(now())
 
-  @@unique([sessionDate, division, groupName, className, sessionType])
+  @@unique([sessionDate, division, groupName, className, sessionType], map: "att_session_identity_key")
   @@index([division, sessionDate])
   @@index([className, sessionDate])
   @@map("attendance_sessions")

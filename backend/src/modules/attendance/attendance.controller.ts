@@ -233,7 +233,7 @@ export async function getAttendanceReport(req: Request, res: Response): Promise<
   });
   const totals = { sessions: sessions.length, present: 0, absent: 0 };
   const groups = new Map<string, { sessions: number; present: number; absent: number }>();
-  const classes = new Map<string, { division: string; groupName: string; department: string; sessions: number; present: number; absent: number }>();
+  const classes = new Map<string, { division: string; className: string; groupName: string; department: string; sessions: number; present: number; absent: number }>();
   const members = new Map<string, { memberId: string; name: string; registrationNumber: string; sessions: number; present: number; absent: number }>();
 
   for (const session of sessions) {
@@ -241,7 +241,7 @@ export async function getAttendanceReport(req: Request, res: Response): Promise<
     group.sessions += 1;
     const classKey = `${session.division}:${session.className}`;
     const classSummary = classes.get(classKey) ?? {
-      division: session.division, groupName: session.groupName, department: session.department,
+      division: session.division, className: session.className, groupName: session.groupName, department: session.department,
       sessions: 0, present: 0, absent: 0,
     };
     classSummary.sessions += 1;

@@ -8,7 +8,7 @@ CREATE TABLE `attendance_sessions` (
     `sessionType` VARCHAR(191) NOT NULL,
     `createdById` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    UNIQUE INDEX `attendance_sessions_sessionDate_division_groupName_className_sessionType_key`(`sessionDate`, `division`, `groupName`, `className`, `sessionType`),
+    UNIQUE INDEX `att_session_identity_key`(`sessionDate`, `division`, `groupName`, `className`, `sessionType`),
     INDEX `attendance_sessions_division_sessionDate_idx`(`division`, `sessionDate`),
     INDEX `attendance_sessions_className_sessionDate_idx`(`className`, `sessionDate`),
     PRIMARY KEY (`id`),
