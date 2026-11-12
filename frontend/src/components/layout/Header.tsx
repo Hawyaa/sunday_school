@@ -372,7 +372,7 @@ export function Header({ transparent = false }: HeaderProps) {
               </Link>
             </li>
             <li>
-              <Link href="/about" aria-current={pathname.startsWith('/about') ? 'page' : undefined}>
+              <Link href="/about" aria-current={pathname?.startsWith('/about') ? 'page' : undefined}>
                 {isAm ? 'ስለ እኛ' : 'About'}
               </Link>
             </li>
@@ -394,21 +394,21 @@ export function Header({ transparent = false }: HeaderProps) {
                 <Link
                   href="/events"
                   onClick={() => setUpdatesOpen(false)}
-                  aria-current={pathname.startsWith('/events') ? 'page' : undefined}
+                  aria-current={pathname?.startsWith('/events') ? 'page' : undefined}
                 >
                   {isAm ? 'መርሐ ግብሮች' : 'Events'}
                 </Link>
                 <Link
                   href="/announcements"
                   onClick={() => setUpdatesOpen(false)}
-                  aria-current={pathname.startsWith('/announcements') ? 'page' : undefined}
+                  aria-current={pathname?.startsWith('/announcements') ? 'page' : undefined}
                 >
                   {isAm ? 'ማስታወቂያዎች' : 'Announcements'}
                 </Link>
                 <Link
                   href="/reports"
                   onClick={() => setUpdatesOpen(false)}
-                  aria-current={pathname.startsWith('/reports') ? 'page' : undefined}
+                  aria-current={pathname?.startsWith('/reports') ? 'page' : undefined}
                 >
                   {isAm ? 'ሪፖርቶች' : 'Reports'}
                 </Link>
@@ -432,21 +432,21 @@ export function Header({ transparent = false }: HeaderProps) {
                 <Link
                   href="/mezmur"
                   onClick={() => setMediaOpen(false)}
-                  aria-current={pathname.startsWith('/mezmur') ? 'page' : undefined}
+                  aria-current={pathname?.startsWith('/mezmur') ? 'page' : undefined}
                 >
                   {isAm ? 'መዝሙር' : 'Mezmur'}
                 </Link>
                 <Link
                   href="/teachings"
                   onClick={() => setMediaOpen(false)}
-                  aria-current={pathname.startsWith('/teachings') ? 'page' : undefined}
+                  aria-current={pathname?.startsWith('/teachings') ? 'page' : undefined}
                 >
                   {isAm ? 'ትምህርት' : 'Teachings'}
                 </Link>
                 <Link
                   href="/gallery"
                   onClick={() => setMediaOpen(false)}
-                  aria-current={pathname.startsWith('/gallery') ? 'page' : undefined}
+                  aria-current={pathname?.startsWith('/gallery') ? 'page' : undefined}
                 >
                   {isAm ? 'ማዕከለ ስዕል' : 'Gallery'}
                 </Link>
@@ -454,7 +454,7 @@ export function Header({ transparent = false }: HeaderProps) {
             </li>
 
             <li>
-              <Link href="/contact" aria-current={pathname.startsWith('/contact') ? 'page' : undefined}>
+              <Link href="/contact" aria-current={pathname?.startsWith('/contact') ? 'page' : undefined}>
                 {isAm ? 'ያግኙን' : 'Contact'}
               </Link>
             </li>

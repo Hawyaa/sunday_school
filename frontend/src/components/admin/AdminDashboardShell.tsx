@@ -6,10 +6,10 @@
  * Single sidebar layout supporting direct public page management and platform modules.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getSession, clearSession } from '@/lib/auth';
+import { getSession, clearSession, API } from '@/lib/auth';
 import { PublicPageEditor } from '@/components/admin/PublicPageEditor';
 import '@/app/admin/admin.css';
 
@@ -95,6 +95,356 @@ export interface AdminDashboardShellProps {
   pageSlug?: string;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Live Registrations Panel — fetches from /api/admin/members
+   ══════════════════════════════════════════════════════════════════════════*/
+type RegStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+interface RegMember {
+  id: string;
+  fullName: string;
+  christianName: string;
+  division: string;
+  registrationType: string;
+  registrationNumber: string;
+  age?: number;
+  gender?: string;
+  phoneNumber?: string;
+  motherName?: string;
+  address?: string;
+  kebele?: string;
+  confessionFather?: string;
+  confessionChurch?: string;
+  preferredDepartment?: string;
+  talentSkills?: string;
+  emergencyContactName?: string;
+  emergencyRelationship?: string;
+  emergencyContactPhone?: string;
+  parentName?: string;
+  parentConsent?: boolean;
+  youthCovenantAccepted?: boolean;
+  status: RegStatus;
+  adminNotes?: string;
+  createdAt: string;
+}
+
+function RegistrationsPanel() {
+  const [tab, setTab] = useState<RegStatus>('PENDING');
+  const [members, setMembers] = useState<RegMember[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [selected, setSelected] = useState<RegMember | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionMsg, setActionMsg] = useState('');
+  const [rejectNotes, setRejectNotes] = useState('');
+  const [showRejectBox, setShowRejectBox] = useState(false);
+  const [counts, setCounts] = useState<Record<RegStatus, number>>({ PENDING: 0, APPROVED: 0, REJECTED: 0 });
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState('');
+
+  const fetchMembers = useCallback(async (status: RegStatus, q: string) => {
+    setLoading(true);
+    setError('');
+    try {
+      const session = getSession();
+      const params = new URLSearchParams({ status, limit: '50' });
+      if (q.trim()) params.set('search', q.trim());
+      const r = await fetch(`${API}/api/admin/members?${params}`, {
+        headers: { Authorization: `Bearer ${session?.accessToken ?? ''}` },
+      });
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(json?.message || 'Failed to load registrations');
+      setMembers(Array.isArray(json.data) ? json.data : []);
+      setTotal(json.meta?.total ?? json.data?.length ?? 0);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchCounts = useCallback(async () => {
+    try {
+      const session = getSession();
+      const r = await fetch(`${API}/api/admin/members/stats`, {
+        headers: { Authorization: `Bearer ${session?.accessToken ?? ''}` },
+      });
+      const json = await r.json().catch(() => ({}));
+      if (r.ok && json.data?.byStatus) {
+        const s = json.data.byStatus;
+        setCounts({ PENDING: s.pending ?? 0, APPROVED: s.approved ?? 0, REJECTED: s.rejected ?? 0 });
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    fetchMembers(tab, search);
+    fetchCounts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  async function handleApprove(member: RegMember) {
+    setActionLoading(true);
+    setActionMsg('');
+    try {
+      const session = getSession();
+      const r = await fetch(`${API}/api/admin/members/${member.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.accessToken ?? ''}` },
+        body: JSON.stringify({ status: 'APPROVED' }),
+      });
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(json?.message || 'Approval failed');
+      setActionMsg(`✓ ${member.fullName} approved successfully.`);
+      setSelected(null);
+      await fetchMembers(tab, search);
+      await fetchCounts();
+    } catch (e: unknown) {
+      setActionMsg('✗ ' + (e instanceof Error ? e.message : 'Error'));
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleReject(member: RegMember) {
+    if (!showRejectBox) { setShowRejectBox(true); return; }
+    setActionLoading(true);
+    setActionMsg('');
+    try {
+      const session = getSession();
+      const r = await fetch(`${API}/api/admin/members/${member.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.accessToken ?? ''}` },
+        body: JSON.stringify({ status: 'REJECTED', adminNotes: rejectNotes.trim() || undefined }),
+      });
+      const json = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(json?.message || 'Rejection failed');
+      setActionMsg(`✓ ${member.fullName} rejected.`);
+      setSelected(null);
+      setShowRejectBox(false);
+      setRejectNotes('');
+      await fetchMembers(tab, search);
+      await fetchCounts();
+    } catch (e: unknown) {
+      setActionMsg('✗ ' + (e instanceof Error ? e.message : 'Error'));
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    fetchMembers(tab, search);
+  }
+
+  const TAB_LABELS: { key: RegStatus; label: string }[] = [
+    { key: 'PENDING', label: 'Pending' },
+    { key: 'APPROVED', label: 'Approved' },
+    { key: 'REJECTED', label: 'Rejected' },
+  ];
+
+  return (
+    <div>
+      <div className="top-heading">
+        <div>
+          <h1>Registration requests</h1>
+          <p>Review public registrations before they become official members.</p>
+        </div>
+      </div>
+
+      <div className="chips" style={{ marginBottom: 16 }}>
+        {TAB_LABELS.map(({ key, label }) => (
+          <button
+            key={key}
+            className={'chip' + (tab === key ? ' on' : '')}
+            onClick={() => { setTab(key); setSelected(null); setActionMsg(''); setShowRejectBox(false); }}
+          >
+            {label} ({counts[key]})
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <input
+          ref={searchRef}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search name, reg. no., phone…"
+          style={{ flex: 1 }}
+        />
+        <button type="submit" className="btn o">Search</button>
+        {search && (
+          <button type="button" className="btn o" onClick={() => { setSearch(''); fetchMembers(tab, ''); }}>
+            Clear
+          </button>
+        )}
+      </form>
+
+      {actionMsg && (
+        <div
+          className={'note w'}
+          style={{ marginBottom: 12, color: actionMsg.startsWith('✓') ? 'var(--ok)' : 'var(--red)' }}
+        >
+          {actionMsg}
+        </div>
+      )}
+
+      {error && <div className="note w" style={{ marginBottom: 12, color: 'var(--red)' }}>{error}</div>}
+
+      <div
+        className="grid"
+        style={{ gridTemplateColumns: selected ? 'minmax(250px, 1fr) minmax(300px, 1.3fr)' : '1fr', gap: 16 }}
+      >
+        {/* LIST */}
+        <div className="card" style={{ padding: '4px 14px' }}>
+          {loading && (
+            <p style={{ color: 'var(--slate)', padding: '12px 0', textAlign: 'center' }}>Loading…</p>
+          )}
+          {!loading && members.length === 0 && (
+            <p style={{ color: 'var(--slate)', padding: '12px 0', textAlign: 'center' }}>
+              No {tab.toLowerCase()} registrations found.
+            </p>
+          )}
+          {members.map((m, i) => (
+            <div
+              key={m.id}
+              className="row"
+              style={
+                selected?.id === m.id
+                  ? { background: 'var(--sky)', margin: '0 -14px', padding: '9px 14px', cursor: 'pointer' }
+                  : { cursor: 'pointer' }
+              }
+              onClick={() => { setSelected(m); setShowRejectBox(false); setRejectNotes(''); setActionMsg(''); }}
+            >
+              <div>
+                <b>{m.fullName}</b>
+                <small>
+                  {m.christianName && <> · {m.christianName}</>}
+                  {m.division && <> · {m.division}</>}
+                  {m.createdAt && <> · {new Date(m.createdAt).toLocaleDateString()}</>}
+                </small>
+              </div>
+              <span className={
+                m.status === 'APPROVED' ? 'tag pub' :
+                m.status === 'REJECTED' ? 'tag dr' : 'tag un'
+              }>
+                {m.status === 'APPROVED' ? 'Approved' : m.status === 'REJECTED' ? 'Rejected' : 'Pending'}
+              </span>
+            </div>
+          ))}
+          {!loading && total > members.length && (
+            <p style={{ color: 'var(--slate)', fontSize: 12, padding: '8px 0' }}>
+              Showing {members.length} of {total}
+            </p>
+          )}
+        </div>
+
+        {/* DETAIL PANEL */}
+        {selected && (
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+              <div>
+                <h3 style={{ marginBottom: 2 }}>{selected.fullName}</h3>
+                <small style={{ color: 'var(--slate)' }}>{selected.registrationNumber}</small>
+              </div>
+              <button className="btn o" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setSelected(null)}>✕ Close</button>
+            </div>
+
+            <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+              {[
+                ['Christian name', selected.christianName],
+                ['Division', selected.division],
+                ['Type', selected.registrationType],
+                ['Gender', selected.gender],
+                ['Age', selected.age],
+                ['Phone', selected.phoneNumber],
+                ['Mother', selected.motherName],
+                ['Address', selected.address],
+                ['Kebele', selected.kebele],
+                ['Confession father', selected.confessionFather],
+                ['Confession church', selected.confessionChurch],
+                ['Dept. preference', selected.preferredDepartment],
+                ['Talent / skills', selected.talentSkills],
+                ['Emergency contact', selected.emergencyContactName],
+                ['Emergency relation', selected.emergencyRelationship],
+                ['Emergency phone', selected.emergencyContactPhone],
+                ['Parent / guardian', selected.parentName],
+                ['Parent consent', selected.parentConsent ? 'Yes ✓' : selected.parentConsent === false ? 'No' : undefined],
+                ['Youth covenant', selected.youthCovenantAccepted ? 'Accepted ✓' : selected.youthCovenantAccepted === false ? 'Not accepted' : undefined],
+              ]
+                .filter(([, v]) => v !== undefined && v !== null && v !== '')
+                .map(([label, val]) => (
+                  <div key={String(label)}>
+                    <small style={{ color: 'var(--slate)', textTransform: 'uppercase', fontSize: 11, fontWeight: 600 }}>
+                      {label}
+                    </small>
+                    <br />
+                    <span style={{ fontSize: 14 }}>{String(val)}</span>
+                  </div>
+                ))}
+            </div>
+
+            {selected.adminNotes && (
+              <div className="note w" style={{ marginBottom: 12 }}>
+                <b>Admin notes:</b> {selected.adminNotes}
+              </div>
+            )}
+
+            {selected.status === 'PENDING' && (
+              <>
+                {showRejectBox && (
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 600, color: 'var(--slate)' }}>
+                      Rejection reason (optional)
+                    </label>
+                    <textarea
+                      value={rejectNotes}
+                      onChange={e => setRejectNotes(e.target.value)}
+                      rows={3}
+                      placeholder="Reason for rejection…"
+                      style={{ width: '100%', fontSize: 13, padding: 8, borderRadius: 6, border: '1px solid var(--line)', resize: 'vertical' }}
+                    />
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button
+                    className="btn g"
+                    disabled={actionLoading}
+                    onClick={() => handleApprove(selected)}
+                  >
+                    {actionLoading ? 'Processing…' : 'Approve'}
+                  </button>
+                  <button
+                    className="btn r"
+                    disabled={actionLoading}
+                    onClick={() => handleReject(selected)}
+                  >
+                    {showRejectBox ? (actionLoading ? 'Processing…' : 'Confirm Reject') : 'Reject'}
+                  </button>
+                  {showRejectBox && (
+                    <button className="btn o" onClick={() => { setShowRejectBox(false); setRejectNotes(''); }}>
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {selected.status !== 'PENDING' && (
+              <div className="note w" style={{ marginTop: 8 }}>
+                This registration has already been <b>{selected.status.toLowerCase()}</b>.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+/* ══ end RegistrationsPanel ══════════════════════════════════════════════════*/
+
+
 export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -156,7 +506,7 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
       );
       setIsSuper(isSuperUser);
       if (!pageSlug) {
-        const queryView = searchParams.get('view') as ViewKey;
+        const queryView = searchParams ? (searchParams.get('view') as ViewKey) : null;
         if (queryView) {
           setActiveView(queryView);
         } else {
@@ -169,7 +519,7 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
   // Sync active view from query params on /admin
   useEffect(() => {
     if (!pageSlug) {
-      const qv = searchParams.get('view') as ViewKey;
+      const qv = searchParams ? (searchParams.get('view') as ViewKey) : null;
       if (qv && qv !== activeView) {
         if (!isSuper && SUPER_ONLY_VIEWS.includes(qv)) {
           setActiveView('ov');
@@ -626,117 +976,10 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
             </div>
           )}
 
-          {/* 3. REGISTRATIONS (reg) */}
-          {activeView === 'reg' && (
-            <div>
-              <div className="top-heading">
-                <div>
-                  <h1>Registration requests</h1>
-                  <p>Review public registrations before they become official members.</p>
-                </div>
-              </div>
+          {/* 3. REGISTRATIONS (reg) – live API */}
+          {activeView === 'reg' && <RegistrationsPanel />}
 
-              <div className="chips">
-                <button className="chip on">Pending (5)</button>
-                <button className="chip">Approved (303)</button>
-                <button className="chip">Rejected (4)</button>
-              </div>
-
-              <div
-                className="grid"
-                style={{ gridTemplateColumns: 'minmax(250px, 1fr) minmax(300px, 1.3fr)' }}
-              >
-                <div className="card" style={{ padding: '4px 14px' }}>
-                  {[
-                    ['Meron Tesfaye', 'Intermediate', '2 days ago'],
-                    ['Dawit Alemu', 'Children', '3 days ago'],
-                    ['Kidus Worku', 'Youth', '4 days ago'],
-                    ['Selam Tadesse', 'Children', '5 days ago'],
-                    ['Abel Hailu', 'Youth', '6 days ago'],
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      className="row"
-                      style={
-                        i === 0
-                          ? { background: 'var(--sky)', margin: '0 -14px', padding: '9px 14px' }
-                          : undefined
-                      }
-                    >
-                      <div>
-                        <b>{item[0]}</b>
-                        <small>{item[1]} · {item[2]}</small>
-                      </div>
-                      {renderTag('dr', 'Pending')}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="card">
-                  <h3>Meron Tesfaye</h3>
-                  <div className="note w">Possible duplicate: “Meron Tesfay”, same phone number.</div>
-
-                  <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                    <div>
-                      <small style={{ color: 'var(--slate)', textTransform: 'uppercase', fontSize: 11, fontWeight: 600 }}>
-                        Division
-                      </small>
-                      <br />
-                      Intermediate
-                    </div>
-                    <div>
-                      <small style={{ color: 'var(--slate)', textTransform: 'uppercase', fontSize: 11, fontWeight: 600 }}>
-                        Age / DOB
-                      </small>
-                      <br />
-                      16 · 12 Mar 2010
-                    </div>
-                    <div>
-                      <small style={{ color: 'var(--slate)', textTransform: 'uppercase', fontSize: 11, fontWeight: 600 }}>
-                        Preferred dept.
-                      </small>
-                      <br />
-                      Mezmur <span className="tag un">preference only</span>
-                    </div>
-                    <div>
-                      <small style={{ color: 'var(--slate)', textTransform: 'uppercase', fontSize: 11, fontWeight: 600 }}>
-                        Guardian
-                      </small>
-                      <br />
-                      Almaz Haile ✓
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
-                    <button
-                      className="btn g"
-                      onClick={() =>
-                        ask(
-                          'Approve registration?',
-                          'Creates one official member record. Duplicates are checked first.'
-                        )
-                      }
-                    >
-                      Approve
-                    </button>
-                    <button
-                      className="btn r"
-                      onClick={() =>
-                        ask(
-                          'Reject registration?',
-                          'A reason is required and will be sent to the applicant.'
-                        )
-                      }
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 4. STUDENTS & MEMBERS (mem) */}
+                    {/* 4. STUDENTS & MEMBERS (mem) */}
           {activeView === 'mem' && (
             <div>
               <div className="top-heading">

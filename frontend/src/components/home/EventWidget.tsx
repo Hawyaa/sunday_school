@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * EventWidget.tsx
@@ -8,13 +8,26 @@
  * - Subsequent events with date badges and trailing arrow.
  */
 
-import React from 'react';
-import Link from 'next/link';
-import { useAppStore } from '@/lib/store';
-import type { ChurchEvent } from '@/types/event';
+import React from "react";
+import Link from "next/link";
+import { useAppStore } from "@/lib/store";
+import type { ChurchEvent } from "@/types/event";
 
-const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const MON = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
+];
+const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 interface EventRow {
   badgeMonth: string;
@@ -28,40 +41,40 @@ interface EventRow {
 
 const FALLBACK_EVENTS: EventRow[] = [
   {
-    badgeMonth: 'SEP',
-    badgeDay: '15',
-    dayOfWeek: 'TUE',
-    title: 'Meskel Celebration',
-    titleAm: 'የመስቀል ደመራ በዓል',
-    place: 'Church Hall',
-    placeAm: 'የቤተክርስቲያን አዳራሽ',
+    badgeMonth: "SEP",
+    badgeDay: "15",
+    dayOfWeek: "TUE",
+    title: "Meskel Celebration",
+    titleAm: "የመስቀል ደመራ በዓል",
+    place: "Church Hall",
+    placeAm: "የቤተክርስቲያን አዳራሽ",
   },
   {
-    badgeMonth: 'OCT',
-    badgeDay: '09',
-    dayOfWeek: 'SUN',
-    title: 'Youth Fellowship',
-    titleAm: 'የወጣቶች ሕብረት ጉባኤ',
-    place: 'Church Hall',
-    placeAm: 'አዳራሽ 2',
+    badgeMonth: "OCT",
+    badgeDay: "09",
+    dayOfWeek: "SUN",
+    title: "Youth Fellowship",
+    titleAm: "የወጣቶች ሕብረት ጉባኤ",
+    place: "Church Hall",
+    placeAm: "አዳራሽ 2",
   },
   {
-    badgeMonth: 'OCT',
-    badgeDay: '06',
-    dayOfWeek: 'WED',
-    title: 'Bible Study & Teaching',
-    titleAm: 'የመጽሐፍ ቅዱስ ጥናትና ትምህርት',
-    place: 'Church Hall',
-    placeAm: 'አዳራሽ 1',
+    badgeMonth: "OCT",
+    badgeDay: "06",
+    dayOfWeek: "WED",
+    title: "Bible Study & Teaching",
+    titleAm: "የመጽሐፍ ቅዱስ ጥናትና ትምህርት",
+    place: "Church Hall",
+    placeAm: "አዳራሽ 1",
   },
   {
-    badgeMonth: 'OCT',
-    badgeDay: '05',
-    dayOfWeek: 'FRI',
-    title: 'Confession & Spiritual Guidance',
-    titleAm: 'የንስሐና መንፈሳዊ ምክር አገልግሎት',
-    place: 'Church Hall',
-    placeAm: 'አዳራሽ 3',
+    badgeMonth: "OCT",
+    badgeDay: "05",
+    dayOfWeek: "FRI",
+    title: "Confession & Spiritual Guidance",
+    titleAm: "የንስሐና መንፈሳዊ ምክር አገልግሎት",
+    place: "Church Hall",
+    placeAm: "አዳራሽ 3",
   },
 ];
 
@@ -73,7 +86,7 @@ interface Props {
 
 export function EventWidget({ events, event, isLoading = false }: Props) {
   const { locale } = useAppStore();
-  const isAm = locale === 'am';
+  const isAm = locale === "am";
 
   // Map real events if provided, else use fallback
   const source = events?.length ? events : event ? [event] : [];
@@ -81,13 +94,13 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
     ? source.map((e) => {
         const d = new Date(e.startDate);
         return {
-          badgeMonth: MON[d.getMonth()] ?? 'SEP',
-          badgeDay: String(d.getDate()).padStart(2, '0'),
-          dayOfWeek: DAYS[d.getDay()] ?? 'SUN',
+          badgeMonth: MON[d.getMonth()] ?? "SEP",
+          badgeDay: String(d.getDate()).padStart(2, "0"),
+          dayOfWeek: DAYS[d.getDay()] ?? "SUN",
           title: e.title,
           titleAm: e.title,
-          place: e.location || 'Church Hall',
-          placeAm: e.location || 'የቤተክርስቲያን አዳራሽ',
+          place: e.location || "Church Hall",
+          placeAm: e.location || "የቤተክርስቲያን አዳራሽ",
         };
       })
     : FALLBACK_EVENTS;
@@ -100,17 +113,17 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
       <div className="flex items-end justify-between mb-3">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-widest text-[#C99A3B] block mb-1">
-            {isAm ? 'መርሐ ግብር' : 'MARK YOUR CALENDAR'}
+            {isAm ? "መርሐ ግብር" : "MARK YOUR CALENDAR"}
           </span>
           <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#0F1B3E]">
-            {isAm ? 'የሚመጡ መርሐ ግብሮች' : 'Upcoming Events'}
+            {isAm ? "የሚመጡ መርሐ ግብሮች" : "Upcoming Events"}
           </h2>
         </div>
         <Link
           href="/events"
           className="text-xs font-semibold text-[#505E7B] hover:text-[#C99A3B] transition-colors"
         >
-          {isAm ? 'ሁሉንም ይመልከቱ' : 'View All'} →
+          {isAm ? "ሁሉንም ይመልከቱ" : "View All"} →
         </Link>
       </div>
 
@@ -119,7 +132,10 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
         {isLoading || !featured ? (
           <div className="space-y-3 py-2">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-12 animate-pulse rounded-lg bg-[#F5F2EB]" />
+              <div
+                key={i}
+                className="h-12 animate-pulse rounded-lg bg-[#F5F2EB]"
+              />
             ))}
           </div>
         ) : (
@@ -138,10 +154,14 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-xs sm:text-[13.5px] font-bold text-[#0F1B3E] truncate">
-                    {isAm && featured.titleAm ? featured.titleAm : featured.title}
+                    {isAm && featured.titleAm
+                      ? featured.titleAm
+                      : featured.title}
                   </h3>
                   <p className="text-[11px] text-[#7C88A8] truncate mt-0.5">
-                    {isAm && featured.placeAm ? featured.placeAm : featured.place}
+                    {isAm && featured.placeAm
+                      ? featured.placeAm
+                      : featured.place}
                   </p>
                 </div>
               </div>
@@ -150,7 +170,7 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
                 href="/events"
                 className="px-3.5 py-1.5 rounded-lg bg-[#C99A3B] hover:bg-[#b08328] text-white text-xs font-bold transition shadow-xs shrink-0 cursor-pointer"
               >
-                {isAm ? 'ዝርዝር' : 'Read More'}
+                {isAm ? "ዝርዝር" : "Read More"}
               </Link>
             </div>
 

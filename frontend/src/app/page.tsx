@@ -17,7 +17,7 @@
  * Header, HeroSection, and Footer are NOT modified.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { useHomeReveal } from './useHomeReveal';
@@ -34,37 +34,137 @@ import { HeroSection } from '@/components/home/HeroSection';
    ═══════════════════════════════════════════════════════════════ */
 
 const EVENTS = [
-  { day: '10', title: 'Meskel Celebration',      titleAm: 'የመስቀል ደመራ በዓል',           meta: 'Meskerem • 4:00 PM', metaAm: 'መስከረም • 10:00 ሰዓት' },
-  { day: '11', title: 'Youth Fellowship',        titleAm: 'የወጣቶች መንፈሳዊ ሕብረት',        meta: 'Meskerem • 2:00 PM', metaAm: 'መስከረም • 8:00 ሰዓት' },
-  { day: '13', title: 'Bible Study & Teaching',   titleAm: 'የመጽሐፍ ቅዱስ ጥናትና ትምህርት', meta: 'Meskerem • 6:00 PM', metaAm: 'መስከረም • 12:00 ሰዓት' },
-  { day: '20', title: 'Spiritual Guidance',       titleAm: 'መንፈሳዊ ምክርና ውይይት',        meta: 'Meskerem • 3:00 PM', metaAm: 'መስከረም • 9:00 ሰዓት' },
-  { day: '27', title: 'Sunday School Session',    titleAm: 'የሰንበት ትምህርት ቤት ጉባኤ',     meta: 'Meskerem • 8:00 AM', metaAm: 'መስከረም • 2:00 ሰዓት' },
+  { day: '10', title: 'Meskel Celebration',      titleAm: 'የመስቀል ደመራ በዓል',           meta: 'Meskerem • 4:00 PM', metaAm: 'መስከረም • 10:00 ሰዓት', color: 'blue', on: true },
+  { day: '11', title: 'Youth Fellowship',        titleAm: 'የወጣቶች መንፈሳዊ ሕብረት',        meta: 'Meskerem • 2:00 PM', metaAm: 'መስከረም • 8:00 ሰዓት', color: 'green' },
+  { day: '13', title: 'Bible Study & Teaching',   titleAm: 'የመጽሐፍ ቅዱስ ጥናትና ትምህርት', meta: 'Meskerem • 6:00 PM', metaAm: 'መስከረም • 12:00 ሰዓት', color: 'orange' },
+  { day: '20', title: 'Spiritual Guidance',       titleAm: 'መንፈሳዊ ምክርና ውይይት',        meta: 'Meskerem • 3:00 PM', metaAm: 'መስከረም • 9:00 ሰዓት', color: 'purple' },
+  { day: '27', title: 'Sunday School Session',    titleAm: 'የሰንበት ትምህርት ቤት ጉባኤ',     meta: 'Meskerem • 8:00 AM', metaAm: 'መስከረም • 2:00 ሰዓት', color: 'teal' },
 ];
 
-interface GalImg {
-  src: string;
-  label: string;
-  labelAm: string;
-  cat: string;
-  catAm: string;
+interface HomeGalleryItem {
+  cls: string;
+  img: string;
+  fallback?: string;
+  kicker: string;
+  kickerAm: string;
+  title: string;
+  titleAm: string;
 }
 
-const ROW_1: GalImg[] = [
-  { src: 'https://i.pinimg.com/474x/aa/b6/55/aab655bda9ce179c5c34b95c20816317.jpg', label: 'Sacred Ethiopian Iconography', labelAm: 'የኢትዮጵያ ቅዱሳት ሥዕላት', cat: 'Manuscript Art', catAm: 'የብራና ጥበብ' },
-  { src: 'https://i.pinimg.com/474x/56/af/4c/56af4cbb84cef34b0fb50b27bd176691.jpg', label: 'Feast Day Liturgy', labelAm: 'የበዓለ ንግሥ ጉባኤ', cat: 'Clergy & Faithful', catAm: 'ካህናትና ምእመናን' },
-  { src: 'https://i.pinimg.com/474x/3a/93/40/3a93404041ca22b153f4392a3d758541.jpg', label: 'Icon of the Last Supper', labelAm: 'የምስጢረ ቍርባን ሥዕል', cat: 'Sacred Art', catAm: 'ቅዱስ ጥበብ' },
-  { src: 'https://i.pinimg.com/474x/97/ab/5c/97ab5cea194f9cc2f4dc52294f585203.jpg', label: 'The Ethiopian Cross', labelAm: 'ቅዱስ መስቀል', cat: 'Symbol of Faith', catAm: 'የእምነት ምልክት' },
-  { src: '/images/events/featured.jpg',  label: 'Divine Liturgy', labelAm: 'ቅዳሴ', cat: 'Worship', catAm: 'አምልኮ' },
-  { src: '/images/hero/hero-1.jpg',      label: 'Parish Heritage', labelAm: 'ቤተክርስቲያን ቅርስ', cat: 'Heritage', catAm: 'ቅርስ' },
+const HOME_GALLERY: HomeGalleryItem[] = [
+  {
+    cls: 'a',
+    img: '/images/gallery-1.jpg',
+    fallback: 'https://i.pinimg.com/474x/aa/b6/55/aab655bda9ce179c5c34b95c20816317.jpg',
+    kicker: 'Manuscript Art',
+    kickerAm: 'የብራና ጥበብ',
+    title: 'Sacred Ethiopian Iconography',
+    titleAm: 'የኢትዮጵያ ቅዱሳት ሥዕላት',
+  },
+  {
+    cls: 'bb',
+    img: '/images/gallery-2.jpg',
+    fallback: 'https://i.pinimg.com/474x/56/af/4c/56af4cbb84cef34b0fb50b27bd176691.jpg',
+    kicker: 'Clergy & Faithful',
+    kickerAm: 'ካህናትና ምእመናን',
+    title: 'Feast Day Liturgy',
+    titleAm: 'የበዓለ ንግሥ ጉባኤ',
+  },
+  {
+    cls: 'cc',
+    img: '/images/gallery-3.jpg',
+    fallback: 'https://i.pinimg.com/474x/3a/93/40/3a93404041ca22b153f4392a3d758541.jpg',
+    kicker: 'Sacred Art',
+    kickerAm: 'ቅዱስ ጥበብ',
+    title: 'Icon of the Last Supper',
+    titleAm: 'የምስጢረ ቍርባን ሥዕል',
+  },
+  {
+    cls: 'd',
+    img: '/images/gallery-4.jpg',
+    fallback: 'https://i.pinimg.com/474x/97/ab/5c/97ab5cea194f9cc2f4dc52294f585203.jpg',
+    kicker: 'Symbol of Faith',
+    kickerAm: 'የእምነት ምልክት',
+    title: 'The Ethiopian Cross',
+    titleAm: 'ቅዱስ መስቀል',
+  },
+  {
+    cls: 'e',
+    img: '/images/gallery-5.jpg',
+    fallback: '/images/events/featured.jpg',
+    kicker: 'Worship',
+    kickerAm: 'አምልኮ',
+    title: 'Divine Liturgy',
+    titleAm: 'ቅዳሴ',
+  },
+  {
+    cls: 'f',
+    img: '/images/gallery-6.jpg',
+    fallback: '/images/hero/hero-2.jpg',
+    kicker: 'Sacred Space',
+    kickerAm: 'ቅዱስ ቦታ',
+    title: 'Sanctuary & Prayer',
+    titleAm: 'ቤተ መቅደስና ጸሎት',
+  },
 ];
 
-const ROW_2: GalImg[] = [
-  { src: '/images/hero/hero-2.jpg',      label: 'Sanctuary & Prayer', labelAm: 'ቤተ መቅደስና ጸሎት', cat: 'Sacred Space', catAm: 'ቅዱስ ቦታ' },
-  { src: '/images/abune-diskoros-portrait.png', label: 'Apostolic Blessing', labelAm: 'ሐዋርያዊ ቡራኬ', cat: 'Leadership', catAm: 'ትምህርት' },
-  { src: 'https://i.pinimg.com/474x/dd/8a/ac/dd8aacb498e705f0a0f5ed84adec2714.jpg', label: 'Community Fellowship', labelAm: 'ሕብረት', cat: 'Fellowship', catAm: 'ማኅበር' },
-  { src: 'https://i.pinimg.com/474x/25/f2/cf/25f2cf69f3228dff18d2e3b0105baeac.jpg', label: 'Holy Saturday', labelAm: 'ቀዳም ስዑር', cat: 'Devotion', catAm: 'ተመስጦ' },
-  { src: 'https://i.pinimg.com/736x/d5/e8/67/d5e86784cc782e8616d91447b16109fb.jpg', label: 'The Life of Saint Mary', labelAm: 'የእመቤታችን ሕይወት', cat: 'Grace', catAm: 'ጸጋ' },
-  { src: '/images/hero/hero-3.jpg',      label: 'Celebration & Joy', labelAm: 'ደስታና በረከት', cat: 'Feast Days', catAm: 'በዓላት' },
+interface GivingAccount {
+  id: string;
+  bank: string;
+  bankAm: string;
+  logo: string;
+  holder: string;
+  holderAm: string;
+  branch: string;
+  branchAm: string;
+  account: string;
+}
+
+const GIVING_ACCOUNTS: GivingAccount[] = [
+  {
+    id: 'berhan',
+    bank: 'Berhan Bank',
+    bankAm: 'ብርሃን ባንክ',
+    logo: '/images/banks/berhan-bank.png',
+    holder: 'International Evangelical Church',
+    holderAm: 'ዓለም አቀፍ ወንጌላዊት ቤተክርስቲያን',
+    branch: 'Sarbet Branch',
+    branchAm: 'ሳርቤት ቅርንጫፍ',
+    account: '1501160065392',
+  },
+  {
+    id: 'cbe',
+    bank: 'Commercial Bank of Ethiopia',
+    bankAm: 'የኢትዮጵያ ንግድ ባንክ (CBE)',
+    logo: '/images/banks/cbe.png',
+    holder: 'International Evangelical Church',
+    holderAm: 'ዓለም አቀፍ ወንጌላዊት ቤተክርስቲያን',
+    branch: 'Hiwot Amba Branch',
+    branchAm: 'ሕይወት አምባ ቅርንጫፍ',
+    account: '1000248494828',
+  },
+  {
+    id: 'awash',
+    bank: 'Awash Bank',
+    bankAm: 'አዋሽ ባንክ',
+    logo: '/images/banks/awash-bank.png',
+    holder: 'International Evangelical Church',
+    holderAm: 'ዓለም አቀፍ ወንጌላዊት ቤተክርስቲያን',
+    branch: 'Africa Andinet Branch',
+    branchAm: 'አፍሪካ አንድነት ቅርንጫፍ',
+    account: '01304027715500',
+  },
+  {
+    id: 'hibret',
+    bank: 'Hibret Bank',
+    bankAm: 'ሕብረት ባንክ',
+    logo: '/images/banks/hibret-bank.png',
+    holder: 'International Evangelical Church',
+    holderAm: 'ዓለም አቀፍ ወንጌላዊት ቤተክርስቲያን',
+    branch: 'Bisrate Gabriel Branch',
+    branchAm: 'ብስራተ ገብርኤል ቅርንጫፍ',
+    account: '1241116270154019',
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -75,10 +175,15 @@ export default function HomePage() {
   const { locale } = useAppStore();
   const isAm = locale === 'am';
   const rootRef = useHomeReveal();
+  const [copiedAcc, setCopiedAcc] = useState<string | null>(null);
 
-  // Duplicate gallery rows for seamless loop
-  const r1 = [...ROW_1, ...ROW_1];
-  const r2 = [...ROW_2, ...ROW_2];
+  function copyAccount(acc: string) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(acc);
+      setCopiedAcc(acc);
+      setTimeout(() => setCopiedAcc(null), 2500);
+    }
+  }
 
   return (
     <div ref={rootRef} className="home-page min-h-screen flex flex-col">
@@ -107,144 +212,258 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── 3. Upcoming Events (editorial timeline) ── */}
-      <section id="events">
+      {/* ── 3. Upcoming Events (courses grid) ── */}
+      <section className="courses" id="events">
         <div className="wrap">
           <div className="head rv">
-            <h2>{isAm ? 'የሚመጡ መርሐ ግብሮች' : 'Upcoming events'}</h2>
-            <p>{isAm ? 'በአምልኮ፣ በትምህርትና በሕብረት ያሳልፉ።' : 'Join us for worship, learning and fellowship.'}</p>
+            <div>
+              <div className="eyebrow">{isAm ? 'የቤተክርስቲያን መርሐ ግብር' : 'Church Calendar'}</div>
+              <h2>{isAm ? 'የሚመጡ መርሐ ግብሮች' : 'Upcoming events'}</h2>
+            </div>
+            <span className="note">{isAm ? 'በአምልኮ፣ በትምህርትና በሕብረት ያሳልፉ።' : 'Join us for worship, learning and fellowship.'}</span>
           </div>
 
-          <div className="ev">
+          <div className="grid">
             {EVENTS.map((e, i) => (
               <Link
                 key={i}
-                href="/events"
-                className="er rv"
+                className={`card ${e.on ? 'on' : ''} rv`}
                 style={{ '--d': `${i * 0.08}s` } as React.CSSProperties}
+                href="/events"
               >
-                <b>{e.day}</b>
-                <div>
-                  <h3>{isAm ? e.titleAm : e.title}</h3>
-                  <small>{isAm ? e.metaAm : e.meta}</small>
-                </div>
-                <span className="arrow">{isAm ? 'ዝርዝር →' : 'Details →'}</span>
+                <span className={`ic ${e.color}`}>
+                  <span className="day">{e.day}</span>
+                </span>
+                <h3>{isAm ? e.titleAm : e.title}</h3>
+                <p>{isAm ? e.metaAm : e.meta}</p>
+                <span className="more">
+                  {isAm ? 'ዝርዝር' : 'Details'}{' '}
+                  <svg className="arrow" viewBox="0 0 24 24">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── 4. Teachings (split layout with image + quote) ── */}
-      <section className="teach" id="teach">
+      {/* ── 4. Teachings (split section) ── */}
+      <section className="split-sec" id="teach">
         <div className="wrap split">
-          {/* Left: image with quote overlay */}
-          <div className="timg rl">
+          <div className="pic rl">
             <img
-              src="https://i.pinimg.com/474x/56/af/4c/56af4cbb84cef34b0fb50b27bd176691.jpg"
-              alt={isAm ? 'የሰንበት ት/ቤት ትምህርት' : 'Ethiopian Orthodox Sunday School'}
-              loading="lazy"
+              src="/images/teaching.jpg"
+              alt={isAm ? 'የሰንበት ት/ቤት ትምህርት' : 'Orthodox church domes at sunset'}
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                if (!target.src.includes('featured.jpg')) {
+                  target.src = '/images/events/featured.jpg';
+                }
+              }}
             />
-            <div className="quote">
-              {isAm ? 'ሃይማኖትን መማር፣\nበሃይማኖት መኖር' : 'Learn the faith,\nlive the faith'}
-            </div>
-            {/* Dark gradient overlay for text clarity */}
-            <div style={{
-              position: 'absolute', inset: 0, zIndex: 1,
-              background: 'linear-gradient(to bottom, rgba(15,35,82,0.45), rgba(15,35,82,0.15) 50%, rgba(15,35,82,0.65))',
-              pointerEvents: 'none',
-            }} />
+            <div className="cap">{isAm ? 'ሃይማኖትን መማር፣ በሃይማኖት መኖር' : 'Learn the faith, live the faith'}</div>
           </div>
-
-          {/* Right: text */}
-          <div className="rr">
-            <h2>{isAm ? 'እምነት በተግባር' : 'Faith made practical'}</h2>
+          <div className="txt rr">
+            <div className="eyebrow">{isAm ? 'ትምህርተ ሃይማኖት' : 'Teachings'}</div>
+            <h2>
+              {isAm ? (
+                <>እምነት<br />በተግባር</>
+              ) : (
+                <>Faith made<br />practical</>
+              )}
+            </h2>
             <p>
               {isAm
-                ? 'የሰንበት ትምህርት ቤት ትምህርቶች፣ ለእያንዳንዱ ዕድሜ የሚመጥን መንፈሳዊ ዕድገትና የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ እምነት ጥልቅ ግንዛቤ።'
-                : 'Sunday school lessons and spiritual teachings, designed to help every age grow in the Ethiopian Orthodox faith.'}
+                ? 'የሰንበት ትምህርት ቤት ትምህርቶችና መንፈሳዊ ጉባኤያት፣ እያንዳንዱ ምእመን በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ እምነቱ እንዲያድግ የተዘጋጀ።'
+                : 'Sunday school lessons and spiritual teachings, designed to help each person grow in the Ethiopian Orthodox faith.'}
             </p>
-            <Link href="/teachings" className="pill pill-navy">
+            <p>
+              {isAm
+                ? 'ከሕፃናት ትምህርተ ሃይማኖት እስከ አዋቂዎች የመጽሐፍ ቅዱስ ጥናት፣ እያንዳንዱ ትምህርት በቅዱሳት መጻሕፍት፣ በቅዱሳን አባቶች ትምህርትና በተዋሕዶ ቤተክርስቲያን ሕያው ትውፊት ላይ የተመሠረተ ነው። መምህራኖቻችን እያንዳንዱን ተማሪ በትዕግሥት ይመራሉ፣ በዚህም እምነት በቤት፣ በቤተክርስቲያንና በማኅበረሰብ ውስጥ የዕለት ተዕለት ሕይወት አካል ይሆናል።'
+                : "From children's catechism to adult Bible study, every lesson is rooted in Scripture, the teachings of the Church Fathers, and the living tradition of the Tewahedo Church. Our teachers guide each learner patiently, so faith becomes part of everyday life at home, at church and in the community."}
+            </p>
+            <ul className="checks">
+              <li>{isAm ? 'ለሕፃናት፣ ለወጣቶችና ለአዋቂዎች የተዘጋጁ ትምህርቶች' : 'Lessons for children, youth and adults'}</li>
+              <li>{isAm ? 'በቅዱሳት መጻሕፍትና በአበው ትምህርት ላይ የተመሠረተ' : 'Rooted in Scripture and the Church Fathers'}</li>
+              <li>{isAm ? 'በሰንበት ትምህርት ቤት ልምድ ባላቸው መምህራን የሚመራ' : 'Led by experienced Sunday school teachers'}</li>
+              <li>{isAm ? 'በራስዎ ፍጥነት ለመማር ቪዲዮ፣ ኦዲዮ እና የጥናት ማስታወሻዎች' : 'Video, audio and study notes to learn at your own pace'}</li>
+            </ul>
+            <Link className="btn" href="/teachings">
               {isAm ? 'ትምህርቶችን ያስሱ' : 'Discover teachings'}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── 5. Gallery (dual marquee on navy) ── */}
-      <section className="gal" id="gallery">
-        <div className="wrap rv">
-          <h2>{isAm ? 'የሥዕላት ማኅደር' : 'Gallery'}</h2>
-        </div>
-
-        {/* Row 1 → moves left (forward) */}
-        <div className="mq">
-          {r1.map((g, i) => (
-            <div className="gimg" key={`r1-${i}`}>
-              <img src={g.src} alt={isAm ? g.labelAm : g.label} loading="lazy" />
-              <div className="gc">
-                <small>{isAm ? g.catAm : g.cat}</small>
-                <span>{isAm ? g.labelAm : g.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Row 2 → moves right (reverse) */}
-        <div className="mq rev">
-          {r2.map((g, i) => (
-            <div className="gimg" key={`r2-${i}`}>
-              <img src={g.src} alt={isAm ? g.labelAm : g.label} loading="lazy" />
-              <div className="gc">
-                <small>{isAm ? g.catAm : g.cat}</small>
-                <span>{isAm ? g.labelAm : g.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 6. Announcements (featured + side stack) ── */}
-      <section>
+      {/* ── 5. Gallery (Editorial Mosaic Grid) ── */}
+      <section className="gallery" id="gallery">
         <div className="wrap">
           <div className="head rv">
-            <h2>{isAm ? 'ወቅታዊ ማስታወቂያዎች' : 'Latest announcements'}</h2>
-            <Link href="/announcements" className="hlink">
-              {isAm ? 'ሁሉንም ይመልከቱ' : 'See all announcements'}
+            <div>
+              <h2>{isAm ? 'ማዕከለ ስዕል.' : 'Gallery.'}</h2>
+              <p>
+                {isAm
+                  ? 'ከቤተክርስቲያናችን፣ ከሰንበት ትምህርት ቤታችን እና ከማህበረሰባችን የተመረጡ ቅዱሳት ጊዜያት።'
+                  : 'Sacred moments from our church, Sunday school and community, selected by our media team.'}
+              </p>
+            </div>
+            <Link className="all" href="/gallery">
+              {isAm ? 'ሁሉንም ፎቶዎች ይመልከቱ →' : 'View all photos →'}
             </Link>
           </div>
 
-          <div className="ann">
-            {/* Featured article */}
-            <article className="feat rv">
-              <div className="feat-img">
+          <div className="grid">
+            {HOME_GALLERY.map((g, i) => (
+              <Link
+                key={i}
+                className={`c ${g.cls} rv`}
+                style={{ '--d': `${i * 0.08}s` } as React.CSSProperties}
+                href="/gallery"
+              >
                 <img
-                  src="https://i.pinimg.com/474x/97/ab/5c/97ab5cea194f9cc2f4dc52294f585203.jpg"
-                  alt={isAm ? 'የመስቀል በዓል ዝግጅት' : 'Feast of the Holy Cross preparation'}
-                  loading="lazy"
+                  src={g.img}
+                  alt={isAm ? g.titleAm : g.title}
+                  onError={(e) => {
+                    if (g.fallback && e.currentTarget.src !== g.fallback) {
+                      e.currentTarget.src = g.fallback;
+                    } else {
+                      e.currentTarget.style.display = 'none';
+                    }
+                  }}
                 />
-              </div>
-              <span className="date">{isAm ? 'መስከረም 12' : 'Meskerem 12'}</span>
-              <h3>{isAm ? 'የመስቀል በዓል መንፈሳዊ ዝግጅት' : 'Feast of the Holy Cross preparation'}</h3>
-              <p>{isAm ? 'ከቤተክርስቲያን ማኅበረሰብ የቅርብ ጊዜ ዜናዎችና ማስታወቂያዎች።' : 'News and notices from the church community.'}</p>
-            </article>
-
-            {/* Side stack */}
-            <div className="side rv" style={{ '--d': '0.15s' } as React.CSSProperties}>
-              <Link href="/register">
-                <span className="date">{isAm ? 'መስከረም 15' : 'Meskerem 15'}</span>
-                <h3>{isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration'}</h3>
+                <div>
+                  <span className="k">{isAm ? g.kickerAm : g.kicker}</span>
+                  <h3>{isAm ? g.titleAm : g.title}</h3>
+                </div>
+                <span className="b">{isAm ? 'ምስሉን ይመልከቱ' : 'View photo'}</span>
               </Link>
-              <Link href="/announcements">
-                <span className="date">{isAm ? 'መስከረም 22' : 'Meskerem 22'}</span>
-                <h3>{isAm ? 'የበጎ አድራጎትና የማኅበራዊ ድጋፍ' : 'Community charity and outreach'}</h3>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. Announcements (News & Events layout) ── */}
+      <section className="news" id="announcements">
+        <div className="wrap">
+          <div className="top rv">
+            <div className="eyebrow">{isAm ? 'ዜናና መርሐ ግብሮች' : 'News & Events'}</div>
+            <h2>{isAm ? 'ወቅታዊ ማስታወቂያዎች' : 'Latest Announcements'}</h2>
+            <span className="bar"></span>
+          </div>
+
+          <div className="layout">
+            {/* Card 1 */}
+            <Link className="card c1 rv" href="/announcements">
+              <img
+                src="/images/announcement-1.jpg"
+                alt={isAm ? 'የመስቀል በዓል ዝግጅት' : 'Feast of the Holy Cross preparation'}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://i.pinimg.com/474x/97/ab/5c/97ab5cea194f9cc2f4dc52294f585203.jpg';
+                }}
+              />
+              <time>{isAm ? 'መስከረም 12' : 'Meskerem 12'}</time>
+              <h3>{isAm ? 'የመስቀል በዓል መንፈሳዊ ዝግጅት' : 'Feast of the Holy Cross preparation'}</h3>
+              <span className="rm">{isAm ? 'ተጨማሪ ያንብቡ →' : 'Read More →'}</span>
+            </Link>
+
+            {/* Card 2 */}
+            <Link className="card c2 rv" href="/register" style={{ '--d': '0.1s' } as React.CSSProperties}>
+              <img
+                src="/images/announcement-2.jpg"
+                alt={isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration'}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://i.pinimg.com/474x/56/af/4c/56af4cbb84cef34b0fb50b27bd176691.jpg';
+                }}
+              />
+              <time>{isAm ? 'መስከረም 15' : 'Meskerem 15'}</time>
+              <h3>{isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration'}</h3>
+              <span className="rm">{isAm ? 'ተጨማሪ ያንብቡ →' : 'Read More →'}</span>
+            </Link>
+
+            {/* Side list */}
+            <div className="list rv" style={{ '--d': '0.2s' } as React.CSSProperties}>
+              <Link className="item" href="/announcements">
+                <span className="t">{isAm ? 'የማኅበረሰብ በጎ አድራጎትና ድጋፍ' : 'Community charity and outreach'}</span>
+                <time>{isAm ? 'መስከረም 22' : 'Meskerem 22'}</time>
+              </Link>
+              <Link className="item" href="/announcements">
+                <span className="t">{isAm ? 'የወጣቶች ሳምንታዊ ጉባኤ፡ አዲስ ሰዓትና ቦታ' : 'Youth fellowship weekly gathering: new meeting time and location'}</span>
+                <time>{isAm ? 'መስከረም 18' : 'Meskerem 18'}</time>
+              </Link>
+              <Link className="item" href="/announcements">
+                <span className="t">{isAm ? 'የመስቀል በዓል የመዘምራን ልምምድ ክፍት ሆነ' : 'Choir rehearsals open for the Meskel celebration hymns'}</span>
+                <time>{isAm ? 'መስከረም 10' : 'Meskerem 10'}</time>
+              </Link>
+              <Link className="item" href="/announcements">
+                <span className="t">{isAm ? 'የሰንበት ት/ቤት መምህራን ስብሰባ፡ የአዲሱ መንፈቅ ዕቅድ' : "Sunday school teachers' meeting: lesson plans for the new term"}</span>
+                <time>{isAm ? 'መስከረም 8' : 'Meskerem 8'}</time>
+              </Link>
+              <Link className="all" href="/announcements">
+                {isAm ? 'ሁሉንም ማስታወቂያዎች ይመልከቱ' : 'See all announcements'}
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 7. CTA (parchment gradient) ── */}
+      {/* ── 7. Tithes, Gifts & Offerings (Local Giving Marquee) ── */}
+      <section className="giving-sec" id="giving">
+        <div className="wrap">
+          <div className="head rv">
+            <span className="eyebrow">{isAm ? 'የአገር ውስጥ ስጦታዎችና ምጽዋት' : 'Local Giving & Donations'}</span>
+            <h2>{isAm ? 'ለአሥራት፣ ለስጦታና ለምጽዋት...' : 'For your tithes, gifts and offerings...'}</h2>
+            <p className="sub">
+              {isAm
+                ? 'አሥራት፣ ስጦታና ምጽዋትዎን ከዚህ በታች በተዘረዘሩት የታመኑ የኢትዮጵያ ባንኮች የሒሳብ ቁጥሮች በኩል በቀጥታ ማስተላለፍ ይችላሉ።'
+                : 'Transfer your tithes, offerings, and donations directly through any of our verified Ethiopian bank accounts below.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Continuous auto-scrolling track (moves right to left) */}
+        <div className="giving-marquee-wrap" aria-label={isAm ? 'የባንክ ሒሳብ አማራጮች' : 'Bank transfer options'}>
+          <div className="giving-marquee-track">
+            {[...GIVING_ACCOUNTS, ...GIVING_ACCOUNTS, ...GIVING_ACCOUNTS, ...GIVING_ACCOUNTS].map((acc, idx) => (
+              <div key={`${acc.id}-${idx}`} className="giving-card">
+                <div className="giving-logo-box">
+                  <img src={acc.logo} alt={isAm ? acc.bankAm : acc.bank} />
+                </div>
+                <div className="giving-holder">{isAm ? acc.holderAm : acc.holder}</div>
+                <div className="giving-branch">{isAm ? acc.branchAm : acc.branch}</div>
+                <div className="giving-acc">{acc.account}</div>
+                <button
+                  type="button"
+                  className="giving-copy-btn"
+                  onClick={() => copyAccount(acc.account)}
+                  title={isAm ? 'የሒሳብ ቁጥር ቅዳ' : 'Copy account number'}
+                >
+                  {copiedAcc === acc.account ? (
+                    isAm ? '✓ ተቀድቷል' : '✓ Copied'
+                  ) : (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      {isAm ? 'ቁጥሩን ቅዳ' : 'Copy account'}
+                    </>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Centered bottom link styled like the reference design */}
+        <div className="giving-foot-link rv">
+          <Link href="/contact">
+            {isAm ? 'ስለ ስጦታዎ ወይም የባንክ ዝውውር ጥያቄ አለዎት? ያነጋግሩን ›' : 'Explore all giving, donation & transfer options ›'}
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 8. CTA (parchment gradient) ── */}
       <section className="cta-sec" id="contact">
         <div className="wrap rv">
           <span className="am-head">ጥበብ ለጉዞዎ</span>

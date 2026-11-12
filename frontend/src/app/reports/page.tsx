@@ -97,26 +97,19 @@ export default function ReportsPage() {
             <Link href="/">{isAm ? 'መነሻ' : 'Home'}</Link> › <b>{isAm ? 'ሪፖርቶች' : 'Reports'}</b>
           </div>
 
-          {/* 3D Flip Book Hero */}
+          {/* Reports Hero Showcase (Clean, Static Presentation) */}
           <div className="bk">
-            <div className="flip">
-              <div className="front" aria-hidden="true">
-                <span className="x">✛</span>
-                <b className="am">አቡነ ሚዲያ</b>
-                <span>REPORTS</span>
-              </div>
-              <div className="back pgL">
-                <span className="kick">{isAm ? 'የሪፖርቶች ማዕከል' : 'REPORTS HUB'}</span>
-                <h1>
-                  <em>
-                    <b>R</b>{isAm ? 'ፖርቶች' : 'eports'}
-                  </em>
-                </h1>
-                <p>
-                  {isAm
-                    ? 'ትምህርታዊ፣ መንፈሳዊና ማህበራዊ አገልግሎቶችን ጨምሮ የተለያዩ ይፋዊ የቤተክርስቲያንና የአስተዳደር ሪፖርቶችን ይመልከቱ።'
-                    : 'Access and review various official church and administrative reports, including educational, service, and community reports.'}
-                </p>
+            <div className="pgL">
+              <span className="kick">{isAm ? 'የሪፖርቶች ማዕከል' : 'REPORTS HUB'}</span>
+              <h1>
+                <b>R</b>{isAm ? 'ፖርቶች' : 'eports'}
+              </h1>
+              <p>
+                {isAm
+                  ? 'ትምህርታዊ፣ መንፈሳዊና ማህበራዊ አገልግሎቶችን ጨምሮ የተለያዩ ይፋዊ የቤተክርስቲያንና የአስተዳደር ሪፖርቶችን ይመልከቱ።'
+                  : 'Access and review various official church and administrative reports, including educational, service, and community reports.'}
+              </p>
+              <div>
                 <a className="btn bn" href="#list">
                   {isAm ? 'ሁሉንም ሪፖርቶች ይመልከቱ →' : 'View all reports →'}
                 </a>

@@ -20,7 +20,7 @@ export function RequireAuth({ role, children }: { role: Role; children: React.Re
   const allowed = !!session && session.role === role;
 
   useEffect(() => {
-    if (ready && !allowed) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    if (ready && !allowed) { const q = pathname ? `?next=${encodeURIComponent(pathname)}` : ""; router.replace(`/login${q}`); }
   }, [ready, allowed, router, pathname]);
 
   if (!ready || !allowed) {

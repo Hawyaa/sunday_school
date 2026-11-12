@@ -36,6 +36,21 @@ function pickStr(r: Record<string, unknown>, keys: string[]): string {
   return '';
 }
 
+const DEFAULT_ANNOUNCEMENT_IMAGES = [
+  '/images/announcement-1.jpg',
+  '/images/announcement-2.jpg',
+  '/images/gallery/gallery-celebration-1.jpg',
+  '/images/gallery/gallery-community-1.jpg',
+  '/images/events/featured.jpg',
+  '/images/gallery/gallery-worship-1.jpg',
+  '/images/gallery-1.jpg',
+  '/images/gallery-2.jpg',
+  '/images/gallery-3.jpg',
+  '/images/events/event-1.jpg',
+  '/images/gallery/gallery-youth-1.jpg',
+  '/images/teaching.jpg',
+];
+
 function toItem(a: Announcement, i: number): Item {
   const r = a as unknown as Record<string, unknown>;
   const body = pickStr(r, ['content', 'body', 'description', 'details']);
@@ -43,6 +58,7 @@ function toItem(a: Announcement, i: number): Item {
     pickStr(r, ['summary', 'excerpt', 'shortDescription']) ||
     (body.length > 140 ? body.slice(0, 140).trimEnd() + '…' : body);
   const ts = Date.parse(pickStr(r, ['publishedAt', 'publishDate', 'createdAt', 'date']));
+  const imgFromApi = pickStr(r, ['imageUrl', 'image', 'coverImage', 'thumbnail']);
   return {
     id: String(r.id ?? r._id ?? i),
     title: pickStr(r, ['title', 'titleEn', 'name']) || 'Untitled announcement',
@@ -51,7 +67,7 @@ function toItem(a: Announcement, i: number): Item {
     category: pickStr(r, ['category', 'type']) || 'General',
     ts: Number.isNaN(ts) ? 0 : ts,
     pinned: Boolean(r.isPinned ?? r.pinned ?? r.featured),
-    image: pickStr(r, ['imageUrl', 'image', 'coverImage', 'thumbnail']),
+    image: imgFromApi || DEFAULT_ANNOUNCEMENT_IMAGES[i % DEFAULT_ANNOUNCEMENT_IMAGES.length],
     g: (i % 3) as 0 | 1 | 2,
   };
 }
@@ -85,7 +101,7 @@ function makeSample(): Item[] {
       category: cats[i % 3],
       ts: Date.now() - i * 3 * day,
       pinned: i < 3,
-      image: '',
+      image: DEFAULT_ANNOUNCEMENT_IMAGES[i % DEFAULT_ANNOUNCEMENT_IMAGES.length],
       g: (i % 3) as 0 | 1 | 2,
       label,
     };
@@ -94,14 +110,15 @@ function makeSample(): Item[] {
 
 /* ───────── small pieces ───────── */
 function Thumb({ item }: { item: Item }) {
+  const imgSrc = item.image || DEFAULT_ANNOUNCEMENT_IMAGES[item.g % DEFAULT_ANNOUNCEMENT_IMAGES.length];
   return (
     <div className={`an-img g${item.g}`}>
       <i
-        style={
-          item.image
-            ? { backgroundImage: `url(${item.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-            : undefined
-        }
+        style={{
+          backgroundImage: `url(${imgSrc})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       />
     </div>
   );

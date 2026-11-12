@@ -84,7 +84,7 @@ export function LoginCard() {
         session = await loginMember(id.trim(), password);
       }
 
-      const next = params.get('next');
+      const next = params?.get('next');
       const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
       router.replace(safeNext ?? getLoginRedirectUrl(session));
     } catch (err) {

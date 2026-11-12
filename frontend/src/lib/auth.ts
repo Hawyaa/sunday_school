@@ -126,6 +126,21 @@ export async function loginMember(name: string, password: string): Promise<Sessi
   const json = await post('/api/registration/login', { name, password });
   const d = json.data ?? json;
   const m = d.member ?? {};
+
+  // Frontend status guard — backend also enforces this, but check here too
+  // so we can show a helpful message even if the backend response slips through.
+  const memberStatus: string | undefined = m.status;
+  if (memberStatus && memberStatus !== 'APPROVED') {
+    if (memberStatus === 'PENDING') {
+      throw new Error(
+        'Your registration is awaiting administrative approval. Please check back later.'
+      );
+    }
+    throw new Error(
+      'Your registration was not approved. Please contact the administration.'
+    );
+  }
+
   const session: Session = {
     role: 'member',
     accessToken: d.accessToken ?? d.token ?? '',

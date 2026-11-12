@@ -42,7 +42,7 @@ export default function AboutPage() {
             </nav>
 
             <div className="hg">
-              <div>
+              <div className="hero-title-block">
                 <h1>
                   <em>{isAm ? 'ስለ ' : 'About '}</em>
                   <em className="us">{isAm ? 'እኛ' : 'Us'}</em>
@@ -332,10 +332,10 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── 8. Call to Action Banner ── */}
+        {/* ── 8. Call to Action Banner (Full-width, flush with footer) ── */}
         <section className="cbs">
-          <div className="w">
-            <div className="cb rv">
+          <div className="cb rv">
+            <div className="w">
               <span className="am">{isAm ? 'ጥበብ ለጉዞዎ' : 'ጥበብ ለጉዞዎ'}</span>
               <h2>Faith &bull; Culture &bull; Community</h2>
               <p>
