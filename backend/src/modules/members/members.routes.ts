@@ -9,8 +9,15 @@ import {
   getMemberStats,
   exportMembersCsv,
   deleteMember,
+  getCurrentMemberProfile,
+  updateCurrentMemberProfile,
+  getCurrentMemberNotices,
+  getCurrentMemberAttendance,
+  getAdminNotices,
+  createAdminNotice,
+  deleteAdminNotice,
 } from './members.controller';
-import { authenticate } from '../../middleware/auth';
+import { authenticate, authenticateMember } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
 import {
   createMemberRegistrationSchema,
@@ -21,6 +28,20 @@ import {
 
 export const publicRegistrationRouter = Router();
 export const adminMembersRouter = Router();
+export const memberPortalRouter = Router();
+
+// Member Portal Protected Endpoints
+memberPortalRouter.use(authenticateMember);
+memberPortalRouter.get('/', getCurrentMemberProfile);
+memberPortalRouter.get('/profile', getCurrentMemberProfile);
+memberPortalRouter.get('/me', getCurrentMemberProfile);
+memberPortalRouter.put('/', updateCurrentMemberProfile);
+memberPortalRouter.put('/profile', updateCurrentMemberProfile);
+memberPortalRouter.put('/me', updateCurrentMemberProfile);
+memberPortalRouter.get('/notices', getCurrentMemberNotices);
+memberPortalRouter.get('/me/notices', getCurrentMemberNotices);
+memberPortalRouter.get('/attendance', getCurrentMemberAttendance);
+memberPortalRouter.get('/me/attendance', getCurrentMemberAttendance);
 
 /**
  * @openapi
@@ -178,6 +199,11 @@ publicRegistrationRouter.post(
 
 // Admin-only protected endpoints
 adminMembersRouter.use(authenticate);
+
+// Admin Student Notices Management
+adminMembersRouter.get('/notices', getAdminNotices);
+adminMembersRouter.post('/notices', createAdminNotice);
+adminMembersRouter.delete('/notices/:id', deleteAdminNotice);
 
 /**
  * @openapi

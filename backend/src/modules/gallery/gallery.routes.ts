@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getPublicAlbums,
   getPublicAlbumById,
+  getPublicPhotos,
   getAdminAlbums,
   createAlbum,
   updateAlbum,
@@ -41,7 +42,9 @@ export const adminGalleryRouter = Router();
  *       200:
  *         description: List of gallery albums
  */
+publicGalleryRouter.get('/', getPublicAlbums);
 publicGalleryRouter.get('/albums', getPublicAlbums);
+publicGalleryRouter.get('/photos', getPublicPhotos);
 
 /**
  * @openapi
@@ -61,6 +64,7 @@ publicGalleryRouter.get('/albums', getPublicAlbums);
  *       404:
  *         description: Album not found
  */
+publicGalleryRouter.get('/:id', getPublicAlbumById);
 publicGalleryRouter.get('/albums/:id', getPublicAlbumById);
 
 // Admin routes

@@ -6,6 +6,7 @@ import {
   createAdmin,
   updateAdmin,
   deleteAdmin,
+  getDashboardStats,
 } from './admin.controller';
 import { authenticate, authorizeRoles } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
@@ -19,6 +20,21 @@ const router = Router();
 
 // All routes require authentication
 router.use(authenticate);
+
+/**
+ * @openapi
+ * /api/admin/dashboard/stats:
+ *   get:
+ *     tags:
+ *       - Admin Profile & Users
+ *     summary: Get dashboard KPIs and content statistics
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Live content statistics
+ */
+router.get('/dashboard/stats', getDashboardStats);
 
 /**
  * @openapi

@@ -39,10 +39,16 @@ import {
   adminScheduleRouter,
 } from './modules/schedule/schedule.routes';
 import uploadRoutes from './modules/upload/upload.routes';
+import attendanceRoutes from './modules/attendance/attendance.routes';
 import {
   publicRegistrationRouter,
   adminMembersRouter,
+  memberPortalRouter,
 } from './modules/members/members.routes';
+import {
+  publicContactRouter,
+  adminContactRouter,
+} from './modules/contact/contact.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -112,7 +118,13 @@ export function createApp(): Application {
   app.use('/api/upload', uploadRoutes);
   app.use('/api/registration', publicRegistrationRouter);
   app.use('/api/members', publicRegistrationRouter);
+  app.use('/api/members/me', memberPortalRouter);
+  app.use('/api/portal', memberPortalRouter);
   app.use('/api/admin/members', adminMembersRouter);
+  app.use('/api/admin/notices', adminMembersRouter);
+  app.use('/api/attendance', attendanceRoutes);
+  app.use('/api/contact', publicContactRouter);
+  app.use('/api/admin/messages', adminContactRouter);
 
   // 404 handler for unknown routes
   app.use((_req: Request, res: Response) => {

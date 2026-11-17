@@ -46,6 +46,28 @@ async function generateRegistrationNumber(): Promise<string> {
 export async function registerMember(req: Request, res: Response): Promise<void> {
   const data = req.body;
 
+  // ── Duplicate-check: reject if phone or full+christian name already exists ──
+  if (data.phoneNumber && String(data.phoneNumber).trim()) {
+    const existingPhone = await prisma.memberRegistration.findFirst({
+      where: { phoneNumber: String(data.phoneNumber).trim() },
+      select: { id: true },
+    });
+    if (existingPhone) {
+      sendError(res, 'A registration with this phone number already exists. If you need help, contact the administration.', 409);
+      return;
+    }
+  }
+  if (data.fullName && data.christianName) {
+    const existingName = await prisma.memberRegistration.findFirst({
+      where: { fullName: String(data.fullName).trim(), christianName: String(data.christianName).trim() },
+      select: { id: true },
+    });
+    if (existingName) {
+      sendError(res, 'A registration with this full name and Christian name combination already exists.', 409);
+      return;
+    }
+  }
+
   let registrationNumber = await generateRegistrationNumber();
 
   // Safeguard against potential collision
@@ -139,6 +161,16 @@ export async function loginMember(req: Request, res: Response): Promise<void> {
   const isPasswordValid = await comparePassword(password, member.passwordHash);
   if (!isPasswordValid) {
     sendError(res, 'የተሳሳተ ስም ወይም የይለፍ ቃል (Invalid name, registration number, or password)', 401);
+    return;
+  }
+
+  // ── Status guard: only APPROVED members may log in ───────────────────────
+  if (member.status === 'PENDING') {
+    sendError(res, 'Your registration is awaiting administrative approval. Please check back later or contact the administration.', 403);
+    return;
+  }
+  if (member.status === 'REJECTED') {
+    sendError(res, 'Your registration was not approved. Please contact the administration for more information.', 403);
     return;
   }
 
@@ -501,4 +533,282 @@ export async function deleteMember(req: Request, res: Response): Promise<void> {
   await prisma.memberRegistration.delete({ where: { id } });
 
   sendSuccess(res, null, 'Member record deleted successfully');
+}
+
+/**
+ * Member Portal: Get authenticated member's complete profile, stats, and badges
+ */
+export async function getCurrentMemberProfile(req: Request, res: Response): Promise<void> {
+  const memberId = req.member?.id;
+  if (!memberId) {
+    sendError(res, 'Authentication required', 401);
+    return;
+  }
+
+  const member = await prisma.memberRegistration.findUnique({
+    where: { id: memberId },
+    include: {
+      attendanceRecords: {
+        include: {
+          session: true,
+        },
+      },
+    },
+  });
+
+  if (!member) {
+    sendError(res, 'Member profile not found', 404);
+    return;
+  }
+
+  const totalSessions = member.attendanceRecords.length;
+  const presentCount = member.attendanceRecords.filter((r) => r.status === 'PRESENT').length;
+  const lateCount = member.attendanceRecords.filter((r) => r.status === 'LATE').length;
+  const excusedCount = member.attendanceRecords.filter((r) => r.status === 'EXCUSED').length;
+  const absentCount = member.attendanceRecords.filter((r) => r.status === 'ABSENT').length;
+  const attendanceRate = totalSessions > 0 ? Math.round(((presentCount + lateCount) / totalSessions) * 100) : 100;
+
+  // Unread notices count
+  const unreadNotices = await prisma.studentNotice.count({
+    where: {
+      isRead: false,
+      OR: [
+        { targetMemberId: member.id },
+        { targetDivision: member.division },
+        { targetClass: member.assignedClass },
+        {
+          AND: [
+            { targetMemberId: null },
+            { targetDivision: null },
+            { targetClass: null },
+          ],
+        },
+      ],
+    },
+  });
+
+  const { passwordHash: _, ...safeMember } = member;
+
+  sendSuccess(
+    res,
+    {
+      ...safeMember,
+      stats: {
+        totalSessions,
+        presentCount,
+        lateCount,
+        excusedCount,
+        absentCount,
+        attendanceRate,
+        unreadNotices,
+      },
+    },
+    'Member profile retrieved successfully'
+  );
+}
+
+/**
+ * Member Portal: Update current member's contact, emergency, and security info
+ */
+export async function updateCurrentMemberProfile(req: Request, res: Response): Promise<void> {
+  const memberId = req.member?.id;
+  if (!memberId) {
+    sendError(res, 'Authentication required', 401);
+    return;
+  }
+
+  const {
+    phoneNumber,
+    address,
+    kebele,
+    houseNumber,
+    schoolOrOccupation,
+    emergencyContactName,
+    emergencyRelationship,
+    emergencyContactPhone,
+    currentPassword,
+    newPassword,
+  } = req.body;
+
+  const currentMember = await prisma.memberRegistration.findUnique({
+    where: { id: memberId },
+  });
+
+  if (!currentMember) {
+    sendError(res, 'Member not found', 404);
+    return;
+  }
+
+  const updateData: Prisma.MemberRegistrationUpdateInput = {};
+
+  if (phoneNumber !== undefined) updateData.phoneNumber = String(phoneNumber).trim();
+  if (address !== undefined) updateData.address = String(address).trim();
+  if (kebele !== undefined) updateData.kebele = String(kebele).trim();
+  if (houseNumber !== undefined) updateData.houseNumber = String(houseNumber).trim();
+  if (schoolOrOccupation !== undefined) updateData.schoolOrOccupation = String(schoolOrOccupation).trim();
+  if (emergencyContactName !== undefined) updateData.emergencyContactName = String(emergencyContactName).trim();
+  if (emergencyRelationship !== undefined) updateData.emergencyRelationship = String(emergencyRelationship).trim();
+  if (emergencyContactPhone !== undefined) updateData.emergencyContactPhone = String(emergencyContactPhone).trim();
+
+  // If updating password
+  if (newPassword) {
+    if (newPassword.length < 6) {
+      sendError(res, 'Password must be at least 6 characters', 400);
+      return;
+    }
+    if (currentMember.passwordHash && currentPassword) {
+      const isMatch = await comparePassword(currentPassword, currentMember.passwordHash);
+      if (!isMatch) {
+        sendError(res, 'Current password is incorrect', 400);
+        return;
+      }
+    }
+    updateData.passwordHash = await hashPassword(newPassword);
+  }
+
+  const updated = await prisma.memberRegistration.update({
+    where: { id: memberId },
+    data: updateData,
+  });
+
+  const { passwordHash: _, ...safeMember } = updated;
+  sendSuccess(res, safeMember, 'Profile updated successfully');
+}
+
+/**
+ * Member Portal: Get notices targeted for the current member
+ */
+export async function getCurrentMemberNotices(req: Request, res: Response): Promise<void> {
+  const member = req.member;
+  if (!member) {
+    sendError(res, 'Authentication required', 401);
+    return;
+  }
+
+  const notices = await prisma.studentNotice.findMany({
+    where: {
+      OR: [
+        { targetMemberId: member.id },
+        { targetDivision: member.division as AgeDivision },
+        { targetClass: member.assignedClass },
+        {
+          AND: [
+            { targetMemberId: null },
+            { targetDivision: null },
+            { targetClass: null },
+          ],
+        },
+      ],
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  sendSuccess(res, notices, 'Notices retrieved successfully');
+}
+
+/**
+ * Member Portal: Get full attendance history & statistics for current member
+ */
+export async function getCurrentMemberAttendance(req: Request, res: Response): Promise<void> {
+  const memberId = req.member?.id;
+  if (!memberId) {
+    sendError(res, 'Authentication required', 401);
+    return;
+  }
+
+  const records = await prisma.attendanceRecord.findMany({
+    where: { memberId },
+    include: {
+      session: {
+        select: {
+          id: true,
+          date: true,
+          sessionType: true,
+          className: true,
+          academicYear: true,
+        },
+      },
+    },
+    orderBy: {
+      session: {
+        date: 'desc',
+      },
+    },
+  });
+
+  const total = records.length;
+  const present = records.filter((r) => r.status === 'PRESENT').length;
+  const late = records.filter((r) => r.status === 'LATE').length;
+  const excused = records.filter((r) => r.status === 'EXCUSED').length;
+  const absent = records.filter((r) => r.status === 'ABSENT').length;
+  const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 100;
+
+  sendSuccess(
+    res,
+    {
+      records: records.map((r) => ({
+        id: r.id,
+        date: r.session.date,
+        sessionType: r.session.sessionType,
+        className: r.session.className,
+        status: r.status,
+        remarks: r.remarks,
+        recordedAt: r.recordedAt,
+      })),
+      stats: {
+        total,
+        present,
+        late,
+        excused,
+        absent,
+        rate,
+      },
+    },
+    'Attendance history retrieved successfully'
+  );
+}
+
+export async function getAdminNotices(req: Request, res: Response): Promise<void> {
+  const notices = await prisma.studentNotice.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      createdBy: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+  });
+  sendSuccess(res, notices, 'Notices retrieved successfully');
+}
+
+export async function createAdminNotice(req: Request, res: Response): Promise<void> {
+  const { title, content, category, priority, targetDivision, targetClass, targetMemberId } = req.body;
+  const adminId = req.admin?.id;
+
+  if (!title || !content) {
+    sendError(res, 'Title and content are required', 400);
+    return;
+  }
+
+  const notice = await prisma.studentNotice.create({
+    data: {
+      title,
+      content,
+      category: category || 'Academic',
+      priority: priority || 'NORMAL',
+      targetDivision: targetDivision || null,
+      targetClass: targetClass || null,
+      targetMemberId: targetMemberId || null,
+      createdById: adminId || null,
+    },
+  });
+
+  sendSuccess(res, notice, 'Notice created successfully', 201);
+}
+
+export async function deleteAdminNotice(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  await prisma.studentNotice.delete({
+    where: { id },
+  });
+  sendSuccess(res, null, 'Notice deleted successfully');
 }

@@ -17,7 +17,10 @@ const envSchema = z.object({
   ADMIN_INITIAL_ROLE: z.enum(['SUPER_ADMIN', 'ADMIN', 'EDITOR']).default('SUPER_ADMIN'),
   LOGIN_RATE_LIMIT_WINDOW_MS: z.string().transform((v) => parseInt(v, 10)).default('900000'),
   LOGIN_RATE_LIMIT_MAX: z.string().transform((v) => parseInt(v, 10)).default('10'),
-  CORS_ORIGIN: z.string().default('*'),
+  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

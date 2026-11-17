@@ -3,6 +3,41 @@ import { prisma } from '../../lib/prisma';
 import { hashPassword, comparePassword } from '../../utils/bcrypt';
 import { sendSuccess, sendError } from '../../utils/response';
 
+export async function getDashboardStats(_req: Request, res: Response): Promise<void> {
+  try {
+    const [
+      announcementsCount,
+      eventsCount,
+      reportsCount,
+      mezmurCount,
+      teachingsCount,
+      schedulesCount,
+    ] = await Promise.all([
+      prisma.announcement.count(),
+      prisma.event.count(),
+      prisma.report.count(),
+      prisma.mezmur.count(),
+      prisma.teaching.count(),
+      prisma.schedule.count(),
+    ]);
+
+    sendSuccess(
+      res,
+      {
+        announcementsCount,
+        eventsCount,
+        reportsCount,
+        mezmurCount,
+        teachingsCount,
+        schedulesCount,
+      },
+      'Dashboard stats retrieved'
+    );
+  } catch (error: any) {
+    sendError(res, 'Failed to fetch dashboard stats', 500, error.message);
+  }
+}
+
 export async function getProfile(req: Request, res: Response): Promise<void> {
   const admin = await prisma.admin.findUnique({
     where: { id: req.admin!.id },

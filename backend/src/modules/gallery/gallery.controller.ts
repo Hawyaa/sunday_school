@@ -66,6 +66,40 @@ export async function getPublicAlbumById(req: Request, res: Response): Promise<v
   sendSuccess(res, album, 'Gallery album details retrieved');
 }
 
+export async function getPublicPhotos(req: Request, res: Response): Promise<void> {
+  const { albumId, category } = req.query;
+  const whereClause: Prisma.GalleryPhotoWhereInput = {
+    album: {
+      isPublished: true,
+    },
+  };
+  if (albumId && typeof albumId === 'string') {
+    whereClause.albumId = albumId;
+  }
+  if (category && typeof category === 'string') {
+    whereClause.album = {
+      isPublished: true,
+      title: { contains: category },
+    };
+  }
+
+  const photos = await prisma.galleryPhoto.findMany({
+    where: whereClause,
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+    include: {
+      album: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+        },
+      },
+    },
+  });
+
+  sendSuccess(res, photos, 'Public photos retrieved');
+}
+
 export async function getAdminAlbums(req: Request, res: Response): Promise<void> {
   const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string, 10) || 10));

@@ -7,24 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AdminRole {
-  SUPER_ADMIN
-  ADMIN
-  EDITOR
-}
-
 model Admin {
-  id           String         @id @default(uuid())
-  email        String         @unique
-  passwordHash String
-  name         String
-  role         AdminRole      @default(ADMIN)
-  isActive     Boolean        @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  refreshTokens RefreshToken[]
-  announcements Announcement[]
+  id                String               @id @default(uuid())
+  email             String               @unique
+  passwordHash      String
+  name              String
+  role              AdminRole            @default(ADMIN)
+  isActive          Boolean              @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  assignedClasses   String?
+  canTakeAttendance Boolean              @default(false)
+  announcements     Announcement[]
+  attendanceAudits  AttendanceAuditLog[] @relation("ChangedByAdmin")
+  recordedSessions  AttendanceSession[]  @relation("RecordedByAdmin")
+  refreshTokens     RefreshToken[]
+  createdNotices    StudentNotice[]      @relation("CreatedByAdmin")
 
   @@map("admins")
 }
@@ -33,11 +32,11 @@ model RefreshToken {
   id                  String    @id @default(uuid())
   tokenHash           String    @unique
   adminId             String
-  admin               Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
   expiresAt           DateTime
   revokedAt           DateTime?
   replacedByTokenHash String?
   createdAt           DateTime  @default(now())
+  admin               Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
   @@map("refresh_tokens")
@@ -56,12 +55,13 @@ model Announcement {
   expiresAt   DateTime?
   isArchived  Boolean   @default(false)
   createdById String?
-  createdBy   Admin?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  createdBy   Admin?    @relation(fields: [createdById], references: [id])
 
   @@index([isPublished, isArchived, publishedAt, expiresAt])
   @@index([isPinned])
+  @@index([createdById], map: "announcements_createdById_fkey")
   @@map("announcements")
 }
 
@@ -148,12 +148,12 @@ model GalleryAlbum {
 model GalleryPhoto {
   id        String       @id @default(uuid())
   albumId   String
-  album     GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
   title     String?
   imageUrl  String
   caption   String?
   sortOrder Int          @default(0)
   createdAt DateTime     @default(now())
+  album     GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   @@index([albumId, sortOrder])
   @@map("gallery_photos")
@@ -175,6 +175,142 @@ model Schedule {
 
   @@index([isPublished])
   @@map("schedules")
+}
+
+model MemberRegistration {
+  id                    String               @id @default(uuid())
+  registrationNumber    String               @unique
+  registrationType      RegistrationType     @default(LONG_TERM)
+  division              AgeDivision
+  status                MemberStatus         @default(PENDING)
+  fullName              String
+  christianName         String
+  gender                Gender
+  age                   Int
+  dateOfBirth           DateTime?
+  motherName            String?
+  phoneNumber           String?
+  photoUrl              String?
+  schoolOrOccupation    String?
+  passwordHash          String?
+  confessionFather      String
+  confessionChurch      String?
+  confessionAddress     String?
+  address               String
+  kebele                String?
+  houseNumber           String?
+  admissionDate         DateTime?
+  formFilledDate        DateTime             @default(now())
+  preferredDepartment   String?
+  talentSkills          String?              @db.Text
+  emergencyContactName  String
+  emergencyRelationship String?
+  emergencyContactPhone String
+  parentName            String?
+  parentConsent         Boolean              @default(false)
+  parentSignatureDate   DateTime?
+  youthCovenantAccepted Boolean              @default(false)
+  youthSignatureDate    DateTime?
+  approvedByName        String?
+  approverRole          String?
+  approvalDate          DateTime?
+  chairmanName          String?
+  chairmanApprovalDate  DateTime?
+  adminNotes            String?              @db.Text
+  createdAt             DateTime             @default(now())
+  assignedClass         String?
+  groupType             String?              @default("Sunday School")
+  updatedAt             DateTime             @updatedAt
+  attendanceAudits      AttendanceAuditLog[]
+  attendanceRecords     AttendanceRecord[]
+  personalNotices       StudentNotice[]      @relation("MemberPersonalNotices")
+
+  @@index([status, division, registrationType])
+  @@index([registrationNumber])
+  @@map("member_registrations")
+}
+
+model AttendanceSession {
+  id           String               @id @default(uuid())
+  date         DateTime
+  sessionType  String
+  className    String
+  academicYear String?              @default("2026/2027")
+  recordedById String
+  status       String               @default("FINALIZED")
+  notes        String?              @db.Text
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  auditLogs    AttendanceAuditLog[]
+  records      AttendanceRecord[]
+  recordedBy   Admin                @relation("RecordedByAdmin", fields: [recordedById], references: [id])
+
+  @@index([date, className])
+  @@index([recordedById])
+  @@map("attendance_sessions")
+}
+
+model AttendanceRecord {
+  id         String             @id @default(uuid())
+  sessionId  String
+  memberId   String
+  status     String
+  remarks    String?
+  recordedAt DateTime           @default(now())
+  member     MemberRegistration @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  session    AttendanceSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, memberId])
+  @@index([memberId, status])
+  @@map("attendance_records")
+}
+
+model AttendanceAuditLog {
+  id             String              @id @default(uuid())
+  sessionId      String
+  recordId       String?
+  memberId       String?
+  previousStatus String
+  newStatus      String
+  changedById    String
+  reason         String              @db.Text
+  timestamp      DateTime            @default(now())
+  changedBy      Admin               @relation("ChangedByAdmin", fields: [changedById], references: [id])
+  member         MemberRegistration? @relation(fields: [memberId], references: [id])
+  session        AttendanceSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([memberId])
+  @@index([changedById])
+  @@map("attendance_audit_logs")
+}
+
+model StudentNotice {
+  id             String              @id @default(uuid())
+  title          String
+  content        String              @db.Text
+  category       String              @default("Academic")
+  priority       String              @default("NORMAL")
+  targetDivision AgeDivision?
+  targetClass    String?
+  targetMemberId String?
+  createdById    String?
+  isRead         Boolean             @default(false)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  createdBy      Admin?              @relation("CreatedByAdmin", fields: [createdById], references: [id])
+  targetMember   MemberRegistration? @relation("MemberPersonalNotices", fields: [targetMemberId], references: [id], onDelete: Cascade)
+
+  @@index([targetDivision, targetClass])
+  @@index([targetMemberId])
+  @@index([createdById], map: "student_notices_createdById_fkey")
+  @@map("student_notices")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
 }
 
 enum RegistrationType {
@@ -199,66 +335,16 @@ enum MemberStatus {
   REJECTED
 }
 
-model MemberRegistration {
-  id                    String           @id @default(uuid())
-  registrationNumber    String           @unique
-  registrationType      RegistrationType @default(LONG_TERM)
-  division              AgeDivision
-  status                MemberStatus     @default(PENDING)
+model ContactMessage {
+  id          String   @id @default(uuid())
+  fullName    String
+  contactInfo String
+  topic       String   @default("General question")
+  message     String   @db.Text
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // መሰረታዊ የአባሉ መረጃ (Member Personal Info)
-  fullName              String
-  christianName         String
-  gender                Gender
-  age                   Int
-  dateOfBirth           DateTime?
-  motherName            String?
-  phoneNumber           String?
-  photoUrl              String?
-  schoolOrOccupation    String?
-  passwordHash          String?
-
-  // የንስሐ አባት መረጃ (Confession Father Info)
-  confessionFather      String
-  confessionChurch      String?
-  confessionAddress     String?
-
-  // አድራሻ (Residential Address)
-  address               String
-  kebele                String?
-  houseNumber           String?
-
-  // የአገልግሎት እና የሰንበት ት/ቤት መረጃ (Service & Church Info)
-  admissionDate         DateTime?
-  formFilledDate        DateTime         @default(now())
-  preferredDepartment   String?
-  talentSkills          String?          @db.Text
-
-  // የቅርብ ተጠሪ መረጃ (Emergency Contact / Guardian)
-  emergencyContactName  String
-  emergencyRelationship String?
-  emergencyContactPhone String
-
-  // የፈቃደኝነት እና ማረጋገጫ (Consent & Declarations)
-  parentName            String?
-  parentConsent         Boolean          @default(false)
-  parentSignatureDate   DateTime?
-
-  youthCovenantAccepted Boolean          @default(false)
-  youthSignatureDate    DateTime?
-
-  // የአስተዳደር ማጽደቂያ (Official Approval Section)
-  approvedByName        String?
-  approverRole          String?
-  approvalDate          DateTime?
-  chairmanName          String?
-  chairmanApprovalDate  DateTime?
-  adminNotes            String?          @db.Text
-
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
-
-  @@index([status, division, registrationType])
-  @@index([registrationNumber])
-  @@map("member_registrations")
+  @@index([isRead, createdAt])
+  @@map("contact_messages")
 }
