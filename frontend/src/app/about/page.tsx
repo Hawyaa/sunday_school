@@ -34,89 +34,247 @@ export default function AboutPage() {
       <Header />
 
       <main className="flex-1">
-        {/* ── 2. Hero Section ── */}
-        <div className="hero">
+        {/* ── 2. Hero Section: BloomHer-Inspired Two-Column Editorial Showcase ── */}
+        <section className="about-bloom-hero" aria-label={isAm ? 'ስለ እኛ' : 'About Us'}>
           <div className="w">
-            <nav className="crumb" aria-label="Breadcrumb">
-              <Link href="/">{isAm ? 'መነሻ' : 'Home'}</Link> › <b>{isAm ? 'ስለ እኛ' : 'About'}</b>
-            </nav>
+            <div className="bloom-hero-grid">
+              {/* Left Column: Typography, Tagline, Introduction, CTA, & Stats Row */}
+              <div className="bloom-hero-content rv">
+                {/* Eyebrow Pill Badge */}
+                <div className="bloom-eyebrow-pill">
+                  <span className="pill-dot" aria-hidden="true">†</span>
+                  <span className="pill-text">
+                    {isAm ? 'የእምነትና የአገልግሎት ማዕከል' : 'Our Faith · Our Mission · Our Community'}
+                  </span>
+                </div>
 
-            <div className="hg">
-              <div className="hero-title-block">
-                <h1>
-                  <em>{isAm ? 'ስለ ' : 'About '}</em>
-                  <em className="us">{isAm ? 'እኛ' : 'Us'}</em>
+                {/* Main Heading */}
+                <h1 className="bloom-hero-title">
+                  {isAm ? (
+                    <>
+                      ስለ <em>እኛ</em>
+                    </>
+                  ) : (
+                    <>
+                      About <em>Us</em>
+                    </>
+                  )}
                 </h1>
-                <p className="tag">
-                  {isAm ? 'እምነታችን። ተልእኳችን። ማኅበረሰባችን።' : 'Our Faith. Our Mission. Our Community.'}
+
+                {/* Subtitle / Tagline */}
+                <p className="bloom-hero-tagline">
+                  {isAm
+                    ? 'እምነታችን። ተልእኳችን። ማኅበረሰባችን።'
+                    : 'A sanctuary of prayer, spiritual growth, and enduring heritage.'}
                 </p>
+
+                {/* Introduction Text */}
+                <p className="bloom-hero-intro">
+                  {isAm
+                    ? 'የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያንን ቅዱስ ትውፊትና እምነት በመጠበቅ፣ ምእመናንንና ወጣቶችን በወንጌል እውነትና በክርስቲያናዊ ፍቅር የምናገለግል ማኅበረሰብ ነን።'
+                    : 'Dedicated to preserving the sacred traditions of the Ethiopian Orthodox Tewahedo Church, uplifting families, and nurturing generations in living faith, wisdom, and fellowship.'}
+                </p>
+
+                {/* CTA Action Bar */}
+                <div className="bloom-hero-actions">
+                  <a className="btn bn bloom-cta-btn" href="#legacy">
+                    <span>{isAm ? 'ቅርሳችንን ይወቁ' : 'Explore Our Story'}</span>
+                    <svg className="bloom-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </a>
+
+                  <a className="btn bo bloom-secondary-btn" href="#journey">
+                    <span>{isAm ? 'የጉዟችን ታሪክ' : 'Our Journey'}</span>
+                  </a>
+                </div>
+
+                {/* Micro-Features / Stats Row (Inspired by BloomHer trust icons) */}
+                <div className="bloom-stats-row">
+                  <div className="bloom-stat-item">
+                    <div className="bloom-stat-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    </div>
+                    <div className="bloom-stat-text">
+                      <b className="bloom-stat-num">1998</b>
+                      <span className="bloom-stat-label">{isAm ? 'ያገለገለበት ዘመን' : 'Serving Since'}</span>
+                    </div>
+                  </div>
+
+                  <div className="bloom-stat-sep" aria-hidden="true" />
+
+                  <div className="bloom-stat-item">
+                    <div className="bloom-stat-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <div className="bloom-stat-text">
+                      <b className="bloom-stat-num">200+</b>
+                      <span className="bloom-stat-label">{isAm ? 'የሰንበት ት/ቤት ተማሪዎች' : 'Sunday Students'}</span>
+                    </div>
+                  </div>
+
+                  <div className="bloom-stat-sep" aria-hidden="true" />
+
+                  <div className="bloom-stat-item">
+                    <div className="bloom-stat-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    </div>
+                    <div className="bloom-stat-text">
+                      <b className="bloom-stat-num">4</b>
+                      <span className="bloom-stat-label">{isAm ? 'ተግባራዊ አገልግሎቶች' : 'Active Ministries'}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <dl className="stats">
-                <div>
-                  <dt>{isAm ? 'ያገለገለበት ዘመን' : 'Serving since'}</dt>
-                  <dd>1998</dd>
+              {/* Right Column: Prominent Church Image with Elegant Bloom-style Curvature */}
+              <div className="bloom-hero-media rv" style={{ '--d': '.15s' } as React.CSSProperties}>
+                <div className="bloom-image-frame">
+                  <img
+                    src="/images/about-church.jpg"
+                    alt={isAm ? 'የደብረ ዲዮስቆሮስ ቤተክርስቲያን' : 'Debre Dioskoros Church'}
+                    className="bloom-hero-photo"
+                  />
+                  {/* Subtle inner ambient shading */}
+                  <div className="bloom-image-glow" aria-hidden="true" />
+
+                  {/* Elegant Floating Badge */}
+                  <div className="bloom-floating-badge">
+                    <span className="floating-badge-emblem" aria-hidden="true">†</span>
+                    <div className="floating-badge-copy">
+                      <strong className="floating-badge-heading">
+                        {isAm ? 'ደብረ ዲዮስቆሮስ' : 'Debre Dioskoros'}
+                      </strong>
+                      <span className="floating-badge-caption">
+                        {isAm ? 'አዲስ አበባ፣ ኢትዮጵያ' : 'Addis Ababa, Ethiopia'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <dt>{isAm ? 'የሰንበት ት/ቤት ተማሪዎች' : 'Sunday school students'}</dt>
-                  <dd>200+</dd>
-                </div>
-                <div>
-                  <dt>{isAm ? 'ተግባራዊ አገልግሎቶች' : 'Active ministries'}</dt>
-                  <dd>4</dd>
-                </div>
-              </dl>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* ── 3. Legacy Section (Abune Diskoros with authentic portrait) ── */}
-        <section className="legacy">
-          <div className="w lgrid">
-            <div className="pw rv">
-              <div className="pt">
-                <img
-                  src="/images/abune-diskoros-portrait.png"
-                  alt={isAm ? 'ብፁዕ አቡነ ዲዮስቆሮስ' : 'His Grace Abune Diskoros'}
-                  loading="lazy"
-                />
+        {/* ── 3. Legacy Section: The Archival Chronicle of Abune Diskoros ── */}
+        <section className="about-legacy-chronicle" id="legacy" aria-label={isAm ? 'የብፁዕ አቡነ ዲዮስቆሮስ ቅርስ' : 'The Legacy of Abune Diskoros'}>
+          <div className="w">
+            {/* Archival Showcase Stage */}
+            <div className="legacy-chronicle-stage">
+              {/* Left Monument: Archival Portrait & Memorial Brass Plaque */}
+              <div className="chronicle-monument-col rv">
+                <div className="monument-arch-case">
+                  <div className="monument-portrait-viewport">
+                    <img
+                      src="/images/abune-diskoros-portrait.png"
+                      alt={isAm ? 'ብፁዕ አቡነ ዲዮስቆሮስ' : 'His Grace Abune Diskoros'}
+                      loading="lazy"
+                      className="monument-portrait-photo"
+                    />
+                    <div className="monument-vignette" aria-hidden="true" />
+                  </div>
+
+                  {/* Commemorative Pedestal Inscription */}
+                  <div className="monument-plaque-block">
+                    <div className="plaque-header-row">
+                      <span className="plaque-years-badge">1930 – 2008</span>
+                      <span className="plaque-cross">†</span>
+                    </div>
+                    <h3 className="plaque-patron-name">
+                      {isAm ? 'ብፁዕ አቡነ ዲዮስቆሮስ' : 'His Grace Abune Diskoros'}
+                    </h3>
+                    <p className="plaque-patron-calling">
+                      {isAm ? 'እረኛና መምህር' : 'Shepherd & Teacher'}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="badge">
-                <b>1930 – 2008</b>
-                <small>{isAm ? 'እረኛና መምህር' : 'Shepherd & Teacher'}</small>
+
+              {/* Right Chronicle: Historical Narrative & Connected Triad */}
+              <div className="chronicle-narrative-col rv" style={{ '--d': '.12s' } as React.CSSProperties}>
+                {/* Eyebrow & Title */}
+                <div className="chronicle-intro">
+                  <div className="chronicle-eyebrow">
+                    <span className="eyebrow-accent-icon">❖</span>
+                    <span>{isAm ? 'ታሪካችንና ቅርሳችን' : 'Our Sacred Legacy'}</span>
+                  </div>
+                  <h2 className="chronicle-headline">
+                    {isAm ? 'የብፁዕ አቡነ ዲዮስቆሮስ ' : 'The Legacy of '}
+                    <em>{isAm ? 'መንፈሳዊ ቅርስ' : 'Abune Diskoros'}</em>
+                  </h2>
+                </div>
+
+                {/* Biographical Chronicle Text */}
+                <div className="chronicle-story-card">
+                  <div className="chronicle-dropcap" aria-hidden="true">“</div>
+                  <p className="chronicle-body-text">
+                    {isAm
+                      ? 'ብፁዕ አቡነ ዲዮስቆሮስ ጥልቅ እምነት ያላቸው፣ ራእይ የነበራቸውና የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያንን ያለመታከት ያገለገሉ አባት ነበሩ። ሕይወታቸውን ወንጌልን ለማዳረስ፣ ቤተክርስቲያንን ለማጽናት እና የምእመናንን መንፈሳዊና ማኅበራዊ ሕይወት ከፍ ለማድረግ ሰጥተዋል።'
+                      : 'Abune Diskoros was a visionary bishop, a man of deep faith, and a tireless servant of the Ethiopian Orthodox Tewahedo Church. He dedicated his life to spreading the Gospel, strengthening the Church, and uplifting the spiritual and societal life of the faithful.'}
+                  </p>
+                </div>
+
+                {/* Connected Triptych: The Three Sacred Pillars of Ministry */}
+                <div className="chronicle-triptych-wrap">
+                  <span className="triptych-label">
+                    {isAm ? 'የአገልግሎት ሦስቱ መሠረቶች' : 'Three Pillars of Ministry'}
+                  </span>
+
+                  <div className="chronicle-triptych">
+                    {/* Pillar 1: Gospel */}
+                    <div className="triptych-cell">
+                      <div className="triptych-glyph">†</div>
+                      <div className="triptych-info">
+                        <h4 className="triptych-title">{isAm ? 'ወንጌል' : 'Gospel'}</h4>
+                        <span className="triptych-desc">{isAm ? 'እምነትን አዳረሱ' : 'Spread the faith'}</span>
+                      </div>
+                    </div>
+
+                    {/* Pillar 2: Church */}
+                    <div className="triptych-cell">
+                      <div className="triptych-glyph">☗</div>
+                      <div className="triptych-info">
+                        <h4 className="triptych-title">{isAm ? 'ቤተክርስቲያን' : 'Church'}</h4>
+                        <span className="triptych-desc">{isAm ? 'አካሏን አጸኑ' : 'Strengthened the body'}</span>
+                      </div>
+                    </div>
+
+                    {/* Pillar 3: Faithful */}
+                    <div className="triptych-cell">
+                      <div className="triptych-glyph">❖</div>
+                      <div className="triptych-info">
+                        <h4 className="triptych-title">{isAm ? 'ምእመናን' : 'Faithful'}</h4>
+                        <span className="triptych-desc">{isAm ? 'ሕይወትን አነጹ' : 'Uplifted the lives'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Row */}
+                <div className="chronicle-action-bar">
+                  <a className="btn bn chronicle-cta-btn" href="#journey">
+                    <span>{isAm ? 'የጉዟችን ታሪክ' : 'Our journey'}</span>
+                    <svg className="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </a>
+                  <p className="chronicle-motto">
+                    {isAm ? 'በእምነት የጸና ዘመን ተሻጋሪ ቅርስ' : 'A timeless heritage grounded in faith'}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="rv" style={{ '--d': '.12s' } as React.CSSProperties}>
-              <p className="eb">{isAm ? 'ታሪካችንና ቅርሳችን' : 'Our Legacy'}</p>
-              <h2>
-                {isAm ? 'የብፁዕ አቡነ ዲዮስቆሮስ ' : 'The Legacy of '}
-                <em>{isAm ? 'መንፈሳዊ ቅርስ' : 'Abune Diskoros'}</em>
-              </h2>
-              <p className="bd">
-                {isAm
-                  ? 'ብፁዕ አቡነ ዲዮስቆሮስ ጥልቅ እምነት ያላቸው፣ ራእይ የነበራቸውና የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያንን ያለመታከት ያገለገሉ አባት ነበሩ። ሕይወታቸውን ወንጌልን ለማዳረስ፣ ቤተክርስቲያንን ለማጽናት እና የምእመናንን መንፈሳዊና ማኅበራዊ ሕይወት ከፍ ለማድረግ ሰጥተዋል።'
-                  : 'Abune Diskoros was a visionary bishop, a man of deep faith, and a tireless servant of the Ethiopian Orthodox Tewahedo Church. He dedicated his life to spreading the Gospel, strengthening the Church, and uplifting the spiritual and societal life of the faithful.'}
-              </p>
-
-              <ul className="pil">
-                <li>
-                  <b>{isAm ? 'ወንጌል' : 'Gospel'}</b>
-                  <span>{isAm ? 'እምነትን አዳረሱ' : 'Spread the faith'}</span>
-                </li>
-                <li>
-                  <b>{isAm ? 'ቤተክርስቲያን' : 'Church'}</b>
-                  <span>{isAm ? 'አካሏን አጸኑ' : 'Strengthened the body'}</span>
-                </li>
-                <li>
-                  <b>{isAm ? 'ምእመናን' : 'Faithful'}</b>
-                  <span>{isAm ? 'ሕይወትን አነጹ' : 'Uplifted the lives'}</span>
-                </li>
-              </ul>
-
-              <a className="btn bn" href="#journey">
-                {isAm ? 'የጉዟችን ታሪክ' : 'Our journey'}
-              </a>
             </div>
           </div>
         </section>

@@ -29,6 +29,7 @@ apiClient.interceptors.response.use(
       // Clear token on authorization failure
       localStorage.removeItem('abune_access_token');
       localStorage.removeItem('abune_admin_user');
+      localStorage.removeItem('abune_session');
     }
     return Promise.reject(error);
   }

@@ -16,7 +16,7 @@
  *   8. Interactive Event Modal & .ICS Calendar Export.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { Header } from '@/components/layout/Header';
@@ -24,6 +24,8 @@ import { Footer } from '@/components/layout/Footer';
 import { EventModal } from '@/components/events/EventModal';
 import { EventItem } from '@/components/events/EventCard';
 import { EventIcon } from '@/components/events/EventIcons';
+import { fetchEvents } from '@/services/events';
+import { fetchSchedules } from '@/services/schedule';
 import './events.css';
 
 export interface ChurchEvent extends EventItem {
@@ -282,6 +284,9 @@ export default function EventsPage() {
   const { locale } = useAppStore();
   const isAm = locale === 'am';
 
+  const [eventsList, setEventsList] = useState<ChurchEvent[]>(ALL_EVENTS);
+  const [recurringServices, setRecurringServices] = useState<RecurringService[]>(RECURRING_SERVICES);
+
   // Filters & View State
   const [selectedCat, setSelectedCat] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -289,14 +294,82 @@ export default function EventsPage() {
   const [modalEvent, setModalEvent] = useState<EventItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Spotlight / Primary Featured Event (Nov 22 Annual Gathering)
-  const spotlightEvent = useMemo(() => {
-    return ALL_EVENTS.find((e) => e.id === 'ev-22-1') || ALL_EVENTS[0];
+  useEffect(() => {
+    // Fetch real events from database
+    fetchEvents(50, 1)
+      .then(({ events }) => {
+        if (events && events.length > 0) {
+          const amMonths = ['መስከረም', 'ጥቅምት', 'ኅዳር', 'ታኅሣሥ', 'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዝያ', 'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ'];
+          const mapped: ChurchEvent[] = events.map((e) => {
+            const dt = new Date(e.startDate);
+            const valid = !isNaN(dt.getTime());
+            const d = valid ? dt.getDate() : 1;
+            const monthStr = valid ? dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : 'EVENT';
+            const mIdx = valid ? dt.getMonth() : 0;
+            const monthStrAm = amMonths[mIdx % amMonths.length];
+            const dateStr = valid ? e.startDate.split('T')[0] : '2026-11-20';
+            const timeStr = valid ? dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '9:00 AM';
+
+            const cat = e.category || 'Church Programs';
+            const iconKey = cat.includes('Teach') ? 'book' : cat.includes('Feast') ? 'star' : cat.includes('Community') ? 'heart' : 'church';
+
+            return {
+              id: e.id,
+              d,
+              monthStr,
+              monthStrAm,
+              date: dateStr,
+              title: e.title,
+              titleAm: e.title,
+              cat,
+              catAm: cat === 'Teaching' ? 'ትምህርት' : cat === 'Community Service' ? 'የማኅበረሰብ አገልግሎት' : cat === 'Feast Celebration' ? 'በዓላትና አምልኮ' : 'የቤተክርስቲያን መርሐ ግብር',
+              time: timeStr,
+              place: e.location || 'St. Gabriel Church',
+              placeAm: e.location || 'ቅዱስ ገብርኤል ቤተክርስቲያን',
+              description: e.description || '',
+              descriptionAm: e.description || '',
+              img: e.imageUrl || '/images/events/featured.jpg',
+              icon: iconKey,
+            };
+          });
+          setEventsList(mapped);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch real weekly recurring schedules
+    fetchSchedules()
+      .then((schedules) => {
+        if (schedules && schedules.length > 0) {
+          const mappedServices: RecurringService[] = schedules.map((s) => ({
+            id: s.id,
+            day: `Every ${s.dayOfWeek}`,
+            dayAm: `${s.dayOfWeek} ሁሉ`,
+            title: s.title,
+            titleAm: s.activity || s.title,
+            time: `${s.startTime} – ${s.endTime}`,
+            timeAm: `${s.startTime} – ${s.endTime}`,
+            place: s.location || 'Sanctuary & Classrooms',
+            placeAm: s.location || 'ዋናው ቤተ መቅደስና የመማሪያ ክፍሎች',
+            audience: s.targetGroup || 'All Ages & Families',
+            audienceAm: s.targetGroup || 'ለሁሉም ዕድሜና ቤተሰቦች',
+            desc: s.activity || s.title,
+            descAm: s.activity || s.title,
+          }));
+          setRecurringServices(mappedServices);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  // Spotlight / Primary Featured Event
+  const spotlightEvent = useMemo(() => {
+    return eventsList.find((e) => e.id === 'ev-22-1') || eventsList[0];
+  }, [eventsList]);
 
   // Filtered Events
   const filteredEvents = useMemo(() => {
-    return ALL_EVENTS.filter((e) => {
+    return eventsList.filter((e) => {
       const matchCat = !selectedCat || e.cat === selectedCat;
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
@@ -762,7 +835,7 @@ export default function EventsPage() {
             </div>
 
             <div className="ev-weekly-grid">
-              {RECURRING_SERVICES.map((item) => {
+              {recurringServices.map((item) => {
                 const dayClass = item.id === 'rec-sun' ? 'sun' : item.id === 'rec-sat' ? 'sat' : item.id === 'rec-fri' ? 'fri' : 'wed';
                 return (
                   <div key={item.id} className="ev-weekly-card">

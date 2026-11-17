@@ -57,11 +57,11 @@ export function MezmurTrackList({ tracks, isLoading }: Props) {
         >
           {/* Left info */}
           <div className="flex items-center gap-4 min-w-0 pr-3">
-            <div className="w-11 h-11 bg-[#1E2A5E] text-white border-[1.5px] border-[#C99A3B] rounded-xl flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-11 h-11 bg-[#082052] text-white border-[1.5px] border-[#C99A3B] rounded-xl flex items-center justify-center text-lg shrink-0 group-hover:scale-105 transition-transform">
               🎵
             </div>
             <div className="min-w-0">
-              <h4 className="text-base font-extrabold text-[#1E2A5E] mb-0.5 truncate group-hover:text-[#2F5D9E] transition-colors">
+              <h4 className="text-base font-extrabold text-[#082052] mb-0.5 truncate group-hover:text-[#2F5D9E] transition-colors">
                 {locale === 'am' && track.titleAm ? track.titleAm : track.title}
               </h4>
               <span className="bg-[#E3EEF8] text-[#2F5D9E] text-[11px] font-bold px-2.5 py-0.5 rounded-md inline-block">

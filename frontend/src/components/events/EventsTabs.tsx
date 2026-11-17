@@ -28,8 +28,8 @@ export function EventsTabs({ activeTab, onChange }: Props) {
         onClick={() => onChange('upcoming')}
         className={`flex-1 py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
           activeTab === 'upcoming'
-            ? 'bg-[#1E2A5E] text-white border-[1.5px] border-[#C99A3B] shadow-[0_4px_10px_rgba(30,42,94,0.12)]'
-            : 'bg-white text-[#1E2A5E] border-[1.5px] border-[#E3EEF8] hover:bg-[#1E2A5E] hover:text-white hover:border-[#C99A3B]'
+            ? 'bg-[#082052] text-white border-[1.5px] border-[#C99A3B] shadow-[0_4px_10px_rgba(30,42,94,0.12)]'
+            : 'bg-white text-[#082052] border-[1.5px] border-[#E3EEF8] hover:bg-[#082052] hover:text-white hover:border-[#C99A3B]'
         }`}
       >
         <span>🏠</span>
@@ -43,8 +43,8 @@ export function EventsTabs({ activeTab, onChange }: Props) {
         onClick={() => onChange('past')}
         className={`flex-1 py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
           activeTab === 'past'
-            ? 'bg-[#1E2A5E] text-white border-[1.5px] border-[#C99A3B] shadow-[0_4px_10px_rgba(30,42,94,0.12)]'
-            : 'bg-white text-[#1E2A5E] border-[1.5px] border-[#E3EEF8] hover:bg-[#1E2A5E] hover:text-white hover:border-[#C99A3B]'
+            ? 'bg-[#082052] text-white border-[1.5px] border-[#C99A3B] shadow-[0_4px_10px_rgba(30,42,94,0.12)]'
+            : 'bg-white text-[#082052] border-[1.5px] border-[#E3EEF8] hover:bg-[#082052] hover:text-white hover:border-[#C99A3B]'
         }`}
       >
         <span>{locale === 'am' ? 'ያለፉ ሁነቶች' : 'Past Events'}</span>

@@ -22,7 +22,7 @@ const FEATURED_IMAGE = EVENT_IMAGES[1];
 
 export function FeaturedEventCard({ onViewDetails }: Props) {
   return (
-    <aside className="relative overflow-hidden rounded-[10px] text-white bg-[#0f2352] min-h-[470px] shadow-[0_6px_22px_rgba(15,35,82,0.25)] flex flex-col justify-end">
+    <aside className="relative overflow-hidden rounded-[10px] text-white bg-[#082052] min-h-[470px] shadow-[0_6px_22px_rgba(15,35,82,0.25)] flex flex-col justify-end">
       {/* Top Background Image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -37,7 +37,7 @@ export function FeaturedEventCard({ onViewDetails }: Props) {
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            'linear-gradient(180deg, rgba(15,35,82,0) 0%, rgba(15,35,82,0) 30px, rgba(15,35,82,0.82) 160px, #0f2352 215px)',
+            'linear-gradient(180deg, rgba(15,35,82,0) 0%, rgba(15,35,82,0) 30px, rgba(15,35,82,0.82) 160px, #082052 215px)',
         }}
       />
 

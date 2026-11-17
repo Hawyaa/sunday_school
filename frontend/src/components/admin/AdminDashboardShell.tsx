@@ -11,6 +11,12 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSession, clearSession, API } from '@/lib/auth';
 import { PublicPageEditor } from '@/components/admin/PublicPageEditor';
+import {
+  fetchAdminContactMessages,
+  toggleMessageReadStatus,
+  deleteContactMessage,
+  type ContactMessageRecord,
+} from '@/services/contact';
 import '@/app/admin/admin.css';
 
 export type ViewKey =
@@ -473,6 +479,38 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
     { id: '5', name: 'Yohannes Bekele', role: 'Teacher', email: 'yohannes@abunemedia.org', authorized: false, assignedClasses: 'Not assigned', group: 'Sunday School' },
   ]);
 
+  // Contact Messages State
+  const [contactMessages, setContactMessages] = useState<ContactMessageRecord[]>([]);
+  const [messagesFilter, setMessagesFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0);
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(false);
+
+  const loadContactMessages = useCallback(async () => {
+    const session = getSession();
+    if (!session || session.role !== 'admin' || !session.accessToken) {
+      return;
+    }
+    setLoadingMessages(true);
+    try {
+      const res = await fetchAdminContactMessages({
+        isRead: messagesFilter === 'unread' ? false : messagesFilter === 'read' ? true : undefined,
+      });
+      setContactMessages(res.messages);
+      setUnreadMessagesCount(res.unreadCount);
+    } catch {
+      // Graceful fallback without dev overlay error triggers
+    } finally {
+      setLoadingMessages(false);
+    }
+  }, [messagesFilter]);
+
+  useEffect(() => {
+    const session = getSession();
+    if (session && session.role === 'admin' && session.accessToken && (activeView === 'msg' || activeView === 'ov')) {
+      loadContactMessages();
+    }
+  }, [activeView, loadContactMessages]);
+
   const toggleAttendancePermission = (id: string) => {
     const target = attendanceStaff.find((s) => s.id === id);
     if (!target) return;
@@ -614,7 +652,12 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
               : activeView === navItem.viewKey;
 
             const displayLabel = !isSuper && navItem.id === 'ov' ? 'Overview' : navItem.label;
-            const displayBadge = navItem.id === 'page-reports' && !isSuper ? 'view' : navItem.badge;
+            const displayBadge =
+              navItem.id === 'msg'
+                ? unreadMessagesCount > 0 ? String(unreadMessagesCount) : undefined
+                : navItem.id === 'page-reports' && !isSuper
+                ? 'view'
+                : navItem.badge;
 
             return (
               <Link
@@ -1315,9 +1358,27 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
               </div>
 
               <div className="chips">
-                <button className="chip on">All</button>
-                <button className="chip">Unread (3)</button>
-                <button className="chip">Resolved</button>
+                <button
+                  type="button"
+                  className={`chip ${messagesFilter === 'all' ? 'on' : ''}`}
+                  onClick={() => setMessagesFilter('all')}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={`chip ${messagesFilter === 'unread' ? 'on' : ''}`}
+                  onClick={() => setMessagesFilter('unread')}
+                >
+                  Unread ({unreadMessagesCount})
+                </button>
+                <button
+                  type="button"
+                  className={`chip ${messagesFilter === 'read' ? 'on' : ''}`}
+                  onClick={() => setMessagesFilter('read')}
+                >
+                  Resolved
+                </button>
               </div>
 
               <div className="card wrap" style={{ padding: '6px 10px' }}>
@@ -1333,37 +1394,75 @@ export function AdminDashboardShell({ pageSlug }: AdminDashboardShellProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="hv">
-                      <td><b>Marta T.</b></td>
-                      <td>Prayer request</td>
-                      <td>Please pray for our family during…</td>
-                      <td>1 h</td>
-                      <td>{renderTag('dr', 'New')}</td>
-                      <td>
-                        <button className="btn o s" onClick={() => ask('Message Detail', 'From Marta T.: Please pray for our family during our upcoming journey.')}>Open</button>{' '}
-                        <button className="btn o s" onClick={() => ask('Resolve Message', 'Mark message as resolved?')}>Resolve</button>
-                      </td>
-                    </tr>
-                    <tr className="hv">
-                      <td><b>Dawit A.</b></td>
-                      <td>General</td>
-                      <td>What time is Sunday school lit…</td>
-                      <td>Yesterday</td>
-                      <td>{renderTag('dr', 'New')}</td>
-                      <td>
-                        <button className="btn o s" onClick={() => ask('Message Detail', 'From Dawit A.: What time is Sunday school liturgy service?')}>Open</button>
-                      </td>
-                    </tr>
-                    <tr className="hv">
-                      <td><b>Liya G.</b></td>
-                      <td>Volunteering</td>
-                      <td>I would like to volunteer with…</td>
-                      <td>2 d</td>
-                      <td>{renderTag('pub', 'Resolved')}</td>
-                      <td>
-                        <button className="btn o s" onClick={() => ask('Message Detail', 'From Liya G.: I would like to volunteer with choir.')}>Open</button>
-                      </td>
-                    </tr>
+                    {contactMessages.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', padding: '24px', color: 'var(--slate)' }}>
+                          {loadingMessages ? 'Loading messages...' : 'No contact messages found.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      contactMessages.map((msg) => (
+                        <tr key={msg.id} className="hv">
+                          <td>
+                            <b>{msg.fullName}</b>
+                            <br />
+                            <small style={{ color: 'var(--slate)' }}>{msg.contactInfo}</small>
+                          </td>
+                          <td>{msg.topic || 'General'}</td>
+                          <td style={{ maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {msg.message}
+                          </td>
+                          <td>{new Date(msg.createdAt).toLocaleDateString()}</td>
+                          <td>{renderTag(msg.isRead ? 'pub' : 'dr', msg.isRead ? 'Resolved' : 'New')}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn o s"
+                              onClick={() =>
+                                ask(
+                                  `Message from ${msg.fullName}`,
+                                  `Contact: ${msg.contactInfo}\nTopic: ${msg.topic || 'General'}\nDate: ${new Date(msg.createdAt).toLocaleString()}\n\nMessage:\n${msg.message}`,
+                                  () => {
+                                    if (!msg.isRead) {
+                                      toggleMessageReadStatus(msg.id, true).then(() => loadContactMessages());
+                                    }
+                                  }
+                                )
+                              }
+                            >
+                              Open
+                            </button>{' '}
+                            <button
+                              type="button"
+                              className="btn o s"
+                              onClick={() =>
+                                ask(
+                                  msg.isRead ? 'Mark as Unread' : 'Resolve Message',
+                                  `Mark message from ${msg.fullName} as ${msg.isRead ? 'unread' : 'resolved'}?`,
+                                  () => {
+                                    toggleMessageReadStatus(msg.id, !msg.isRead).then(() => loadContactMessages());
+                                  }
+                                )
+                              }
+                            >
+                              {msg.isRead ? 'Mark Unread' : 'Resolve'}
+                            </button>{' '}
+                            <button
+                              type="button"
+                              className="btn o s"
+                              style={{ color: 'var(--red)' }}
+                              onClick={() =>
+                                ask('Delete Message', `Permanently delete message from ${msg.fullName}?`, () => {
+                                  deleteContactMessage(msg.id).then(() => loadContactMessages());
+                                })
+                              }
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

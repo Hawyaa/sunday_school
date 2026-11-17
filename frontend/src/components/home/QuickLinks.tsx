@@ -25,7 +25,7 @@ export function QuickLinks() {
 
   return (
     <div className="bg-white rounded-xl border border-[#E3EEF8] p-6 shadow-[0_4px_12px_rgba(30,42,94,0.04)]">
-      <h2 className="text-base font-bold text-[#1E2A5E] mb-3">⚡ Quick Links</h2>
+      <h2 className="text-base font-bold text-[#082052] mb-3">⚡ Quick Links</h2>
       <div className="grid grid-cols-3 gap-2.5">
         {QUICK_LINKS.map((item) => (
           <Link
@@ -34,7 +34,7 @@ export function QuickLinks() {
             className="bg-[#E3EEF8] hover:bg-[#d4e4f4] rounded-lg py-3 px-1.5 text-center transition-all hover:-translate-y-0.5 block"
           >
             <span className="text-lg mb-1 block">{item.icon}</span>
-            <span className="text-[11px] font-bold text-[#1E2A5E] block truncate">
+            <span className="text-[11px] font-bold text-[#082052] block truncate">
               {locale === 'am' ? item.labelAm : item.labelEn}
             </span>
           </Link>

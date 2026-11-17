@@ -18,6 +18,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSession, clearSession } from '@/lib/auth';
+import {
+  fetchAttendanceRoster,
+  fetchAttendanceSessions,
+  recordAttendanceSession,
+  correctAttendanceRecord,
+} from '@/services/attendance';
 import './attendance.css';
 
 /* ── Centralized Student & Class Data ──────────────────────────────────── */
@@ -158,7 +164,7 @@ export default function AttendancePage() {
   const [modalAction, setModalAction] = useState<(() => void) | null>(null);
   const [correctionTarget, setCorrectionTarget] = useState<{ student: StudentRecord; currentStatus: 'P' | 'A' } | null>(null);
 
-  // Sync authenticated session
+  // Sync authenticated session and load historical attendance sessions from backend
   useEffect(() => {
     const session = getSession();
     if (session?.user) {
@@ -167,6 +173,23 @@ export default function AttendancePage() {
       else if (session.user.backendRole === 'ADMIN') setRoleScope('a');
       else setRoleScope('t');
     }
+
+    fetchAttendanceSessions()
+      .then((res) => {
+        if (res.sessions && res.sessions.length > 0) {
+          const mapped: SavedSession[] = res.sessions.map((s, idx) => ({
+            id: idx,
+            date: s.date.split('T')[0],
+            type: s.sessionType === 'SUNDAY_SERVICE' ? 'Sunday School session' : s.sessionType,
+            cls: s.className,
+            by: 'Admin / Teacher',
+            abs: s.records ? s.records.filter((r) => r.status === 'ABSENT').map((r, i) => i) : [],
+            hist: [],
+          }));
+          setSessions(mapped);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const showToast = (msg: string) => {
@@ -229,6 +252,26 @@ export default function AttendancePage() {
       setSessions([newSession, ...sessions]);
       setListLoaded(false);
       setMarks({});
+
+      const sessionTypeMap: Record<string, 'SUNDAY_SERVICE' | 'SATURDAY_CLASS' | 'WEEKDAY_PRAYER' | 'SPECIAL_EVENT'> = {
+        'Sunday School session': 'SUNDAY_SERVICE',
+        'Choir practice': 'SATURDAY_CLASS',
+        'Weekday prayer': 'WEEKDAY_PRAYER',
+      };
+
+      recordAttendanceSession({
+        sessionType: sessionTypeMap[sessionType] || 'SUNDAY_SERVICE',
+        date: new Date(sessionDate).toISOString(),
+        academicYear: '2026/2027',
+        className: selectedClass,
+        records: currentStudents.map((s) => ({
+          memberId: String(s.id),
+          status: marks[s.id] === 'A' ? 'ABSENT' : 'PRESENT',
+        })),
+      }).catch((err) => {
+        console.error('Failed to persist session to database:', err);
+      });
+
       showToast('Attendance saved to central database');
     });
     setModalOpen(true);

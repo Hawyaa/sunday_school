@@ -34,7 +34,7 @@ export function MezmurSpotlightCard({ onPlayAll }: Props) {
 
       {/* Text block grows/centres so the card matches its neighbours' height */}
       <div className="flex flex-1 flex-col justify-center py-4">
-        <h3 className="font-['Crimson_Text',serif] text-[21px] font-bold leading-[1.2] text-[#0f2352]">
+        <h3 className="font-['Crimson_Text',serif] text-[21px] font-bold leading-[1.2] text-[#082052]">
           {am ? SPOTLIGHT.titleAm : SPOTLIGHT.title}
         </h3>
         <p className="mt-2 font-['Crimson_Text',serif] text-[15px] text-[#35496b]">

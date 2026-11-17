@@ -30,7 +30,7 @@ export default function SchedulePage() {
   const showDaily = ['all', 'daily'].includes(activeTab);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBF7F0]">
+    <div className="min-h-screen flex flex-col bg-[#F8F0E5]">
       {/* 1. Navigation Header */}
       <Header />
 

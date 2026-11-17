@@ -3,18 +3,18 @@
    ========================================================================== */
 
 .ppm-root {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --bg: #FBF7F0;
+  --bg: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --card: #fff;
   --line: #e7e0d2;
   --red: #b3262e;
   --ok: #2e7d4f;
-  --text: #1E2A5E;
+  --text: #082052;
   --okbg: #dff1e6;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--text);
@@ -40,7 +40,7 @@
 /* ── Preview bar ───────────────────────────────────────────────────────── */
 .ppm-pv {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
   padding: 8px 16px;
   display: flex;
   gap: 12px;
@@ -58,13 +58,13 @@
   font-weight: 600;
   font-size: 12px;
   background: #fff;
-  color: #1E2A5E;
+  color: #082052;
   cursor: pointer;
 }
 
 /* ── Top Bar ───────────────────────────────────────────────────────────── */
 .ppm-bar {
-  background: #1E2A5E;
+  background: #082052;
   color: #fff;
   padding: 12px 22px;
   display: flex;
@@ -148,7 +148,7 @@
 
 .ppm-btn.g {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .ppm-btn.o {
@@ -258,7 +258,7 @@
   text-transform: uppercase;
 }
 
-.ppm-t-text { background: #dbe8f7; color: #1E2A5E; }
+.ppm-t-text { background: #dbe8f7; color: #082052; }
 .ppm-t-list { background: #fbeccb; color: #8A6414; }
 .ppm-t-auto { background: #e6e8ef; color: #44506B; }
 .ppm-t-mod  { background: var(--okbg); color: #1f6b40; }
@@ -523,7 +523,7 @@
   top: 6px;
   right: 6px;
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
   border-radius: 10px;
   padding: 1px 8px;
   font-size: 10px;

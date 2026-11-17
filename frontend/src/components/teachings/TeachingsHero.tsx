@@ -24,7 +24,7 @@ export function TeachingsHero() {
           <TIcon name="home" solid className="h-[15px] w-[15px] text-[#c8952f]" />
           <Link href="/">Home</Link><span className="text-[#c8952f]">›</span><span>Teachings</span>
         </nav>
-        <h1 className="mb-2 mt-1 text-[40px] font-bold leading-[1.05] text-[#0f2352] md:text-[56px]" style={PF}>Teachings</h1>
+        <h1 className="mb-2 mt-1 text-[40px] font-bold leading-[1.05] text-[#082052] md:text-[56px]" style={PF}>Teachings</h1>
         <p className="max-w-[480px] font-['Crimson_Text',serif] text-[16.5px] leading-[1.35] text-[#1c3a63]">
           Discover timeless teachings from the Holy Bible, the Church Fathers, and our spiritual tradition to strengthen your faith and live a Christ-centered life.
         </p>

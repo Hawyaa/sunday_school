@@ -7,8 +7,9 @@ import type { Announcement } from '@/types/announcement';
 import { UrgentBanner } from '@/components/layout/UrgentBanner';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import './announcements.css';
 
-/* ───────── view model + adapter (the ONLY place that knows your API field names) ───────── */
+/* ───────── view model + adapter ───────── */
 type Item = {
   id: string;
   title: string;
@@ -19,7 +20,6 @@ type Item = {
   pinned: boolean;
   image: string;
   g: 0 | 1 | 2;
-  /** optional ready-made date text (used by the preview data) */
   label?: string;
 };
 
@@ -72,73 +72,46 @@ function toItem(a: Announcement, i: number): Item {
   };
 }
 
-/** Swap this for your Ethiopian-calendar formatter (lib/calendar.ts) if you want "Meskerem 12" style dates. */
-const fmtDate = (ts: number) =>
-  ts ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(ts) : '';
+/** Formats dates to match the reference screenshot (e.g. "27 FEBRUARY, 2024") */
+function formatCardDate(item: Item): string {
+  if (item.label) return item.label.toUpperCase();
+  if (!item.ts) return '';
+  const d = new Date(item.ts);
+  const day = d.getDate();
+  const month = d.toLocaleString('en-US', { month: 'long' }).toUpperCase();
+  const year = d.getFullYear();
+  return `${day} ${month}, ${year}`;
+}
 
-const dateText = (i: Item) => i.label ?? fmtDate(i.ts);
-
-/** Development-only preview data (the same sample content as the HTML design). */
+/** Development-only preview data (ensures the grid looks rich if the backend is empty) */
 function makeSample(): Item[] {
-  const cats = ['Church', 'Education', 'Community'];
+  const cats = ['Culture', 'Topics', 'Business', 'Conference', 'Education', 'Community'];
   const titles = [
-    'Feast of the Holy Cross preparation',
-    'New Sunday school registration',
-    'Community charity and outreach',
+    'Feast of the Holy Cross Preparation & Sacred Liturgy',
+    'New Sunday School Youth Registration and Orientation',
+    'Community Charity and Humanitarian Outreach',
+    'Saint Yared Sacred Music and Hymnody Seminar',
+    'Spiritual Fellowship and Youth Leadership Conference',
+    'Parish Renewal and Church Expansion Milestone',
   ];
-  const first = [12, 15, 22, 25, 27, 29];
   const day = 86400000;
-  return Array.from({ length: 30 }, (_, i) => {
-    const label =
-      i < 6
-        ? `Meskerem ${first[i]}`
-        : `${['Meskerem', 'Tikimt', 'Hidar'][Math.floor((i - 6) / 8)]} ${((i - 6) % 8) * 3 + 1}`;
+  return Array.from({ length: 18 }, (_, i) => {
     return {
       id: `sample-${i}`,
-      title: titles[i] ?? `Announcement title ${i + 1}`,
-      summary: 'A short summary of this announcement goes here.',
-      body: 'The full text of this announcement goes here.\nAdd the date, time and place if they apply.',
-      category: cats[i % 3],
+      title: titles[i % titles.length] + (i >= titles.length ? ` (Part ${Math.floor(i / titles.length) + 1})` : ''),
+      summary: 'Essential updates, schedule arrangements, and details for our faithful church community.',
+      body: 'The full announcement text provides detailed schedules, participation guidelines, and clergy contact information.\nAll congregants and families are warmly welcomed to take part in this blessed endeavor.',
+      category: cats[i % cats.length],
       ts: Date.now() - i * 3 * day,
-      pinned: i < 3,
+      pinned: i < 2,
       image: DEFAULT_ANNOUNCEMENT_IMAGES[i % DEFAULT_ANNOUNCEMENT_IMAGES.length],
       g: (i % 3) as 0 | 1 | 2,
-      label,
     };
   });
 }
 
-/* ───────── small pieces ───────── */
-function Thumb({ item }: { item: Item }) {
-  const imgSrc = item.image || DEFAULT_ANNOUNCEMENT_IMAGES[item.g % DEFAULT_ANNOUNCEMENT_IMAGES.length];
-  return (
-    <div className={`an-img g${item.g}`}>
-      <i
-        style={{
-          backgroundImage: `url(${imgSrc})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
-    </div>
-  );
-}
+const FIRST_PAGE = 8;
 
-function Meta({ item }: { item: Item }) {
-  return (
-    <div>
-      {(item.label || item.ts > 0) && <span className="an-dt">{dateText(item)}</span>}
-      <span className="an-ct">{item.category}</span>
-      {item.pinned && <span className="an-pt">PINNED</span>}
-    </div>
-  );
-}
-
-const ROT = [-1.6, 0.9, -0.7];
-const ROT0 = [-8, 6, -5];
-const FIRST_PAGE = 10;
-
-/* ───────── page ───────── */
 export default function AnnouncementsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -149,12 +122,24 @@ export default function AnnouncementsPage() {
   const [lim, setLim] = useState(FIRST_PAGE);
   const [open, setOpen] = useState<Item | null>(null);
   const [bodies, setBodies] = useState<Record<string, string>>({});
+  const [isAm, setIsAm] = useState(false);
 
   const lastFocus = useRef<HTMLElement | null>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  /* load list */
+  /* Detect language preference */
+  useEffect(() => {
+    try {
+      const c = document.cookie.split('; ').find((r) => r.startsWith('NEXT_LOCALE='));
+      const l = c ? c.split('=')[1] : localStorage.getItem('lang');
+      setIsAm(l === 'am');
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  /* Load announcement list */
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -192,42 +177,40 @@ export default function AnnouncementsPage() {
     setAttempt((n) => n + 1);
   };
 
-  /* derived */
+  /* Categories & Filtering */
   const categories = useMemo(() => Array.from(new Set(items.map((i) => i.category))), [items]);
-  const board = useMemo(() => {
-    const pinned = items.filter((i) => i.pinned);
-    return (pinned.length ? pinned : items).slice(0, 3);
-  }, [items]);
-  const boardIds = useMemo(() => new Set(board.map((b) => b.id)), [board]);
 
-  const act = Boolean(q || cat);
-  const feed = useMemo(() => {
+  const isFiltered = Boolean(q || cat);
+  const filteredItems = useMemo(() => {
     const term = q.toLowerCase();
     return items.filter(
       (i) =>
-        (!cat || i.category === cat) &&
-        (!term || (i.title + i.category + i.summary).toLowerCase().includes(term)) &&
-        (act || !boardIds.has(i.id))
+        (!cat || i.category.toLowerCase() === cat.toLowerCase()) &&
+        (!term || (i.title + i.category + i.summary).toLowerCase().includes(term))
     );
-  }, [items, q, cat, act, boardIds]);
+  }, [items, q, cat]);
 
-  const lead = feed[0];
-  const side = feed.slice(1, 3);
-  const rows = feed.slice(3, 3 + lim);
-  const left = feed.length - 3 - lim;
+  const visibleItems = filteredItems.slice(0, lim);
+  const remainingCount = filteredItems.length - lim;
 
-  /* reader drawer */
+  /* Reader drawer management */
   const openItem = (item: Item, el: HTMLElement) => {
     lastFocus.current = el;
     setOpen(item);
     if (bodies[item.id] === undefined && !item.id.startsWith('sample-')) {
       fetchAnnouncementById(item.id).then((full) => {
         if (!full) return;
-        const body = pickStr(full as unknown as Record<string, unknown>, ['content', 'body', 'description', 'details']);
+        const body = pickStr(full as unknown as Record<string, unknown>, [
+          'content',
+          'body',
+          'description',
+          'details',
+        ]);
         if (body) setBodies((b) => ({ ...b, [item.id]: body }));
       });
     }
   };
+
   const closeReader = () => setOpen(null);
 
   useEffect(() => {
@@ -262,7 +245,7 @@ export default function AnnouncementsPage() {
     };
   }, [open]);
 
-  const clear = () => {
+  const clearFilters = () => {
     setQ('');
     setCat('');
     setLim(FIRST_PAGE);
@@ -271,215 +254,294 @@ export default function AnnouncementsPage() {
   const readerBody = open ? bodies[open.id] ?? open.body ?? open.summary : '';
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="an-page-wrapper">
       <UrgentBanner />
       <Header />
-      <main id="main" className="an-page flex-1">
-      {/* ===== HERO + pinned notes ===== */}
-      <section className="an-hero">
-        <div className="an-w">
-          <nav className="an-crumb" aria-label="Breadcrumb">
-            <Link href="/">Home</Link> › <b>Announcements</b>
-          </nav>
-          <span className="an-kick">NEWS &amp; NOTICES</span>
-          <h1 className="an-h1">
-            <span className="an-mk">
-              <em>Announcements</em>
-            </span>
-          </h1>
-          <span className="an-am an-sub">ማስታወቂያዎች</span>
-          <p className="an-lead an-fi">News and notices from the church community.</p>
 
-          {status === 'ready' && board.length > 0 && (
-            <div className="an-board">
-              {board.map((a, n) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  className="an-note"
-                  style={{ '--r': `${ROT[n % 3]}deg`, '--r0': `${ROT0[n % 3]}deg`, '--i': n } as React.CSSProperties}
-                  onClick={(e) => openItem(a, e.currentTarget)}
-                >
-                  <span className="an-dt">{(a.label || a.ts ? dateText(a) : a.category).toUpperCase()}</span>
-                  <h3>{a.title}</h3>
-                  <u>Read →</u>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <main id="main" className="flex-1">
+        {/* ── 1. Hero Section matching screenshot (Dark backdrop with atmosphere photo) ── */}
+        <section className="an-blog-hero" aria-label="Announcements Hero">
+          <div className="an-hero-container">
+            <nav className="an-hero-crumb" aria-label="Breadcrumb">
+              <Link href="/">HOME</Link>
+              <span className="an-hero-crumb-sep">&gt;</span>
+              <span className="an-hero-crumb-active">
+                {isAm ? 'ማስታወቂያዎች' : 'ANNOUNCEMENTS'}
+              </span>
+            </nav>
 
-      {/* ===== toolbar + feed ===== */}
-      <div className="an-w" id="list">
-        {isSample && (
-          <p className="an-dev">Preview data: your API returned nothing. Shown in development only.</p>
-        )}
+            <h1 className="an-hero-title">
+              {isAm ? 'ማስታወቂያዎች' : 'Announcements'}
+            </h1>
 
-        <div className="an-bar">
-          <div className="an-tabs" role="group" aria-label="Categories">
-            <button type="button" className={!cat ? 'sel' : ''} onClick={() => { setCat(''); setLim(FIRST_PAGE); }}>
-              All<i>{items.length}</i>
-            </button>
-            {categories.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={cat === c ? 'sel' : ''}
-                onClick={() => { setCat(c); setLim(FIRST_PAGE); }}
-              >
-                {c}
-                <i>{items.filter((i) => i.category === c).length}</i>
-              </button>
-            ))}
-          </div>
-          <input
-            className="an-search"
-            type="search"
-            value={q}
-            onChange={(e) => { setQ(e.target.value); setLim(FIRST_PAGE); }}
-            placeholder="Search announcements"
-            aria-label="Search announcements"
-          />
-        </div>
+            {isAm && <span className="an-hero-sub-am">የቤተክርስቲያን መረጃዎችና ጥሪዎች</span>}
 
-        <div aria-live="polite">
-          {status === 'loading' && <p className="an-empty">Loading announcements…</p>}
-
-          {status === 'error' && (
-            <p className="an-empty">
-              We couldn’t load announcements.{' '}
-              <button type="button" className="an-clr" onClick={retry}>
-                Try again
-              </button>
+            <p className="an-hero-subtitle">
+              {isAm
+                ? 'ከደብረ ዲዮስቆሮስ ቤተክርስቲያን ማኅበረሰብ የወጡ ወቅታዊ ማስታወቂያዎች፣ ዝግጅቶችና መልእክቶች።'
+                : 'Current news, seasonal notices, and spiritual updates from our parish community.'}
             </p>
-          )}
+          </div>
+        </section>
 
-          {status === 'ready' && items.length === 0 && <p className="an-empty">No announcements yet.</p>}
+        {/* ── 2. Main Sheet Canvas (Rounded White Card Container) ── */}
+        <section className="an-sheet-section">
+          <div className="an-sheet-card">
+            {/* Filter Pills & Search Bar Toolbar */}
+            <div className="an-toolbar">
+              <div className="an-filter-pills" role="group" aria-label="Filter by category">
+                <button
+                  type="button"
+                  className={`an-pill-btn ${!cat ? 'active' : ''}`}
+                  onClick={() => {
+                    setCat('');
+                    setLim(FIRST_PAGE);
+                  }}
+                >
+                  {isAm ? 'ሁሉም' : 'All'}
+                  <span className="an-pill-badge">{items.length}</span>
+                </button>
+                {categories.map((c) => {
+                  const count = items.filter((i) => i.category === c).length;
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`an-pill-btn ${cat.toLowerCase() === c.toLowerCase() ? 'active' : ''}`}
+                      onClick={() => {
+                        setCat(c);
+                        setLim(FIRST_PAGE);
+                      }}
+                    >
+                      {c}
+                      <span className="an-pill-badge">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-          {status === 'ready' && items.length > 0 && (
-            <>
-              <div className="an-cnt">
-                Showing {Math.min(feed.length, 3 + lim)} of {feed.length} announcements
-                {act && (
-                  <button type="button" className="an-clr" onClick={clear}>
-                    Clear filters
+              <div className="an-search-box">
+                <svg
+                  className="an-search-icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="search"
+                  className="an-search-input"
+                  value={q}
+                  onChange={(e) => {
+                    setQ(e.target.value);
+                    setLim(FIRST_PAGE);
+                  }}
+                  placeholder={isAm ? 'ማስታወቂያዎችን ይፈልጉ...' : 'Search announcements...'}
+                  aria-label="Search announcements"
+                />
+              </div>
+            </div>
+
+            {/* Results count & clear link */}
+            <div className="an-status-row">
+              <span>
+                {status === 'ready' &&
+                  (isAm
+                    ? `${filteredItems.length} ማስታወቂያዎች ተገኝተዋል`
+                    : `Showing ${Math.min(filteredItems.length, lim)} of ${filteredItems.length} announcements`)}
+              </span>
+              {isFiltered && (
+                <button type="button" className="an-clear-btn" onClick={clearFilters}>
+                  {isAm ? 'ማጣሪያዎችን አጥራ' : 'Clear filters'}
+                </button>
+              )}
+            </div>
+
+            {/* Loading / Error States */}
+            {status === 'loading' && (
+              <div className="an-empty-state">
+                <p>{isAm ? 'ማስታወቂያዎች በመጫን ላይ ናቸው...' : 'Loading announcements…'}</p>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="an-empty-state">
+                <p>
+                  {isAm ? 'ማስታወቂያዎችን ማግኘት አልተቻለም።' : 'We could not load announcements.'}{' '}
+                  <button type="button" className="an-clear-btn" onClick={retry}>
+                    {isAm ? 'እንደገና ሞክር' : 'Try again'}
                   </button>
+                </p>
+              </div>
+            )}
+
+            {/* ── 3. Two-Column Blog Grid (Exact composition from screenshot) ── */}
+            {status === 'ready' && filteredItems.length === 0 && (
+              <div className="an-empty-state">
+                <p>{isAm ? 'ምንም ማስታወቂያ አልተገኘም።' : 'No announcements match your search.'}</p>
+              </div>
+            )}
+
+            {status === 'ready' && filteredItems.length > 0 && (
+              <div className="an-blog-grid">
+                {visibleItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className="an-blog-card"
+                    onClick={(e) => openItem(item, e.currentTarget)}
+                    aria-label={`Open announcement: ${item.title}`}
+                  >
+                    {/* Left: Rounded Thumbnail Image */}
+                    <div className="an-card-media">
+                      <img src={item.image} alt={item.title} className="an-card-img" loading="lazy" />
+                    </div>
+
+                    {/* Right: Meta Tag, Date, Title, Summary, and Readmore ↗ */}
+                    <div className="an-card-details">
+                      <div className="an-card-meta">
+                        <span className="an-card-tag">{item.category}</span>
+                        {(item.label || item.ts > 0) && (
+                          <span className="an-card-date">{formatCardDate(item)}</span>
+                        )}
+                        {item.pinned && (
+                          <span className="an-card-pinned-tag">
+                            {isAm ? 'ዋና' : 'PINNED'}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="an-card-title">{item.title}</h3>
+
+                      {item.summary && <p className="an-card-summary">{item.summary}</p>}
+
+                      <span className="an-card-readmore">
+                        {isAm ? 'ሙሉውን አንብብ' : 'Readmore'}{' '}
+                        <span className="an-readmore-arrow" aria-hidden="true">
+                          ↗
+                        </span>
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {status === 'ready' && remainingCount > 0 && (
+              <div className="an-loadmore-wrap">
+                <button
+                  type="button"
+                  className="an-loadmore-btn"
+                  onClick={() => setLim((n) => n + FIRST_PAGE)}
+                >
+                  {isAm
+                    ? `ተጨማሪ ማስታወቂያዎችን አሳይ · ${remainingCount} ይቀራሉ`
+                    : `Show more announcements · ${remainingCount} left`}
+                </button>
+              </div>
+            )}
+
+            {/* Telegram Community Band */}
+            <div className="an-telegram-band">
+              <div>
+                <h2 className="an-telegram-title">
+                  {isAm ? 'ማስታወቂያዎችን በቅጽበት ይከታተሉ' : 'Never miss a notice.'}
+                </h2>
+                <p className="an-telegram-desc">
+                  {isAm
+                    ? 'በቴሌግራም ቻናላችን አማካኝነት የቤተክርስቲያኗን ወቅታዊ መረጃዎች ወዲያውኑ ያግኙ።'
+                    : 'Follow our official Telegram channel for instantaneous notices and announcements.'}
+                </p>
+              </div>
+              <a
+                className="an-telegram-cta"
+                href="https://t.me/abune_media"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>{isAm ? 'በቴሌግራም ይቀላቀሉ' : 'Follow on Telegram'}</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 4. Full-Detail Sliding Reader Drawer ── */}
+        <div
+          className={`an-drawer-overlay ${open ? 'active' : ''}`}
+          onClick={closeReader}
+          aria-hidden={!open}
+        />
+        <aside
+          ref={drawerRef}
+          className={`an-reader-drawer ${open ? 'active' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="an-drawer-title"
+          aria-hidden={!open}
+        >
+          <button
+            ref={closeRef}
+            type="button"
+            className="an-drawer-close"
+            aria-label="Close details"
+            onClick={closeReader}
+          >
+            ✕
+          </button>
+
+          {open && (
+            <>
+              <div className="an-card-meta" style={{ marginTop: 8 }}>
+                <span className="an-card-tag">{open.category}</span>
+                {(open.label || open.ts > 0) && (
+                  <span className="an-card-date">{formatCardDate(open)}</span>
+                )}
+                {open.pinned && (
+                  <span className="an-card-pinned-tag">{isAm ? 'ዋና' : 'PINNED'}</span>
                 )}
               </div>
 
-              {feed.length === 0 ? (
-                <p className="an-empty">No announcements match your search.</p>
-              ) : (
-                <>
-                  <div className="an-fd">
-                    {lead && (
-                      <button
-                        type="button"
-                        className="an-st an-leadst"
-                        onClick={(e) => openItem(lead, e.currentTarget)}
-                      >
-                        <Thumb item={lead} />
-                        <Meta item={lead} />
-                        <h3>{lead.title}</h3>
-                        <p>{lead.summary}</p>
-                      </button>
-                    )}
-                    <div className="an-side">
-                      {side.map((a, n) => (
-                        <button
-                          key={a.id}
-                          type="button"
-                          className="an-st an-sdst"
-                          style={{ '--n': n + 1 } as React.CSSProperties}
-                          onClick={(e) => openItem(a, e.currentTarget)}
-                        >
-                          <Thumb item={a} />
-                          <div>
-                            <Meta item={a} />
-                            <h3>{a.title}</h3>
-                            <p>{a.summary}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <h2 id="an-drawer-title" className="an-drawer-title">
+                {open.title}
+              </h2>
 
-                  {rows.length > 0 && (
-                    <div className="an-rows">
-                      {rows.map((a, n) => (
-                        <button
-                          key={a.id}
-                          type="button"
-                          className="an-st an-rw"
-                          style={{ '--n': Math.min(n + 3, 8) } as React.CSSProperties}
-                          onClick={(e) => openItem(a, e.currentTarget)}
-                        >
-                          <span className="an-dt">{a.label || a.ts ? dateText(a) : ''}</span>
-                          <div>
-                            <h3>{a.title}</h3>
-                            <span className="an-ct" style={{ margin: 0 }}>{a.category}</span>
-                          </div>
-                          <u>Read →</u>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+              <img src={open.image} alt={open.title} className="an-drawer-hero-img" />
 
-                  {left > 0 && (
-                    <div style={{ textAlign: 'center', marginTop: 30 }}>
-                      <button type="button" className="an-btn" onClick={() => setLim((n) => n + FIRST_PAGE)}>
-                        Show more announcements · {left} left
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
+              {(readerBody || open.summary || '')
+                .split(/\n+/)
+                .filter(Boolean)
+                .map((paragraph, index) => (
+                  <p key={index} className="an-drawer-body">
+                    {paragraph}
+                  </p>
+                ))}
+
+              <div className="an-drawer-contact-note">
+                {isAm ? (
+                  <>
+                    ተጨማሪ ጥያቄዎች አሉዎት?{' '}
+                    <Link href="/contact">የቤተክርስቲያኑን አስተዳደር ያነጋግሩ</Link>።
+                  </>
+                ) : (
+                  <>
+                    Questions or inquiries?{' '}
+                    <Link href="/contact">Contact the church administration</Link>.
+                  </>
+                )}
+              </div>
             </>
           )}
-        </div>
-      </div>
-
-      {/* ===== Telegram band ===== */}
-      <section className="an-tg">
-        <div className="an-w">
-          <div>
-            <h2>Never miss a notice.</h2>
-            <p>Follow our Telegram channel for the latest announcements.</p>
-          </div>
-          <a className="an-btn" href="https://t.me/abune_media" target="_blank" rel="noopener noreferrer">
-            Follow on Telegram →
-          </a>
-        </div>
-      </section>
-
-      {/* ===== reader drawer ===== */}
-      <div className={`an-ov ${open ? 'on' : ''}`} onClick={closeReader} />
-      <aside
-        ref={drawerRef}
-        className={`an-dr ${open ? 'on' : ''}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="an-dt-title"
-        aria-hidden={!open}
-      >
-        <button ref={closeRef} type="button" className="an-x" aria-label="Close" onClick={closeReader}>
-          ✕
-        </button>
-        {open && (
-          <>
-            <Meta item={open} />
-            <h2 id="an-dt-title">{open.title}</h2>
-            <Thumb item={open} />
-            {(readerBody || '').split(/\n+/).filter(Boolean).map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-            <div className="an-nt">
-              Questions? <Link href="/contact">Contact the church administration</Link>.
-            </div>
-          </>
-        )}
-      </aside>
+        </aside>
       </main>
 
       <Footer compact={false} />

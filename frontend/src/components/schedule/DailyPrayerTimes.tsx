@@ -32,11 +32,11 @@ export function DailyPrayerTimes() {
     <section className="bg-white rounded-xl p-7 border border-[#E3EEF8] shadow-[0_4px_12px_rgba(30,42,94,0.02)]">
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-[38px] h-[38px] bg-[#E3EEF8] rounded-lg flex items-center justify-center text-lg text-[#1E2A5E]">
+        <div className="w-[38px] h-[38px] bg-[#E3EEF8] rounded-lg flex items-center justify-center text-lg text-[#082052]">
           🕒
         </div>
         <div>
-          <h3 className="text-lg font-extrabold text-[#1E2A5E] leading-tight">
+          <h3 className="text-lg font-extrabold text-[#082052] leading-tight">
             {locale === 'am' ? 'ዕለታዊ የጸሎት ሰዓታት' : 'Daily Prayer Times'}
           </h3>
           <p className="text-xs text-[#44506B]">
@@ -55,10 +55,10 @@ export function DailyPrayerTimes() {
             className="bg-white border border-[#E3EEF8] rounded-xl p-6 text-center flex flex-col items-center justify-center shadow-[0_4px_10px_rgba(30,42,94,0.02)] hover:-translate-y-0.5 transition-transform"
           >
             {/* Icon Circle */}
-            <div className="w-14 h-14 bg-[#1E2A5E] border-2 border-[#C99A3B] rounded-full flex items-center justify-center text-[#C99A3B] text-2xl mb-3.5">
+            <div className="w-14 h-14 bg-[#082052] border-2 border-[#C99A3B] rounded-full flex items-center justify-center text-[#C99A3B] text-2xl mb-3.5">
               {p.icon}
             </div>
-            <h5 className="text-[15px] font-bold text-[#1E2A5E] mb-1">
+            <h5 className="text-[15px] font-bold text-[#082052] mb-1">
               {locale === 'am' ? p.nameAm : p.nameEn}
             </h5>
             <div className="text-[13px] font-bold text-[#C99A3B] mb-1.5">{p.time}</div>

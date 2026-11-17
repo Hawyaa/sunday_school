@@ -45,7 +45,7 @@ export function ReportsSidebar() {
         <h2
           data-rm="fade"
           style={rmDelay(450)}
-          className="mb-3 font-['Playfair_Display',serif] text-[25px] font-bold leading-[1.2] text-[#0f2352]"
+          className="mb-3 font-['Playfair_Display',serif] text-[25px] font-bold leading-[1.2] text-[#082052]"
         >
           {am ? 'የተወሰነ ሪፖርት ይፈልጋሉ?' : 'Need a Specific Report?'}
         </h2>

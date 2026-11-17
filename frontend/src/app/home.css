@@ -12,17 +12,17 @@
 .home-page {
   font: 400 16px/1.65 Inter, system-ui, sans-serif;
   color: var(--slate, #44506B);
-  background: var(--cream, #FBF7F0);
+  background: var(--cream, #F8F0E5);
   overflow-x: hidden;
 }
 
 /* --- design tokens --- */
 .home-page {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --cream: #FBF7F0;
+  --cream: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --red: #B4232C;
@@ -772,7 +772,7 @@
    ═══════════════════════════════════════════════════════════════ */
 .home-page .giving-sec {
   padding: 80px 0 88px;
-  background: linear-gradient(180deg, #fbf7f0 0%, #f6efe2 100%);
+  background: linear-gradient(180deg, #F8F0E5 0%, #f6efe2 100%);
   border-top: 1px solid rgba(201, 154, 59, 0.25);
   border-bottom: 1px solid rgba(201, 154, 59, 0.2);
   overflow: hidden;

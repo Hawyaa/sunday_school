@@ -49,7 +49,7 @@ export function TimelineDetail() {
       {/* Back link */}
       <Link
         href="/about"
-        className="mb-6 inline-flex items-center gap-2 text-[13px] font-semibold text-[#35609a] hover:text-[#0f2352]"
+        className="mb-6 inline-flex items-center gap-2 text-[13px] font-semibold text-[#35609a] hover:text-[#082052]"
       >
         <span aria-hidden="true">←</span>
         {am ? 'ወደ ስለ እኛ ተመለስ' : 'Back to About'}
@@ -58,7 +58,7 @@ export function TimelineDetail() {
       {/* Heading */}
       <header className="mb-8 max-w-[760px]">
         <Eyebrow>{am ? 'ጉዟችን' : 'Our Journey'}</Eyebrow>
-        <h1 className={`${PF} mb-3 text-[30px] font-bold leading-[1.1] text-[#0f2352] lg:text-[40px]`}>
+        <h1 className={`${PF} mb-3 text-[30px] font-bold leading-[1.1] text-[#082052] lg:text-[40px]`}>
           {am ? 'የእምነትና የአገልግሎት መንገድ' : 'A Path of Faith and Service'}
         </h1>
         <p className="text-[15px] leading-[1.7] text-[#39445d]">
@@ -74,7 +74,7 @@ export function TimelineDetail() {
           <a
             key={m.year}
             href={`#y${m.year}`}
-            className="rounded-full px-4 py-1.5 text-[13px] font-bold text-[#0f2352] transition hover:bg-[#0f2352] hover:text-white"
+            className="rounded-full px-4 py-1.5 text-[13px] font-bold text-[#082052] transition hover:bg-[#082052] hover:text-white"
           >
             {m.year}
           </a>
@@ -113,7 +113,7 @@ export function TimelineDetail() {
                     <IconBadge name={m.icon} dark />
                     <span className={`${PF} text-[32px] font-bold leading-none text-[#b9852a]`}>{m.year}</span>
                   </div>
-                  <h2 className={`${PF} mb-3 text-[21px] font-bold leading-tight text-[#0f2352]`}>{title}</h2>
+                  <h2 className={`${PF} mb-3 text-[21px] font-bold leading-tight text-[#082052]`}>{title}</h2>
                   <div className="space-y-3 text-[14px] leading-[1.75] text-[#39445d]">
                     {paragraphs.map((p, k) => (
                       <p key={k}>{p}</p>

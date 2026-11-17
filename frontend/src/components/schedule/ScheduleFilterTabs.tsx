@@ -42,8 +42,8 @@ export function ScheduleFilterTabs({ activeTab, onTabChange }: Props) {
             onClick={() => onTabChange(tab.key)}
             className={`flex items-center gap-3 rounded-xl px-5 py-4 border text-left transition-all cursor-pointer shadow-[0_2px_6px_rgba(30,42,94,0.02)] ${
               isActive
-                ? 'bg-[#1E2A5E] border-[#C99A3B] text-white'
-                : 'bg-white border-[#E3EEF8] text-[#1E2A5E] hover:bg-[#1E2A5E] hover:text-white hover:border-[#C99A3B]'
+                ? 'bg-[#082052] border-[#C99A3B] text-white'
+                : 'bg-white border-[#E3EEF8] text-[#082052] hover:bg-[#082052] hover:text-white hover:border-[#C99A3B]'
             }`}
           >
             <span className={`text-[22px] ${isActive ? 'text-[#C99A3B]' : ''}`}>

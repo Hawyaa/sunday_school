@@ -56,7 +56,7 @@ export function SiteLogoSettings() {
 
   return (
     <section className="bg-white border border-[#E3EEF8] rounded-xl p-5 sm:p-6 max-w-xl">
-      <h3 className="text-lg font-extrabold text-[#0F1B3E] mb-1">Site Logo</h3>
+      <h3 className="text-lg font-extrabold text-[#082052] mb-1">Site Logo</h3>
       <p className="text-[13px] text-[#44506B] mb-4">
         Upload one image and it replaces the logo in both the header and the footer.
         JPG, PNG or WebP, up to 2 MB. Square images look best.
@@ -85,7 +85,7 @@ export function SiteLogoSettings() {
         type="file"
         accept="image/jpeg,image/png,image/webp"
         onChange={(e) => pick(e.target.files?.[0] ?? null)}
-        className="block w-full text-[13px] text-[#44506B] mb-3 file:mr-3 file:rounded-lg file:border-0 file:bg-[#0F1B3E] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#13224F]"
+        className="block w-full text-[13px] text-[#44506B] mb-3 file:mr-3 file:rounded-lg file:border-0 file:bg-[#082052] file:px-4 file:py-2 file:text-xs file:font-bold file:text-white hover:file:bg-[#13224F]"
       />
 
       <input
@@ -101,7 +101,7 @@ export function SiteLogoSettings() {
           type="button"
           disabled={!file || !adminKey || busy}
           onClick={() => send('POST')}
-          className="bg-[#0F1B3E] text-white border-[1.5px] border-[#C99A3B] px-5 py-2 rounded-lg text-xs font-bold disabled:opacity-40 cursor-pointer hover:bg-[#13224F] transition"
+          className="bg-[#082052] text-white border-[1.5px] border-[#C99A3B] px-5 py-2 rounded-lg text-xs font-bold disabled:opacity-40 cursor-pointer hover:bg-[#13224F] transition"
         >
           {busy ? 'Saving…' : 'Save logo'}
         </button>

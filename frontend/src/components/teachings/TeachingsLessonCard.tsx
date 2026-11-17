@@ -95,7 +95,7 @@ export function TeachingsLessonCard({ item }: { item: TeachingLesson }) {
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <Link
             href={href}
-            className="text-[19px] font-semibold leading-[1.2] text-[#0f2352] hover:text-[#b9852a] transition-colors"
+            className="text-[19px] font-semibold leading-[1.2] text-[#082052] hover:text-[#b9852a] transition-colors"
           >
             {item.title}
           </Link>

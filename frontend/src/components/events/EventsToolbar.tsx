@@ -69,7 +69,7 @@ export function EventsToolbar({
     <div className="my-5 sm:mb-6 p-2.5 flex flex-wrap items-center gap-2 bg-[#f6f1e8] border border-[#ece5d8] rounded-[14px]">
       {/* Search */}
       <label className="flex items-center gap-3.5 w-full sm:flex-1 sm:min-w-[220px] h-[42px] px-4 rounded-xl bg-[#fffdf9] border border-[#ece5d8] cursor-text focus-within:border-[#c8952f]">
-        <EventIcon name="search" className="w-[18px] h-[18px] text-[#0f2352] shrink-0" />
+        <EventIcon name="search" className="w-[18px] h-[18px] text-[#082052] shrink-0" />
         <input
           type="search"
           value={searchQuery}
@@ -104,7 +104,7 @@ export function EventsToolbar({
         </select>
         <EventIcon
           name="chev"
-          className="w-4 h-4 text-[#0f2352] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          className="w-4 h-4 text-[#082052] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
         />
       </div>
 
@@ -118,20 +118,20 @@ export function EventsToolbar({
           aria-label="Filter by category"
           className={`flex items-center gap-2.5 w-full h-[42px] pl-3.5 pr-9 rounded-xl border text-[13px] font-medium cursor-pointer transition-colors text-left ${
             isFiltered
-              ? 'bg-[#0f2352] border-[#0f2352] text-white'
-              : 'bg-[#fffdf9] border-[#ece5d8] text-[#0f2352] hover:border-[#c8952f]'
+              ? 'bg-[#082052] border-[#082052] text-white'
+              : 'bg-[#fffdf9] border-[#ece5d8] text-[#082052] hover:border-[#c8952f]'
           } ${open ? 'border-[#c8952f]' : ''}`}
         >
           <EventIcon
             name={active.icon}
-            className={`w-[18px] h-[18px] shrink-0 ${isFiltered ? 'text-white' : 'text-[#0f2352]'}`}
+            className={`w-[18px] h-[18px] shrink-0 ${isFiltered ? 'text-white' : 'text-[#082052]'}`}
           />
           <span className="truncate">{active.label}</span>
           <EventIcon
             name="chev"
             className={`w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none transition-transform ${
               open ? 'rotate-180' : ''
-            } ${isFiltered ? 'text-white' : 'text-[#0f2352]'}`}
+            } ${isFiltered ? 'text-white' : 'text-[#082052]'}`}
           />
         </button>
 
@@ -153,13 +153,13 @@ export function EventsToolbar({
                     }}
                     className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] cursor-pointer transition-colors ${
                       selected
-                        ? 'bg-[#0f2352] text-white'
-                        : 'text-[#0f2352] hover:bg-[#f6f1e8]'
+                        ? 'bg-[#082052] text-white'
+                        : 'text-[#082052] hover:bg-[#f6f1e8]'
                     }`}
                   >
                     <EventIcon
                       name={cat.icon}
-                      className={`w-[18px] h-[18px] shrink-0 ${selected ? 'text-white' : 'text-[#0f2352]'}`}
+                      className={`w-[18px] h-[18px] shrink-0 ${selected ? 'text-white' : 'text-[#082052]'}`}
                     />
                     <span className="grow">{cat.label}</span>
                     {selected && <span aria-hidden="true">✓</span>}

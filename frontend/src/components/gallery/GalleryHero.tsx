@@ -71,20 +71,20 @@ export function GalleryHero() {
         />
 
         {/* Breadcrumb */}
-        <div className="gl-crumb relative z-10 flex items-center gap-2 text-[13px] font-semibold text-[#0F1B3E] mb-3">
+        <div className="gl-crumb relative z-10 flex items-center gap-2 text-[13px] font-semibold text-[#082052] mb-3">
           <Link href="/" className="hover:underline flex items-center gap-1">
             <span>🏠</span>
             <span>{isAm ? 'ዋና ገጽ' : 'Home'}</span>
           </Link>
           <span className="text-slate-400">›</span>
-          <span className="text-[#0F1B3E] font-bold">{title}</span>
+          <span className="text-[#082052] font-bold">{title}</span>
         </div>
 
         {/* Title Container with Gold Vertical Line */}
         <div className="relative z-10 flex items-start gap-3 sm:gap-3.5">
           <div className="gl-line w-1 h-12 bg-[#C99A3B] rounded-xs mt-1 shrink-0" />
           <div className="hero-text-content">
-            <h2 className="text-3xl sm:text-[38px] font-extrabold text-[#0F1B3E] leading-[1.1] mb-2 font-serif sm:font-sans">
+            <h2 className="text-3xl sm:text-[38px] font-extrabold text-[#082052] leading-[1.1] mb-2 font-serif sm:font-sans">
               <span className="sr-only">{title}</span>
               <span aria-hidden="true">
                 <SplitText text={title} />

@@ -17,10 +17,15 @@
  * Header, HeroSection, and Footer are NOT modified.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 import { useHomeReveal } from './useHomeReveal';
+import { fetchEvents } from '@/services/events';
+import { fetchLatestAnnouncements } from '@/services/announcements';
+import { fetchGalleryPhotos } from '@/services/gallery';
+import { fetchSchedules } from '@/services/schedule';
+import type { Announcement } from '@/types/announcement';
 import './home.css';
 
 // Layout
@@ -177,6 +182,85 @@ export default function HomePage() {
   const rootRef = useHomeReveal();
   const [copiedAcc, setCopiedAcc] = useState<string | null>(null);
 
+  const [eventsData, setEventsData] = useState(EVENTS);
+  const [announcementsData, setAnnouncementsData] = useState<Announcement[]>([]);
+  const [galleryData, setGalleryData] = useState(HOME_GALLERY);
+  const [nextSessionData, setNextSessionData] = useState<{
+    title: string;
+    titleAm: string;
+    meta: string;
+    metaAm: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // Load real upcoming events from API
+    fetchEvents(5, 1)
+      .then(({ events }) => {
+        if (events && events.length > 0) {
+          const colors = ['blue', 'green', 'orange', 'purple', 'teal'];
+          const mapped = events.map((e, idx) => {
+            const d = new Date(e.startDate);
+            const dayStr = isNaN(d.getTime()) ? String(idx + 1) : String(d.getDate()).padStart(2, '0');
+            const monthStr = isNaN(d.getTime()) ? 'Event' : d.toLocaleDateString('en-US', { month: 'short' });
+            return {
+              day: dayStr,
+              title: e.title,
+              titleAm: e.title,
+              meta: `${monthStr} • ${e.location || 'Church'}`,
+              metaAm: `${monthStr} • ${e.location || 'ቤተክርስቲያን'}`,
+              color: colors[idx % colors.length],
+              on: idx === 0,
+            };
+          });
+          setEventsData(mapped);
+        }
+      })
+      .catch(() => {});
+
+    // Load real announcements from API
+    fetchLatestAnnouncements(6)
+      .then((items) => {
+        if (items && items.length > 0) {
+          setAnnouncementsData(items);
+        }
+      })
+      .catch(() => {});
+
+    // Load real gallery photos from API
+    fetchGalleryPhotos()
+      .then((photos) => {
+        if (photos && photos.length > 0) {
+          const classes = ['a', 'bb', 'cc', 'd', 'e', 'f'];
+          const mapped = photos.slice(0, 6).map((p, idx) => ({
+            cls: classes[idx % classes.length],
+            img: p.imageUrl,
+            fallback: '/images/gallery-1.jpg',
+            kicker: p.album?.title || 'Sanctuary',
+            kickerAm: p.album?.title || 'ማዕከለ ስዕል',
+            title: p.title,
+            titleAm: p.caption || p.title,
+          }));
+          setGalleryData(mapped);
+        }
+      })
+      .catch(() => {});
+
+    // Load real schedule for next session
+    fetchSchedules()
+      .then((schedules) => {
+        if (schedules && schedules.length > 0) {
+          const first = schedules[0];
+          setNextSessionData({
+            title: first.title,
+            titleAm: first.activity || first.title,
+            meta: `${first.dayOfWeek} • ${first.startTime} - ${first.endTime} • ${first.location || 'Main Sanctuary'}`,
+            metaAm: `${first.dayOfWeek} • ${first.startTime} - ${first.endTime} • ${first.location || 'ዋናው ቤተ መቅደስ'}`,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   function copyAccount(acc: string) {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(acc);
@@ -200,9 +284,15 @@ export default function HomePage() {
           <div className="nbox rv">
             <div>
               <small>{isAm ? 'ቀጣይ መርሐ ግብር' : 'Next session'}</small>
-              <h3>{isAm ? 'የሰንበት ት/ቤት ጉባኤ' : 'Sunday School Session'}</h3>
+              <h3>
+                {nextSessionData
+                  ? (isAm ? nextSessionData.titleAm : nextSessionData.title)
+                  : (isAm ? 'የሰንበት ት/ቤት ጉባኤ' : 'Sunday School Session')}
+              </h3>
               <span style={{ color: 'var(--slate)', fontSize: 14 }}>
-                {isAm ? 'መስከረም 27 • 2:00 ሰዓት • ዋናው አዳራሽ' : 'Meskerem 27 • 8:00 AM • Main hall'}
+                {nextSessionData
+                  ? (isAm ? nextSessionData.metaAm : nextSessionData.meta)
+                  : (isAm ? 'መስከረም 27 • 2:00 ሰዓት • ዋናው አዳራሽ' : 'Meskerem 27 • 8:00 AM • Main hall')}
               </span>
             </div>
             <Link href="/schedule" className="pill pill-navy">
@@ -224,7 +314,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid">
-            {EVENTS.map((e, i) => (
+            {eventsData.map((e, i) => (
               <Link
                 key={i}
                 className={`card ${e.on ? 'on' : ''} rv`}
@@ -314,7 +404,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid">
-            {HOME_GALLERY.map((g, i) => (
+            {galleryData.map((g, i) => (
               <Link
                 key={i}
                 className={`c ${g.cls} rv`}
@@ -356,49 +446,60 @@ export default function HomePage() {
             {/* Card 1 */}
             <Link className="card c1 rv" href="/announcements">
               <img
-                src="/images/announcement-1.jpg"
-                alt={isAm ? 'የመስቀል በዓል ዝግጅት' : 'Feast of the Holy Cross preparation'}
+                src={announcementsData[0]?.imageUrl || '/images/announcement-1.jpg'}
+                alt={announcementsData[0]?.title || (isAm ? 'የመስቀል በዓል ዝግጅት' : 'Feast of the Holy Cross preparation')}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = 'https://i.pinimg.com/474x/97/ab/5c/97ab5cea194f9cc2f4dc52294f585203.jpg';
                 }}
               />
-              <time>{isAm ? 'መስከረም 12' : 'Meskerem 12'}</time>
-              <h3>{isAm ? 'የመስቀል በዓል መንፈሳዊ ዝግጅት' : 'Feast of the Holy Cross preparation'}</h3>
+              <time>
+                {announcementsData[0]?.publishedAt
+                  ? new Date(announcementsData[0].publishedAt).toLocaleDateString(isAm ? 'am-ET' : 'en-US', { month: 'short', day: 'numeric' })
+                  : (isAm ? 'መስከረም 12' : 'Meskerem 12')}
+              </time>
+              <h3>
+                {announcementsData[0]?.title || (isAm ? 'የመስቀል በዓል መንፈሳዊ ዝግጅት' : 'Feast of the Holy Cross preparation')}
+              </h3>
               <span className="rm">{isAm ? 'ተጨማሪ ያንብቡ →' : 'Read More →'}</span>
             </Link>
 
             {/* Card 2 */}
             <Link className="card c2 rv" href="/register" style={{ '--d': '0.1s' } as React.CSSProperties}>
               <img
-                src="/images/announcement-2.jpg"
-                alt={isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration'}
+                src={announcementsData[1]?.imageUrl || '/images/announcement-2.jpg'}
+                alt={announcementsData[1]?.title || (isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration')}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = 'https://i.pinimg.com/474x/56/af/4c/56af4cbb84cef34b0fb50b27bd176691.jpg';
                 }}
               />
-              <time>{isAm ? 'መስከረም 15' : 'Meskerem 15'}</time>
-              <h3>{isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration'}</h3>
+              <time>
+                {announcementsData[1]?.publishedAt
+                  ? new Date(announcementsData[1].publishedAt).toLocaleDateString(isAm ? 'am-ET' : 'en-US', { month: 'short', day: 'numeric' })
+                  : (isAm ? 'መስከረም 15' : 'Meskerem 15')}
+              </time>
+              <h3>
+                {announcementsData[1]?.title || (isAm ? 'የአዲሱ ዓመት ሰንበት ት/ቤት ምዝገባ' : 'New Sunday school registration')}
+              </h3>
               <span className="rm">{isAm ? 'ተጨማሪ ያንብቡ →' : 'Read More →'}</span>
             </Link>
 
             {/* Side list */}
             <div className="list rv" style={{ '--d': '0.2s' } as React.CSSProperties}>
-              <Link className="item" href="/announcements">
-                <span className="t">{isAm ? 'የማኅበረሰብ በጎ አድራጎትና ድጋፍ' : 'Community charity and outreach'}</span>
-                <time>{isAm ? 'መስከረም 22' : 'Meskerem 22'}</time>
-              </Link>
-              <Link className="item" href="/announcements">
-                <span className="t">{isAm ? 'የወጣቶች ሳምንታዊ ጉባኤ፡ አዲስ ሰዓትና ቦታ' : 'Youth fellowship weekly gathering: new meeting time and location'}</span>
-                <time>{isAm ? 'መስከረም 18' : 'Meskerem 18'}</time>
-              </Link>
-              <Link className="item" href="/announcements">
-                <span className="t">{isAm ? 'የመስቀል በዓል የመዘምራን ልምምድ ክፍት ሆነ' : 'Choir rehearsals open for the Meskel celebration hymns'}</span>
-                <time>{isAm ? 'መስከረም 10' : 'Meskerem 10'}</time>
-              </Link>
-              <Link className="item" href="/announcements">
-                <span className="t">{isAm ? 'የሰንበት ት/ቤት መምህራን ስብሰባ፡ የአዲሱ መንፈቅ ዕቅድ' : "Sunday school teachers' meeting: lesson plans for the new term"}</span>
-                <time>{isAm ? 'መስከረም 8' : 'Meskerem 8'}</time>
-              </Link>
+              {(announcementsData.length > 2 ? announcementsData.slice(2, 6) : [
+                { id: '1', title: isAm ? 'የማኅበረሰብ በጎ አድራጎትና ድጋፍ' : 'Community charity and outreach', dateStr: isAm ? 'መስከረም 22' : 'Meskerem 22' },
+                { id: '2', title: isAm ? 'የወጣቶች ሳምንታዊ ጉባኤ፡ አዲስ ሰዓትና ቦታ' : 'Youth fellowship weekly gathering: new meeting time and location', dateStr: isAm ? 'መስከረም 18' : 'Meskerem 18' },
+                { id: '3', title: isAm ? 'የመስቀል በዓል የመዘምራን ልምምድ ክፍት ሆነ' : 'Choir rehearsals open for the Meskel celebration hymns', dateStr: isAm ? 'መስከረም 10' : 'Meskerem 10' },
+                { id: '4', title: isAm ? 'የሰንበት ት/ቤት መምህራን ስብሰባ፡ የአዲሱ መንፈቅ ዕቅድ' : "Sunday school teachers' meeting: lesson plans for the new term", dateStr: isAm ? 'መስከረም 8' : 'Meskerem 8' },
+              ]).map((item: any, idx: number) => (
+                <Link key={item.id || idx} className="item" href="/announcements">
+                  <span className="t">{item.title}</span>
+                  <time>
+                    {item.publishedAt
+                      ? new Date(item.publishedAt).toLocaleDateString(isAm ? 'am-ET' : 'en-US', { month: 'short', day: 'numeric' })
+                      : item.dateStr || ''}
+                  </time>
+                </Link>
+              ))}
               <Link className="all" href="/announcements">
                 {isAm ? 'ሁሉንም ማስታወቂያዎች ይመልከቱ' : 'See all announcements'}
               </Link>

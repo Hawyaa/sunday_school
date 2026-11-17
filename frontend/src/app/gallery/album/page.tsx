@@ -80,7 +80,7 @@ export default function GalleryAlbumPage() {
           className="w-full h-full object-cover"
         />
         {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f1b3e]/90 via-[#0f1b3e]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#082052]/90 via-[#082052]/40 to-transparent" />
 
         {/* Back button */}
         <div className="absolute top-5 left-5">
@@ -111,7 +111,7 @@ export default function GalleryAlbumPage() {
 
       {/* ── Photo Grid ── */}
       <main className="flex-1 max-w-[1200px] w-full mx-auto px-5 sm:px-8 py-10">
-        <h2 className="text-lg sm:text-xl font-extrabold text-[#0F1B3E] mb-6 flex items-center gap-2">
+        <h2 className="text-lg sm:text-xl font-extrabold text-[#082052] mb-6 flex items-center gap-2">
           <span className="w-1 h-6 rounded-full bg-[#C99A3B] inline-block" />
           {isAm ? 'ሁሉም ፎቶዎች' : 'All Photos'}
         </h2>

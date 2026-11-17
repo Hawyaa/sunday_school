@@ -6,8 +6,9 @@
  * Clean table of weekly church services with day badges and scripture quote.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
+import { fetchSchedules } from '@/services/schedule';
 
 interface ScheduleRow {
   day: string;
@@ -36,25 +37,54 @@ interface Props {
 
 export function WeeklyScheduleTable({ filter = 'all' }: Props) {
   const { locale } = useAppStore();
+  const [scheduleList, setScheduleList] = useState<ScheduleRow[]>(SCHEDULE_DATA);
+
+  useEffect(() => {
+    fetchSchedules()
+      .then((items) => {
+        if (items && items.length > 0) {
+          const amDays: Record<string, string> = {
+            Sunday: 'እሑድ',
+            Monday: 'ሰኞ',
+            Tuesday: 'ማክሰኞ',
+            Wednesday: 'ረቡዕ',
+            Thursday: 'ሐሙስ',
+            Friday: 'ዓርብ',
+            Saturday: 'ቅዳሜ',
+          };
+          const mapped: ScheduleRow[] = items.map((s) => ({
+            day: s.dayOfWeek,
+            dayAm: amDays[s.dayOfWeek] || s.dayOfWeek,
+            time: `${s.startTime} – ${s.endTime}`,
+            service: s.title,
+            serviceAm: s.activity || s.title,
+            location: s.location || 'Church Grounds, Addis Ababa',
+            type: (s.targetGroup?.toLowerCase().includes('special') ? 'special' : 'weekly') as 'weekly' | 'special',
+          }));
+          setScheduleList(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filteredData = filter === 'all'
-    ? SCHEDULE_DATA
+    ? scheduleList
     : filter === 'weekly'
-      ? SCHEDULE_DATA.filter((r) => r.type === 'weekly')
+      ? scheduleList.filter((r) => r.type === 'weekly')
       : filter === 'special'
-        ? SCHEDULE_DATA.filter((r) => r.type === 'special')
-        : SCHEDULE_DATA;
+        ? scheduleList.filter((r) => r.type === 'special')
+        : scheduleList;
 
   return (
     <section className="bg-white rounded-xl p-7 border border-[#E3EEF8] shadow-[0_4px_12px_rgba(30,42,94,0.03)]">
       {/* Header Row */}
       <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-[38px] h-[38px] bg-[#E3EEF8] rounded-lg flex items-center justify-center text-lg text-[#1E2A5E]">
+          <div className="w-[38px] h-[38px] bg-[#E3EEF8] rounded-lg flex items-center justify-center text-lg text-[#082052]">
             📅
           </div>
           <div>
-            <h3 className="text-lg font-extrabold text-[#1E2A5E] leading-tight">
+            <h3 className="text-lg font-extrabold text-[#082052] leading-tight">
               {locale === 'am' ? 'ሳምንታዊ የአገልግሎት መርሐ ግብር' : 'Weekly Service Schedule'}
             </h3>
             <p className="text-xs text-[#44506B]">
@@ -76,16 +106,16 @@ export function WeeklyScheduleTable({ filter = 'all' }: Props) {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="bg-[#F4F8FC]">
-              <th className="text-[#1E2A5E] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
+              <th className="text-[#082052] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
                 {locale === 'am' ? 'ቀን' : 'Day'}
               </th>
-              <th className="text-[#1E2A5E] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
+              <th className="text-[#082052] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
                 {locale === 'am' ? 'ሰዓት' : 'Time'}
               </th>
-              <th className="text-[#1E2A5E] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
+              <th className="text-[#082052] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
                 {locale === 'am' ? 'አገልግሎት' : 'Service'}
               </th>
-              <th className="text-[#1E2A5E] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
+              <th className="text-[#082052] text-[13px] font-bold py-3 px-4 border-b-2 border-[#E3EEF8]">
                 {locale === 'am' ? 'ቦታ' : 'Location'}
               </th>
             </tr>
@@ -94,14 +124,14 @@ export function WeeklyScheduleTable({ filter = 'all' }: Props) {
             {filteredData.map((row, i) => (
               <tr key={`${row.day}-${row.time}-${i}`} className="hover:bg-[#E3EEF8]/30 transition">
                 <td className="py-3.5 px-4 border-b border-[#EDF2F7] text-[13px]">
-                  <span className="bg-[#E3EEF8] text-[#1E2A5E] px-2.5 py-1 rounded-md text-xs font-bold inline-block">
+                  <span className="bg-[#E3EEF8] text-[#082052] px-2.5 py-1 rounded-md text-xs font-bold inline-block">
                     {locale === 'am' ? row.dayAm : row.day}
                   </span>
                 </td>
                 <td className="py-3.5 px-4 border-b border-[#EDF2F7] text-[13px] text-[#44506B]">
                   {row.time}
                 </td>
-                <td className="py-3.5 px-4 border-b border-[#EDF2F7] text-[13px] font-bold text-[#1E2A5E]">
+                <td className="py-3.5 px-4 border-b border-[#EDF2F7] text-[13px] font-bold text-[#082052]">
                   {locale === 'am' ? row.serviceAm : row.service}
                 </td>
                 <td className="py-3.5 px-4 border-b border-[#EDF2F7] text-[13px] text-[#44506B]">

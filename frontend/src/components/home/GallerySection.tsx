@@ -118,7 +118,7 @@ const ROW_2_ITEMS: GalleryItem[] = [
 
 function GalleryCard({ item, isAm }: { item: GalleryItem; isAm: boolean }) {
   return (
-    <div className="group relative shrink-0 w-[240px] sm:w-[280px] md:w-[320px] h-[170px] sm:h-[195px] md:h-[220px] rounded-2xl overflow-hidden shadow-lg border border-[#C99A3B]/25 bg-[#0F2352] cursor-pointer">
+    <div className="group relative shrink-0 w-[240px] sm:w-[280px] md:w-[320px] h-[170px] sm:h-[195px] md:h-[220px] rounded-2xl overflow-hidden shadow-lg border border-[#C99A3B]/25 bg-[#082052] cursor-pointer">
       {/* Background Image with Zoom on Hover */}
       <img
         src={item.image}
@@ -127,7 +127,7 @@ function GalleryCard({ item, isAm }: { item: GalleryItem; isAm: boolean }) {
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
       />
       {/* Dark gradient for text legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0B1A3D]/95 via-[#0B1A3D]/40 to-transparent transition-opacity duration-300 group-hover:from-[#0B1A3D]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#082052]/95 via-[#082052]/40 to-transparent transition-opacity duration-300 group-hover:from-[#082052]" />
 
       {/* Gold illuminated border on hover */}
       <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-[#C99A3B] transition-colors duration-300 pointer-events-none" />
@@ -154,7 +154,7 @@ export function GallerySection() {
   const row2Doubled = [...ROW_2_ITEMS, ...ROW_2_ITEMS];
 
   return (
-    <section id="gallery" className="py-20 sm:py-24 bg-[#1E2A5E] text-white overflow-hidden border-y border-[#C99A3B]/30">
+    <section id="gallery" className="py-20 sm:py-24 bg-[#082052] text-white overflow-hidden border-y border-[#C99A3B]/30">
       {/* Section Header */}
       <div className="mx-auto w-full max-w-[1240px] px-6 mb-10 sm:mb-14">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -189,8 +189,8 @@ export function GallerySection() {
         {/* ROW 1: Moves Left-to-Right */}
         <div className="group relative w-full overflow-hidden" tabIndex={0} aria-label="Gallery Row 1 Left to Right">
           {/* Subtle edge fades matching deep navy */}
-          <div className="pointer-events-none absolute left-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-r from-[#1E2A5E] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-l from-[#1E2A5E] to-transparent z-10" />
+          <div className="pointer-events-none absolute left-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-r from-[#082052] to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-l from-[#082052] to-transparent z-10" />
 
           <div className="gallery-track-ltr flex gap-5 sm:gap-6 w-max group-hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]">
             {row1Doubled.map((item, index) => (
@@ -201,8 +201,8 @@ export function GallerySection() {
 
         {/* ROW 2: Moves Right-to-Left */}
         <div className="group relative w-full overflow-hidden" tabIndex={0} aria-label="Gallery Row 2 Right to Left">
-          <div className="pointer-events-none absolute left-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-r from-[#1E2A5E] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-l from-[#1E2A5E] to-transparent z-10" />
+          <div className="pointer-events-none absolute left-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-r from-[#082052] to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 inset-y-0 w-16 sm:w-28 bg-gradient-to-l from-[#082052] to-transparent z-10" />
 
           <div className="gallery-track-rtl flex gap-5 sm:gap-6 w-max group-hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]">
             {row2Doubled.map((item, index) => (

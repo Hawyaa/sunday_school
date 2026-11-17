@@ -30,7 +30,7 @@ export function MissionCard() {
             {isAm ? 'ተልዕኳችን' : 'OUR MISSION'}
           </span>
 
-          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#0F1B3E] leading-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#082052] leading-tight mb-4">
             {isAm ? 'እምነትን መጠበቅ፤ ቅርስን ማካፈል' : 'Preserving Faith, Sharing Heritage'}
           </h2>
 
@@ -43,7 +43,7 @@ export function MissionCard() {
           {/* 3 Pillars */}
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#EAE6DF]">
             <div>
-              <strong className="block text-base sm:text-lg font-serif font-bold text-[#0F1B3E]">
+              <strong className="block text-base sm:text-lg font-serif font-bold text-[#082052]">
                 {isAm ? 'እምነት' : 'Faith'}
               </strong>
               <span className="text-xs text-[#7C88A8]">
@@ -51,7 +51,7 @@ export function MissionCard() {
               </span>
             </div>
             <div>
-              <strong className="block text-base sm:text-lg font-serif font-bold text-[#0F1B3E]">
+              <strong className="block text-base sm:text-lg font-serif font-bold text-[#082052]">
                 {isAm ? 'እውቀት' : 'Knowledge'}
               </strong>
               <span className="text-xs text-[#7C88A8]">
@@ -59,7 +59,7 @@ export function MissionCard() {
               </span>
             </div>
             <div>
-              <strong className="block text-base sm:text-lg font-serif font-bold text-[#0F1B3E]">
+              <strong className="block text-base sm:text-lg font-serif font-bold text-[#082052]">
                 {isAm ? 'አገልግሎት' : 'Service'}
               </strong>
               <span className="text-xs text-[#7C88A8]">

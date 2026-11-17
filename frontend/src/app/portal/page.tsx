@@ -21,6 +21,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSession, clearSession } from '@/lib/auth';
+import {
+  fetchMemberProfile,
+  updateMemberProfile,
+  fetchMemberNotices,
+  fetchMemberAttendance,
+} from '@/services/portal';
 import './portal.css';
 
 /* ── SVG Icons ─────────────────────────────────────────────────────────── */
@@ -91,7 +97,7 @@ export default function MemberPortalPage() {
 
   // Student Profile Data
   const [studentName, setStudentName] = useState('Meron Tesfaye');
-  const [christianName] = useState('ማርያም ወልደ');
+  const [christianName, setChristianName] = useState('ማርያም ወልደ');
   const [regNo, setRegNo] = useState('ABN-2026-0142');
   const [division, setDivision] = useState('Intermediate');
   const [phone, setPhone] = useState('+251 911 000 000');
@@ -100,6 +106,9 @@ export default function MemberPortalPage() {
   const [emergencyName, setEmergencyName] = useState('Almaz Haile');
   const [emergencyRel, setEmergencyRel] = useState('Mother');
   const [emergencyPhone, setEmergencyPhone] = useState('+251 922 000 000');
+
+  const [memberNoticesList, setMemberNoticesList] = useState<NoticeItem[]>([]);
+  const [attendanceList, setAttendanceList] = useState<[string, number][]>([]);
 
   // Preview simulation controls
   const [memberType, setMemberType] = useState<MemberType>('b');
@@ -118,7 +127,7 @@ export default function MemberPortalPage() {
     { id: '3', t: 'Your phone number was updated', s: 'Account', w: '5 days ago', r: 1 },
   ]);
 
-  // Sync with authenticated session if available
+  // Sync with authenticated session and fetch real member data from database
   useEffect(() => {
     const session = getSession();
     if (session?.user) {
@@ -126,7 +135,77 @@ export default function MemberPortalPage() {
       if (session.user.registrationNumber) setRegNo(session.user.registrationNumber);
       if (session.user.division) setDivision(session.user.division);
     }
+
+    // Load real member profile from backend API
+    fetchMemberProfile()
+      .then((profile) => {
+        if (profile) {
+          if (profile.fullName) setStudentName(profile.fullName);
+          if (profile.christianName) setChristianName(profile.christianName);
+          if (profile.registrationNumber) setRegNo(profile.registrationNumber);
+          if (profile.division) setDivision(profile.division);
+          if (profile.phoneNumber) setPhone(profile.phoneNumber);
+          if (profile.address) setAddress(profile.address);
+          if (profile.kebele) setKebele(profile.kebele);
+          if (profile.emergencyContactName) setEmergencyName(profile.emergencyContactName);
+          if (profile.emergencyRelationship) setEmergencyRel(profile.emergencyRelationship);
+          if (profile.emergencyContactPhone) setEmergencyPhone(profile.emergencyContactPhone);
+        }
+      })
+      .catch(() => {});
+
+    // Load real student notices
+    fetchMemberNotices()
+      .then((notices) => {
+        if (notices && notices.length > 0) {
+          const mapped: NoticeItem[] = notices.map((n) => {
+            const d = new Date(n.createdAt);
+            return {
+              id: n.id,
+              t: n.title,
+              g: n.category || 'Sunday School',
+              d: isNaN(d.getTime()) ? 'Recent' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              m: n.content,
+              r: 0,
+              forGroup: 'all',
+            };
+          });
+          setMemberNoticesList(mapped);
+        }
+      })
+      .catch(() => {});
+
+    // Load real attendance history
+    fetchMemberAttendance()
+      .then((records) => {
+        if (records && records.length > 0) {
+          const mapped: [string, number][] = records.map((r) => {
+            const d = new Date(r.session.date);
+            const dateStr = isNaN(d.getTime()) ? 'Recent' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const val = r.status === 'PRESENT' ? 0 : r.status === 'LATE' ? 2 : 1;
+            return [dateStr, val];
+          });
+          setAttendanceList(mapped);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  const handleSaveProfile = async () => {
+    try {
+      await updateMemberProfile({
+        phoneNumber: phone,
+        address,
+        emergencyContactName: emergencyName,
+        emergencyRelationship: emergencyRel,
+        emergencyContactPhone: emergencyPhone,
+      });
+      setIsEditingProfile(false);
+      showToast('Profile updated successfully');
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || err?.message || 'Failed to update profile');
+    }
+  };
 
   // Helper Toast trigger
   const showToast = (msg: string) => {
@@ -178,9 +257,10 @@ export default function MemberPortalPage() {
     },
   ];
 
+  const effectiveNotices = memberNoticesList.length > 0 ? memberNoticesList : allNotices;
   const filteredNotices = hasNotices === 'n'
     ? []
-    : allNotices.filter((n) => {
+    : effectiveNotices.filter((n) => {
         if (n.forGroup === 'all') return true;
         if (memberType === 'b') return true;
         return n.forGroup === memberType;
@@ -200,9 +280,11 @@ export default function MemberPortalPage() {
     ['Nehase 8', 0],
   ];
 
+  const effectiveAttendanceRaw = attendanceList.length > 0 ? attendanceList : attendanceRaw;
+
   const attendanceRecords = hasAttendance === 'n'
     ? []
-    : attendanceRaw.map(([date, isAbsent], idx) => {
+    : effectiveAttendanceRaw.map(([date, statusVal], idx) => {
         const sessionName =
           memberType === 'c' || (memberType === 'b' && idx % 2 === 1)
             ? 'Choir practice'
@@ -210,7 +292,7 @@ export default function MemberPortalPage() {
         return {
           date,
           session: sessionName,
-          status: isAbsent ? 'Absent' : 'Present',
+          status: statusVal === 0 ? 'Present' : statusVal === 2 ? 'Late' : 'Absent',
         };
       });
 
@@ -756,10 +838,7 @@ export default function MemberPortalPage() {
                   <button
                     type="button"
                     className="btn g"
-                    onClick={() => {
-                      setIsEditingProfile(false);
-                      showToast('Profile updated successfully');
-                    }}
+                    onClick={handleSaveProfile}
                   >
                     Save changes
                   </button>

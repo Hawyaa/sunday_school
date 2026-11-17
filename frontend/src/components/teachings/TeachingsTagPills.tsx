@@ -34,8 +34,8 @@ export function TeachingsTagPills({ activeTag, onSelect }: Props) {
             onClick={() => onSelect(t.key)}
             className={`px-4.5 py-2 rounded-full text-xs font-bold cursor-pointer whitespace-nowrap transition-all border ${
               isActive
-                ? 'bg-[#E3EEF8] text-[#1E2A5E] border-[#C99A3B]'
-                : 'bg-white text-[#1E2A5E] border-[#E3EEF8] hover:border-[#C99A3B] hover:bg-[#E3EEF8]'
+                ? 'bg-[#E3EEF8] text-[#082052] border-[#C99A3B]'
+                : 'bg-white text-[#082052] border-[#E3EEF8] hover:border-[#C99A3B] hover:bg-[#E3EEF8]'
             }`}
           >
             {locale === 'am' ? t.labelAm : t.labelEn}

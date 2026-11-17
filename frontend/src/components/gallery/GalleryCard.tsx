@@ -35,7 +35,7 @@ export function GalleryCard({ album, onOpen }: Props) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
           {/* Category Pill Top Left */}
-          <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#1E2A5E]/85 text-white border border-[#C99A3B]/60 text-[11px] font-bold backdrop-blur-xs">
+          <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#082052]/85 text-white border border-[#C99A3B]/60 text-[11px] font-bold backdrop-blur-xs">
             {isAm ? album.categoryAm : album.category}
           </div>
 
@@ -53,7 +53,7 @@ export function GalleryCard({ album, onOpen }: Props) {
 
         {/* Content details */}
         <div className="p-5">
-          <h3 className="text-base font-extrabold text-[#1E2A5E] group-hover:text-[#2F5D9E] transition-colors mb-2 line-clamp-2">
+          <h3 className="text-base font-extrabold text-[#082052] group-hover:text-[#2F5D9E] transition-colors mb-2 line-clamp-2">
             {isAm ? album.titleAm : album.title}
           </h3>
           <p className="text-xs text-[#44506B] line-clamp-2 leading-relaxed">
@@ -63,7 +63,7 @@ export function GalleryCard({ album, onOpen }: Props) {
       </div>
 
       <div className="px-5 pb-5 pt-2">
-        <div className="w-full py-2.5 px-4 rounded-xl bg-[#E3EEF8] group-hover:bg-[#1E2A5E] text-[#1E2A5E] group-hover:text-white border border-[#C99A3B] text-xs font-bold transition flex items-center justify-center gap-1.5">
+        <div className="w-full py-2.5 px-4 rounded-xl bg-[#E3EEF8] group-hover:bg-[#082052] text-[#082052] group-hover:text-white border border-[#C99A3B] text-xs font-bold transition flex items-center justify-center gap-1.5">
           <span>🖼️</span>
           <span>{isAm ? 'አልበሙን ክፈት' : 'Open Album'}</span>
         </div>

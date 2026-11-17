@@ -181,7 +181,7 @@ export function GalleryMosaicGrid() {
               className="gl-cover w-full h-full object-cover"
             />
             {/* Hover overlay hint */}
-            <div className="absolute inset-0 bg-[#0F1B3E]/0 group-hover:bg-[#0F1B3E]/40 transition-colors flex items-center justify-center">
+            <div className="absolute inset-0 bg-[#082052]/0 group-hover:bg-[#082052]/40 transition-colors flex items-center justify-center">
               <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity bg-[#C99A3B]/90 px-3 py-1 rounded-full">
                 {isAm ? 'ሁሉንም ይመልከቱ' : 'View All'}
               </span>
@@ -191,7 +191,7 @@ export function GalleryMosaicGrid() {
           <div className="flex flex-col justify-between h-full py-1 pr-1 min-w-0">
             <div>
               <div className="gl-album-title">
-                <h3 className="text-base font-extrabold text-[#0F1B3E] mb-0.5 truncate">{albumTitle}</h3>
+                <h3 className="text-base font-extrabold text-[#082052] mb-0.5 truncate">{albumTitle}</h3>
                 <div className="text-xs text-[#505E7B] mb-2.5 font-medium">{featuredAlbum.dateStr}</div>
               </div>
 

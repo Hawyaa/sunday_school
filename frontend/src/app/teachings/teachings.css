@@ -1,10 +1,10 @@
 /* Teachings Page Scoped Styles */
 .teachings-page {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --cream: #FBF7F0;
+  --cream: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --red: #B4232C;
@@ -170,7 +170,7 @@
   animation: teachingsRv 1.4s .2s var(--e) both;
   cursor: pointer;
   overflow: hidden;
-  background: radial-gradient(circle at 72% 30%, #f1d089, transparent 26%), linear-gradient(160deg, #2F5D9E, #1E2A5E);
+  background: radial-gradient(circle at 72% 30%, #f1d089, transparent 26%), linear-gradient(160deg, #2F5D9E, #082052);
   box-shadow: 0 20px 40px rgba(30, 42, 94, 0.25);
   border-radius: 2px;
 }
@@ -361,7 +361,7 @@
   transform: scale(1.03);
 }
 .teachings-page .th.vd {
-  background: radial-gradient(circle at 70% 30%, rgba(241, 208, 137, 0.65), transparent 30%), linear-gradient(160deg, #2F5D9E, #1E2A5E);
+  background: radial-gradient(circle at 70% 30%, rgba(241, 208, 137, 0.65), transparent 30%), linear-gradient(160deg, #2F5D9E, #082052);
 }
 .teachings-page .th.vd span {
   width: 42px;

@@ -192,7 +192,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
       {/* 6 Section Management Cards */}
       <div>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-serif text-lg font-bold text-[#0F1B3E]">
+          <h2 className="font-serif text-lg font-bold text-[#082052]">
             Content Management Modules
           </h2>
           <span className="text-xs text-[#6B7897]">
@@ -218,7 +218,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
                 </div>
 
                 {/* Card Title & Description */}
-                <h3 className="font-serif text-lg font-bold text-[#0F1B3E] mb-1">
+                <h3 className="font-serif text-lg font-bold text-[#082052] mb-1">
                   {card.title}
                 </h3>
                 <p className="text-xs text-[#6B7897] leading-relaxed mb-3">
@@ -233,14 +233,14 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
               <div className="pt-4 border-t border-[#F2EFE9] flex items-center justify-between gap-3">
                 <button
                   onClick={() => onNavigateSection(card.id, true)}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#0F1B3E] hover:text-[#C8952F] transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#082052] hover:text-[#C8952F] transition-colors"
                 >
                   <IconPlus className="w-3.5 h-3.5" />
                   <span>+ Add new</span>
                 </button>
                 <button
                   onClick={() => onNavigateSection(card.id, false)}
-                  className="px-4 py-1.5 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors"
+                  className="px-4 py-1.5 rounded-lg bg-[#082052] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors"
                 >
                   Manage
                 </button>
@@ -255,7 +255,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
         {/* Table Header */}
         <div className="px-6 py-4.5 border-b border-[#EAE6DF] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-serif text-lg font-bold text-[#0F1B3E]">
+            <h3 className="font-serif text-lg font-bold text-[#082052]">
               Section admins
             </h3>
             <p className="text-xs text-[#6B7897]">
@@ -286,11 +286,11 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
             <tbody className="divide-y divide-[#F2EFE9]">
               {admins.map((adm) => (
                 <tr key={adm.id} className="hover:bg-[#FAF9F5] transition-colors">
-                  <td className="py-4 px-6 font-semibold text-[#0F1B3E]">
+                  <td className="py-4 px-6 font-semibold text-[#082052]">
                     <span className="capitalize">{adm.sectionLabel}</span>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="font-medium text-[#0F1B3E]">{adm.adminName}</div>
+                    <div className="font-medium text-[#082052]">{adm.adminName}</div>
                     <div className="text-[11px] text-[#7C88A8]">{adm.adminEmail}</div>
                   </td>
                   <td className="py-4 px-6 text-[#4A5568] max-w-xs truncate">
@@ -315,7 +315,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
                   <td className="py-4 px-6 text-right space-x-2">
                     <button
                       onClick={() => onNavigateSection(adm.section)}
-                      className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+                      className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
                       title="View section"
                     >
                       <IconEdit className="w-3.5 h-3.5" />
@@ -339,7 +339,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
       {showInviteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#EAE6DF] animate-in fade-in zoom-in-95 duration-150">
-            <h3 className="font-serif text-xl font-bold text-[#0F1B3E] mb-1">
+            <h3 className="font-serif text-xl font-bold text-[#082052] mb-1">
               Invite Section Admin
             </h3>
             <p className="text-xs text-[#6B7897] mb-5">
@@ -348,7 +348,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
 
             <form onSubmit={handleInviteSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Full Name
                 </label>
                 <input
@@ -362,7 +362,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Email Address
                 </label>
                 <input
@@ -376,7 +376,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Assigned Section
                 </label>
                 <select
@@ -396,7 +396,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Custom Permissions Note (Optional)
                 </label>
                 <input
@@ -418,7 +418,7 @@ export function AdminDashboardView({ onNavigateSection }: AdminDashboardViewProp
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-lg bg-[#082052] hover:bg-[#1A2D66] text-white text-xs font-semibold transition-colors"
                 >
                   Send Invitation
                 </button>

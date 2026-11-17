@@ -67,7 +67,7 @@ export function MezmurPlaylistsCard({ onSelect }: Props) {
   return (
     <div className="bg-white rounded-[10px] border border-[#E2E8F0] overflow-hidden shadow-[0_2px_6px_rgba(30,42,94,0.04)]">
       {/* Header */}
-      <div className="bg-[#1E2A5E] text-white px-3.5 py-2.5 text-[13px] font-bold grid grid-cols-[28px_1fr_75px_50px] items-center">
+      <div className="bg-[#082052] text-white px-3.5 py-2.5 text-[13px] font-bold grid grid-cols-[28px_1fr_75px_50px] items-center">
         <span>#</span>
         <span>{isAm ? 'የቅርብ ጊዜ አልበሞች' : 'Recent Playlist / Album'}</span>
         <span>{isAm ? 'መረጃ' : 'Info'}</span>
@@ -83,15 +83,15 @@ export function MezmurPlaylistsCard({ onSelect }: Props) {
             className="grid grid-cols-[28px_1fr_75px_50px] items-center px-3.5 py-2 text-xs cursor-pointer hover:bg-[#E3EEF8] transition-colors"
           >
             <span className="font-semibold text-[#2F5D9E]">{item.num}</span>
-            <span className="font-semibold text-[#1E2A5E] truncate pr-2">
+            <span className="font-semibold text-[#082052] truncate pr-2">
               {item.title}
             </span>
             <span className="text-[#64748B] text-[11px] truncate">
               {item.meta}
             </span>
             <div className="flex items-center gap-1.5 justify-end text-[#2F5D9E] text-[13px]">
-              <span title="Play" className="hover:text-[#1E2A5E]">▶</span>
-              <span title="Info" className="hover:text-[#1E2A5E]">ⓘ</span>
+              <span title="Play" className="hover:text-[#082052]">▶</span>
+              <span title="Info" className="hover:text-[#082052]">ⓘ</span>
             </div>
           </div>
         ))}

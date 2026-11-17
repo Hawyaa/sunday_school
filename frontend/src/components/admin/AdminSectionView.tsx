@@ -1032,7 +1032,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 <IconReports className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
+                <p className="font-semibold text-[#082052] truncate max-w-[240px]">
                   {r.title}
                 </p>
                 <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
@@ -1065,7 +1065,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
           <td className="py-3.5 px-4 text-right space-x-1">
             <button
               onClick={() => handleSelectEdit(r.id)}
-              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+              className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
               title="Edit"
             >
               <IconEdit className="w-3.5 h-3.5" />
@@ -1106,7 +1106,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 <IconMezmur className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
+                <p className="font-semibold text-[#082052] truncate max-w-[240px]">
                   {m.title}
                 </p>
                 <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
@@ -1132,7 +1132,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
           <td className="py-3.5 px-4 text-right space-x-1">
             <button
               onClick={() => handleSelectEdit(m.id)}
-              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+              className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
               title="Edit"
             >
               <IconEdit className="w-3.5 h-3.5" />
@@ -1175,7 +1175,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 className="w-10 h-10 rounded-lg object-cover border border-[#EAE6DF]"
               />
               <div className="min-w-0">
-                <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
+                <p className="font-semibold text-[#082052] truncate max-w-[240px]">
                   {e.title}
                 </p>
                 <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
@@ -1201,7 +1201,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
           <td className="py-3.5 px-4 text-right space-x-1">
             <button
               onClick={() => handleSelectEdit(e.id)}
-              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+              className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
               title="Edit Event"
             >
               <IconEdit className="w-3.5 h-3.5" />
@@ -1242,7 +1242,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 <IconAnnouncement className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
+                <p className="font-semibold text-[#082052] truncate max-w-[240px]">
                   {a.title}
                 </p>
                 <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
@@ -1278,7 +1278,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
           <td className="py-3.5 px-4 text-right space-x-1">
             <button
               onClick={() => handleSelectEdit(a.id)}
-              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+              className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
               title="Edit"
             >
               <IconEdit className="w-3.5 h-3.5" />
@@ -1322,7 +1322,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   className="w-10 h-10 rounded-lg object-cover border border-[#C99A3B]"
                 />
                 <div className="min-w-0">
-                  <p className="font-bold text-[#0F1B3E] truncate max-w-[240px]">
+                  <p className="font-bold text-[#082052] truncate max-w-[240px]">
                     ⭐ Featured Album: {featuredAlbum.titleEn}
                   </p>
                   <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
@@ -1332,7 +1332,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               </div>
             </td>
             <td className="py-3.5 px-4">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-[#C99A3B] text-[#0F1B3E]">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-[#C99A3B] text-[#082052]">
                 Featured Album
               </span>
             </td>
@@ -1345,7 +1345,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
             <td className="py-3.5 px-4 text-right">
               <button
                 onClick={() => handleSelectEdit('featured-album')}
-                className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+                className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
                 title="Edit Album"
               >
                 <IconEdit className="w-3.5 h-3.5" />
@@ -1369,7 +1369,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     className="w-10 h-10 rounded-lg object-cover border border-[#EAE6DF]"
                   />
                   <div className="min-w-0">
-                    <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
+                    <p className="font-semibold text-[#082052] truncate max-w-[240px]">
                       {slotLabels[m.slot] || `Slot ${m.slot}`}
                     </p>
                     <p className="text-[11px] text-[#7C88A8] truncate max-w-[240px]">
@@ -1392,7 +1392,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               <td className="py-3.5 px-4 text-right">
                 <button
                   onClick={() => handleSelectEdit(m.id)}
-                  className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+                  className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
                   title="Replace Photo"
                 >
                   <IconEdit className="w-3.5 h-3.5" />
@@ -1437,7 +1437,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               </div>
             )}
             <div className="min-w-0">
-              <p className="font-semibold text-[#0F1B3E] truncate max-w-[240px]">
+              <p className="font-semibold text-[#082052] truncate max-w-[240px]">
                 {i.title}
               </p>
               <div className="flex items-center gap-2 text-[11px] text-[#7C88A8]">
@@ -1483,7 +1483,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
         <td className="py-3.5 px-4 text-right space-x-1">
           <button
             onClick={() => handleSelectEdit(i.id)}
-            className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+            className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
             title="Edit"
           >
             <IconEdit className="w-3.5 h-3.5" />
@@ -1504,7 +1504,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#0F1B3E] text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-xl border border-[#C8952F]/40 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#082052] text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-xl border border-[#C8952F]/40 animate-in fade-in slide-in-from-bottom-2">
           <IconCheck className="w-4 h-4 text-[#C8952F]" />
           <span>{toastMessage}</span>
         </div>
@@ -1615,7 +1615,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
           <div className="bg-white rounded-xl border border-[#EAE6DF] shadow-[0_2px_8px_rgba(15,27,62,0.03)] p-6 sticky top-24">
             <div className="flex items-center justify-between pb-4 border-b border-[#F2EFE9] mb-4">
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#0F1B3E] capitalize">
+                <h3 className="font-serif text-lg font-bold text-[#082052] capitalize">
                   {editingId ? `Edit ${section}` : `Add New ${section}`}
                 </h3>
                 <p className="text-[11px] text-[#7C88A8]">
@@ -1638,7 +1638,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               {section === 'reports' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Report Title (English)
                     </label>
                     <input
@@ -1652,7 +1652,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Amharic Title (የሪፖርቱ ርዕስ)
                     </label>
                     <input
@@ -1666,7 +1666,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Period / Date
                       </label>
                       <input
@@ -1679,7 +1679,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Category
                       </label>
                       <select
@@ -1694,7 +1694,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       PDF Document Upload
                     </label>
                     <div
@@ -1734,7 +1734,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Report Summary Description
                     </label>
                     <textarea
@@ -1748,7 +1748,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div className="flex items-center justify-between p-3 rounded-lg bg-[#FAF9F6] border border-[#EAE6DF]">
                     <div>
-                      <span className="block text-xs font-semibold text-[#0F1B3E]">
+                      <span className="block text-xs font-semibold text-[#082052]">
                         Restricted Access
                       </span>
                       <span className="block text-[10px] text-[#7C88A8]">
@@ -1776,7 +1776,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               {section === 'mezmur' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Ge&apos;ez / Amharic Title (የመዝሙር ርዕስ)
                     </label>
                     <input
@@ -1790,7 +1790,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       English Title
                     </label>
                     <input
@@ -1804,7 +1804,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                      <label className="block text-xs font-semibold text-[#082052]">
                         Category (ምድብ)
                       </label>
                       <button
@@ -1829,7 +1829,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Mezmur Audio Track
                     </label>
                     <div
@@ -1870,7 +1870,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Lyrics (ግጥም / ቃላት)
                     </label>
                     <textarea
@@ -1890,7 +1890,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               {section === 'events' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Event Title
                     </label>
                     <input
@@ -1905,7 +1905,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Category
                       </label>
                       <select
@@ -1923,7 +1923,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Event Icon Style
                       </label>
                       <select
@@ -1943,7 +1943,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Event Date (YYYY-MM-DD)
                       </label>
                       <input
@@ -1956,7 +1956,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Time / Hours
                       </label>
                       <input
@@ -1970,7 +1970,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Location / Church Place
                     </label>
                     <input
@@ -1984,7 +1984,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   {/* Real Event Image Upload */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Event Photo / Flyer
                     </label>
                     <div
@@ -2027,7 +2027,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Event Description & Highlights
                     </label>
                     <textarea
@@ -2045,7 +2045,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               {section === 'announcements' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Announcement Title (English)
                     </label>
                     <input
@@ -2059,7 +2059,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Amharic Title (የማስታወቂያው ርዕስ)
                     </label>
                     <input
@@ -2073,7 +2073,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Category
                       </label>
                       <select
@@ -2089,7 +2089,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Priority Level
                       </label>
                       <select
@@ -2106,7 +2106,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Author / Ministry Office
                     </label>
                     <input
@@ -2119,7 +2119,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Optional Banner / Flyer Image
                     </label>
                     <div
@@ -2144,7 +2144,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Notice Body & Details
                     </label>
                     <textarea
@@ -2162,7 +2162,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               {section === 'gallery' && (
                 <>
                   <div className="p-3 bg-[#FAF4E6]/60 rounded-xl border border-[#E9D9B2] space-y-2">
-                    <label className="block text-xs font-bold text-[#0F1B3E]">
+                    <label className="block text-xs font-bold text-[#082052]">
                       Select Gallery Destination
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -2176,7 +2176,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         }}
                         className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center ${
                           galleryTarget === 'mosaic'
-                            ? 'bg-[#0F1B3E] text-white shadow-xs'
+                            ? 'bg-[#082052] text-white shadow-xs'
                             : 'bg-white text-[#505E7B] border border-[#D5D0C7]'
                         }`}
                       >
@@ -2190,7 +2190,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         }}
                         className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center ${
                           galleryTarget === 'addToAlbum'
-                            ? 'bg-[#0F1B3E] text-white shadow-xs'
+                            ? 'bg-[#082052] text-white shadow-xs'
                             : 'bg-white text-[#505E7B] border border-[#D5D0C7]'
                         }`}
                       >
@@ -2208,7 +2208,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         }}
                         className={`py-1.5 px-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer text-center ${
                           galleryTarget === 'featured'
-                            ? 'bg-[#0F1B3E] text-white shadow-xs'
+                            ? 'bg-[#082052] text-white shadow-xs'
                             : 'bg-white text-[#505E7B] border border-[#D5D0C7]'
                         }`}
                       >
@@ -2219,7 +2219,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   {/* Dropdown position selector - exactly matches what the user screenshotted */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       {galleryTarget === 'mosaic'
                         ? 'Mosaic Grid Slot Position'
                         : galleryTarget === 'addToAlbum'
@@ -2289,7 +2289,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     <>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                          <label className="block text-xs font-semibold text-[#082052] mb-1">
                             Title (English)
                           </label>
                           <input
@@ -2303,7 +2303,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                          <label className="block text-xs font-semibold text-[#082052] mb-1">
                             Title (Amharic)
                           </label>
                           <input
@@ -2317,7 +2317,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Photo Category
                         </label>
                         <select
@@ -2335,7 +2335,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                       {/* Real Image Upload */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Slot Photo Upload
                         </label>
                         <div
@@ -2383,7 +2383,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     <div className="space-y-4">
                       {/* Placement Choice */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1.5">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1.5">
                           Where to Add Photo in Complete Album:
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -2392,7 +2392,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                             onClick={() => setAlbumPosition('top')}
                             className={`py-2 px-3 rounded-lg border text-xs font-bold text-center cursor-pointer transition-all ${
                               albumPosition === 'top'
-                                ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-sm'
+                                ? 'bg-[#082052] text-white border-[#082052] shadow-sm'
                                 : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:bg-[#FAF9F5]'
                             }`}
                           >
@@ -2403,7 +2403,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                             onClick={() => setAlbumPosition('end')}
                             className={`py-2 px-3 rounded-lg border text-xs font-bold text-center cursor-pointer transition-all ${
                               albumPosition === 'end'
-                                ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-sm'
+                                ? 'bg-[#082052] text-white border-[#082052] shadow-sm'
                                 : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:bg-[#FAF9F5]'
                             }`}
                           >
@@ -2419,7 +2419,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                       {/* Photo Upload */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Album Photo Upload
                         </label>
                         <div
@@ -2461,7 +2461,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       </div>
 
                       {/* Info Banner */}
-                      <div className="p-3 bg-[#FAF4E6] border border-[#E9D9B2] rounded-xl text-xs text-[#0F1B3E]">
+                      <div className="p-3 bg-[#FAF4E6] border border-[#E9D9B2] rounded-xl text-xs text-[#082052]">
                         ℹ️ This photo will be added to the Complete Album page (<strong>/gallery/album</strong>). Currently has{' '}
                         <strong>{featuredAlbum.thumbnails.length} photos</strong>.
                       </div>
@@ -2472,7 +2472,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   {galleryTarget === 'featured' && (
                     <>
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Featured Album Title (English)
                         </label>
                         <input
@@ -2486,7 +2486,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Album Title (Amharic)
                         </label>
                         <input
@@ -2499,7 +2499,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Event Date / Period
                         </label>
                         <input
@@ -2513,7 +2513,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                       {/* Main Cover Image */}
                       <div>
-                        <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                        <label className="block text-xs font-semibold text-[#082052] mb-1">
                           Featured Album Main Cover Photo
                         </label>
                         <div
@@ -2540,7 +2540,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       {/* Additional Album Photos Strip with DELETE buttons */}
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs font-semibold text-[#0F1B3E]">
+                          <label className="block text-xs font-semibold text-[#082052]">
                             Complete Album Photos ({featuredThumbnails.length} photos)
                           </label>
                           <span className="text-[10px] text-[#7C88A8]">Hover over photo to delete</span>
@@ -2580,7 +2580,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         <button
                           type="button"
                           onClick={() => multiImageInputRef.current?.click()}
-                          className="text-xs text-[#0F1B3E] font-bold border border-[#D5D0C7] px-3 py-1.5 rounded-lg hover:bg-[#FAF6EF] cursor-pointer"
+                          className="text-xs text-[#082052] font-bold border border-[#D5D0C7] px-3 py-1.5 rounded-lg hover:bg-[#FAF6EF] cursor-pointer"
                         >
                           + Add More Photos from Computer
                         </button>
@@ -2594,7 +2594,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               {section === 'teachings' && (
                 <>
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Teaching Title (English / Ge&apos;ez)
                     </label>
                     <input
@@ -2608,7 +2608,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Teaching Title (Amharic)
                     </label>
                     <input
@@ -2622,7 +2622,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Teacher / Speaker / Preacher
                       </label>
                       <input
@@ -2635,7 +2635,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <label className="block text-xs font-semibold text-[#0F1B3E]">
+                        <label className="block text-xs font-semibold text-[#082052]">
                           Category
                         </label>
                         <button
@@ -2662,7 +2662,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
                   {/* Format Selector */}
                   <div className="bg-[#FAF9F5] p-3 rounded-xl border border-[#EAE6DF]">
-                    <label className="block text-xs font-bold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-bold text-[#082052] mb-1">
                       Teaching Material Format
                     </label>
                     <p className="text-[11px] text-[#7C88A8] mb-2.5">
@@ -2674,7 +2674,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         onClick={() => setTeachingFormat('both')}
                         className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                           teachingFormat === 'both'
-                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            ? 'bg-[#082052] text-white border-[#082052] shadow-xs'
                             : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
                         }`}
                       >
@@ -2685,7 +2685,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         onClick={() => setTeachingFormat('pdf')}
                         className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                           teachingFormat === 'pdf'
-                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            ? 'bg-[#082052] text-white border-[#082052] shadow-xs'
                             : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
                         }`}
                       >
@@ -2696,7 +2696,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         onClick={() => setTeachingFormat('video')}
                         className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                           teachingFormat === 'video'
-                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            ? 'bg-[#082052] text-white border-[#082052] shadow-xs'
                             : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
                         }`}
                       >
@@ -2707,7 +2707,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                         onClick={() => setTeachingFormat('audio')}
                         className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                           teachingFormat === 'audio'
-                            ? 'bg-[#0F1B3E] text-white border-[#0F1B3E] shadow-xs'
+                            ? 'bg-[#082052] text-white border-[#082052] shadow-xs'
                             : 'bg-white text-[#5A6479] border-[#D5D0C7] hover:border-[#C8952F]'
                         }`}
                       >
@@ -2719,7 +2719,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   {/* Video URL Input (if both or video) */}
                   {(teachingFormat === 'both' || teachingFormat === 'video') && (
                     <div className="rounded-xl border border-[#D5D0C7] bg-white p-3 space-y-2">
-                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                      <label className="block text-xs font-semibold text-[#082052]">
                         🎥 Video Lecture URL (YouTube or MP4)
                       </label>
                       <input
@@ -2738,7 +2738,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   {/* PDF Study Book Attachment (if both or pdf) */}
                   {(teachingFormat === 'both' || teachingFormat === 'pdf') && (
                     <div className="rounded-xl border border-[#D5D0C7] bg-white p-3 space-y-2">
-                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                      <label className="block text-xs font-semibold text-[#082052]">
                         📖 Companion Study Book / PDF Document
                       </label>
                       <div className="flex gap-2 items-center">
@@ -2791,7 +2791,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   {/* Audio Attachment (if audio) */}
                   {teachingFormat === 'audio' && (
                     <div className="rounded-xl border border-[#D5D0C7] bg-white p-3 space-y-2">
-                      <label className="block text-xs font-semibold text-[#0F1B3E]">
+                      <label className="block text-xs font-semibold text-[#082052]">
                         🎧 Audio Sermon Track (MP3)
                       </label>
                       <div className="flex gap-2 items-center">
@@ -2820,7 +2820,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   {/* Duration & Banner Image */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Duration (Minutes)
                       </label>
                       <input
@@ -2832,7 +2832,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                      <label className="block text-xs font-semibold text-[#082052] mb-1">
                         Cover Image{' '}
                         <span className="text-[10px] font-normal text-[#7C88A8]">
                           (Optional — defaults to Holy Book image)
@@ -2885,7 +2885,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Key Study Topics / Outline (One per line)
                     </label>
                     <textarea
@@ -2898,7 +2898,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                    <label className="block text-xs font-semibold text-[#082052] mb-1">
                       Teaching Content / Study Notes / Full Lecture Text
                     </label>
                     <textarea
@@ -2923,7 +2923,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-lg bg-[#082052] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   {section === 'gallery' && galleryTarget === 'addToAlbum'
                     ? albumPosition === 'top'
@@ -2950,7 +2950,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#0F1B3E]">
+                <h3 className="font-serif text-lg font-bold text-[#082052]">
                   Manage Mezmur Categories (የመዝሙር ምድቦች)
                 </h3>
                 <p className="text-xs text-[#7C88A8]">
@@ -2960,7 +2960,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               <button
                 type="button"
                 onClick={() => setShowCategoryModal(false)}
-                className="w-8 h-8 rounded-full bg-[#FAF9F5] border border-[#EAE6DF] flex items-center justify-center text-[#5A6479] hover:text-[#0F1B3E] cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#FAF9F5] border border-[#EAE6DF] flex items-center justify-center text-[#5A6479] hover:text-[#082052] cursor-pointer"
               >
                 ✕
               </button>
@@ -2968,7 +2968,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
             {/* Add New Category Form */}
             <div className="bg-[#FAF9F5] p-4 rounded-xl border border-[#EAE6DF] space-y-3">
-              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[#082052] uppercase tracking-wider">
                 + Add New Category
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -3019,7 +3019,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               <button
                 type="button"
                 onClick={handleAddCategory}
-                className="w-full py-2 bg-[#0F1B3E] hover:bg-[#19377D] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                className="w-full py-2 bg-[#082052] hover:bg-[#19377D] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
               >
                 + Add Category to Dropdown
               </button>
@@ -3027,7 +3027,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
             {/* List of Existing Categories */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[#082052] uppercase tracking-wider">
                 Current Categories ({mezmurCategories.length})
               </h4>
               <div className="divide-y divide-[#EAE6DF] border border-[#EAE6DF] rounded-xl overflow-hidden bg-white">
@@ -3058,7 +3058,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       ) : (
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-xs text-[#0F1B3E]">
+                            <span className="font-semibold text-xs text-[#082052]">
                               {c.en}
                             </span>
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#FAF4E6] text-[#8B6E32] font-mono">
@@ -3096,7 +3096,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                             <button
                               type="button"
                               onClick={() => handleStartEditCategory(c)}
-                              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors cursor-pointer"
+                              className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors cursor-pointer"
                               title="Edit Category"
                             >
                               <IconEdit className="w-3.5 h-3.5" />
@@ -3134,7 +3134,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[#F2EFE9] pb-3">
               <div>
-                <h3 className="font-serif text-lg font-bold text-[#0F1B3E]">
+                <h3 className="font-serif text-lg font-bold text-[#082052]">
                   Manage Teaching Categories (የትምህርት ምድቦች)
                 </h3>
                 <p className="text-xs text-[#7C88A8]">
@@ -3144,7 +3144,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               <button
                 type="button"
                 onClick={() => setShowTeachingCatModal(false)}
-                className="w-8 h-8 rounded-full bg-[#FAF9F5] border border-[#EAE6DF] flex items-center justify-center text-[#5A6479] hover:text-[#0F1B3E] cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#FAF9F5] border border-[#EAE6DF] flex items-center justify-center text-[#5A6479] hover:text-[#082052] cursor-pointer"
               >
                 ✕
               </button>
@@ -3152,7 +3152,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
             {/* Add New Category Form */}
             <div className="bg-[#FAF9F5] p-4 rounded-xl border border-[#EAE6DF] space-y-3">
-              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[#082052] uppercase tracking-wider">
                 + Add New Teaching Category
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -3184,7 +3184,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
               <button
                 type="button"
                 onClick={handleAddTeachingCategory}
-                className="w-full py-2 bg-[#0F1B3E] hover:bg-[#19377D] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                className="w-full py-2 bg-[#082052] hover:bg-[#19377D] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
               >
                 + Add Category to Teachings
               </button>
@@ -3192,7 +3192,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
 
             {/* List of Existing Categories */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#0F1B3E] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[#082052] uppercase tracking-wider">
                 Current Teaching Categories ({teachingCategories.length})
               </h4>
               <div className="divide-y divide-[#EAE6DF] border border-[#EAE6DF] rounded-xl overflow-hidden bg-white">
@@ -3223,7 +3223,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                       ) : (
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-xs text-[#0F1B3E]">
+                            <span className="font-semibold text-xs text-[#082052]">
                               {c.en}
                             </span>
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#FAF4E6] text-[#8B6E32] font-mono">
@@ -3261,7 +3261,7 @@ export function AdminSectionView({ section }: AdminSectionViewProps) {
                             <button
                               type="button"
                               onClick={() => handleStartEditTeachingCategory(c)}
-                              className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors cursor-pointer"
+                              className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors cursor-pointer"
                               title="Edit Category"
                             >
                               <IconEdit className="w-3.5 h-3.5" />

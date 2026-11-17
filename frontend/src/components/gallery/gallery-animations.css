@@ -205,7 +205,7 @@
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s var(--gl-ease);
 }
 @media (hover: hover) {
-  .gl-lb-btn:hover { background-color: #c99a3b; color: #0f1b3e; }
+  .gl-lb-btn:hover { background-color: #c99a3b; color: #082052; }
 }
 .gl-lb-btn:active { transform: scale(0.94); }
 

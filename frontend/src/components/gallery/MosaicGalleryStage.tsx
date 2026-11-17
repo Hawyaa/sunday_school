@@ -358,7 +358,7 @@ export function MosaicGalleryStage() {
             {/* Caption Footer */}
             <div className="p-5 sm:p-6 bg-[#FAF6EF] flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold font-serif text-[#0F1B3E]">
+                <h3 className="text-xl font-bold font-serif text-[#082052]">
                   {lightboxData.title}
                 </h3>
                 <span className="text-xs text-[#505E7B]">
@@ -368,7 +368,7 @@ export function MosaicGalleryStage() {
               <button
                 type="button"
                 onClick={() => setLightboxData(null)}
-                className="px-5 py-2 rounded-xl bg-[#0F1B3E] hover:bg-[#13224F] text-white text-xs font-bold transition"
+                className="px-5 py-2 rounded-xl bg-[#082052] hover:bg-[#13224F] text-white text-xs font-bold transition"
               >
                 {isAm ? 'ዝጋ' : 'Close'}
               </button>

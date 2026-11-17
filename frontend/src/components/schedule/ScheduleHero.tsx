@@ -24,7 +24,7 @@ export function ScheduleHero() {
         <span className="text-[11px] uppercase tracking-[1.5px] text-[#8A6414] font-bold border-l-[3px] border-[#C99A3B] pl-2 block mb-2">
           {locale === 'am' ? 'መርሐ ግብር' : 'SCHEDULE'}
         </span>
-        <h1 className="text-3xl sm:text-[38px] font-extrabold text-[#1E2A5E] leading-[1.1] mb-1">
+        <h1 className="text-3xl sm:text-[38px] font-extrabold text-[#082052] leading-[1.1] mb-1">
           የምርሃ ግዜ መርኃ ግብር
         </h1>
         <h2 className="text-2xl sm:text-[30px] italic text-[#C99A3B] font-normal mb-4">

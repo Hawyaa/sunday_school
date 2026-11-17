@@ -25,7 +25,7 @@ export function ValuesSection() {
   return (
     <div className={`${card} px-4 py-[18px]`}>
       <IconBadge name="heart" />
-      <h3 className={`${PF} mb-1.5 mt-3 text-sm font-semibold text-[#0f2352]`}>{am ? 'እሴቶቻችን' : 'Our Values'}</h3>
+      <h3 className={`${PF} mb-1.5 mt-3 text-sm font-semibold text-[#082052]`}>{am ? 'እሴቶቻችን' : 'Our Values'}</h3>
       <ul className="text-[10.5px] text-[#5a6479]">
         {VALUES.map((v) => (
           <li key={v.en} className="mb-[3px] flex items-center gap-2">

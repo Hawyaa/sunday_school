@@ -34,7 +34,7 @@ export function DailyQuote() {
   const quote = QUOTES[quoteIndex] || QUOTES[0]!;
 
   return (
-    <div className="bg-[#1E2A5E] border-l-4 border-[#C99A3B] rounded-xl p-5 text-white">
+    <div className="bg-[#082052] border-l-4 border-[#C99A3B] rounded-xl p-5 text-white">
       <p className="text-[13px] leading-relaxed mb-3 italic">{quote.text}</p>
       <span className="text-xs text-[#C99A3B] block text-right font-semibold">
         {quote.reference}

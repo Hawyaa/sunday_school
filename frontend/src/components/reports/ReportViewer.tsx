@@ -98,7 +98,7 @@ export function ReportViewer({ report, onClose }: Props) {
       >
         {/* Top bar */}
         <div className="flex flex-wrap items-center gap-3 border-b border-[#ece5d8] px-4 py-3">
-          <h2 id="report-viewer-title" className="min-w-0 flex-1 truncate font-['Crimson_Text',serif] text-[19px] font-semibold text-[#0f2352]">
+          <h2 id="report-viewer-title" className="min-w-0 flex-1 truncate font-['Crimson_Text',serif] text-[19px] font-semibold text-[#082052]">
             {title}
           </h2>
 
@@ -119,7 +119,7 @@ export function ReportViewer({ report, onClose }: Props) {
             type="button"
             onClick={onClose}
             aria-label={am ? 'ዝጋ' : 'Close'}
-            className="grid h-11 w-11 place-items-center rounded-full bg-[#0f2352] text-lg text-white transition hover:bg-[#35609a]"
+            className="grid h-11 w-11 place-items-center rounded-full bg-[#082052] text-lg text-white transition hover:bg-[#35609a]"
           >
             ✕
           </button>

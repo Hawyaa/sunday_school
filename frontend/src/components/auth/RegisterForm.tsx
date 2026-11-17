@@ -40,7 +40,7 @@ const input =
 function Field({ label, optional, children }: { label: string; optional?: boolean; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block font-sans text-[12px] font-medium text-[#0f2352]">
+      <span className="mb-1 block font-sans text-[12px] font-medium text-[#082052]">
         {label} {optional && <i className="font-normal not-italic text-[#8a93a8]">(optional)</i>}
       </span>
       {children}
@@ -124,12 +124,12 @@ export function RegisterForm() {
     return (
       <div className="mx-auto w-full max-w-[560px] rounded-2xl border border-[#ecdcb8] bg-[#fffdf9] p-9 text-center shadow-[0_6px_28px_rgba(15,35,82,.08)]">
         <img src="/images/cross.png" alt="" aria-hidden="true" className="mx-auto mb-3 h-[54px] w-auto" />
-        <h2 className="font-['Playfair_Display',Georgia,serif] text-[26px] font-bold text-[#0f2352]">Registration Submitted</h2>
+        <h2 className="font-['Playfair_Display',Georgia,serif] text-[26px] font-bold text-[#082052]">Registration Submitted</h2>
         <p className="mt-2 font-['Crimson_Text',Georgia,serif] text-[17px] leading-snug text-[#35609a]">
           Thank you! Your registration is waiting for approval by the administration.
         </p>
         {done.number && (
-          <p className="mx-auto mt-4 inline-block rounded-full border border-[#e4d3ad] bg-[#f6efe0] px-5 py-2 font-sans text-[13px] font-semibold text-[#0f2352]">
+          <p className="mx-auto mt-4 inline-block rounded-full border border-[#e4d3ad] bg-[#f6efe0] px-5 py-2 font-sans text-[13px] font-semibold text-[#082052]">
             Registration No: {done.number}
           </p>
         )}
@@ -147,8 +147,8 @@ export function RegisterForm() {
       <ol className="mb-8 flex items-center">
         {STEPS.map((s, i) => (
           <li key={s} className="flex flex-1 items-center last:flex-none">
-            <span className={`grid size-9 shrink-0 place-items-center rounded-full font-sans text-[13px] font-semibold ${i <= step ? 'bg-[#0f2352] text-white shadow-[0_0_0_4px_#f3e6cc]' : 'border border-[#e4d3ad] bg-[#f6efe0] text-[#8a93a8]'}`}>{i + 1}</span>
-            <span className={`ml-2 hidden font-sans text-[12px] font-medium sm:block ${i <= step ? 'text-[#0f2352]' : 'text-[#8a93a8]'}`}>{s}</span>
+            <span className={`grid size-9 shrink-0 place-items-center rounded-full font-sans text-[13px] font-semibold ${i <= step ? 'bg-[#082052] text-white shadow-[0_0_0_4px_#f3e6cc]' : 'border border-[#e4d3ad] bg-[#f6efe0] text-[#8a93a8]'}`}>{i + 1}</span>
+            <span className={`ml-2 hidden font-sans text-[12px] font-medium sm:block ${i <= step ? 'text-[#082052]' : 'text-[#8a93a8]'}`}>{s}</span>
             {i < STEPS.length - 1 && <span className={`mx-3 h-px flex-1 ${i < step ? 'bg-[#c8952f]' : 'bg-[#e4d3ad]'}`} />}
           </li>
         ))}

@@ -163,7 +163,7 @@ export function AdminUsersView() {
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#082052] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-xs transition-colors"
         >
           <IconPlus className="w-3.5 h-3.5" />
           <span>+ Add Administrator</span>
@@ -198,7 +198,7 @@ export function AdminUsersView() {
                           .toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-semibold text-[#0F1B3E]">{u.name}</div>
+                        <div className="font-semibold text-[#082052]">{u.name}</div>
                         <div className="text-[11px] text-[#7C88A8]">{u.email}</div>
                       </div>
                     </div>
@@ -244,7 +244,7 @@ export function AdminUsersView() {
                   <td className="py-4 px-6 text-right space-x-2">
                     <button
                       onClick={() => handleEdit(u)}
-                      className="p-1.5 text-[#5A6479] hover:text-[#0F1B3E] hover:bg-[#F2EFE9] rounded-md transition-colors"
+                      className="p-1.5 text-[#5A6479] hover:text-[#082052] hover:bg-[#F2EFE9] rounded-md transition-colors"
                       title="Edit"
                     >
                       <IconEdit className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export function AdminUsersView() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#EAE6DF] animate-in fade-in zoom-in-95 duration-150">
-            <h3 className="font-serif text-xl font-bold text-[#0F1B3E] mb-1">
+            <h3 className="font-serif text-xl font-bold text-[#082052] mb-1">
               {editingUserId ? 'Edit Administrator' : 'Add New Administrator'}
             </h3>
             <p className="text-xs text-[#6B7897] mb-5">
@@ -279,7 +279,7 @@ export function AdminUsersView() {
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Full Name
                 </label>
                 <input
@@ -293,7 +293,7 @@ export function AdminUsersView() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Email
                 </label>
                 <input
@@ -307,7 +307,7 @@ export function AdminUsersView() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Role
                 </label>
                 <select
@@ -325,7 +325,7 @@ export function AdminUsersView() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#0F1B3E] mb-1">
+                <label className="block text-xs font-semibold text-[#082052] mb-1">
                   Assigned Section
                 </label>
                 <select
@@ -353,7 +353,7 @@ export function AdminUsersView() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold transition-colors"
+                  className="px-4 py-2 rounded-lg bg-[#082052] hover:bg-[#1A2D66] text-white text-xs font-semibold transition-colors"
                 >
                   Save Administrator
                 </button>

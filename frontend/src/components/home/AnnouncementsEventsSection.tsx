@@ -141,12 +141,12 @@ function SectionHeading({
           <span aria-hidden="true" className="h-px w-7 bg-[#c8952f]" />
           {eyebrow}
         </div>
-        <h2 className={`${PF} text-[28px] font-bold leading-[1.1] text-[#0f2352] sm:text-[34px]`}>{title}</h2>
+        <h2 className={`${PF} text-[28px] font-bold leading-[1.1] text-[#082052] sm:text-[34px]`}>{title}</h2>
       </div>
 
       <Link
         href={viewAllHref}
-        className={`${INTER} group mb-1 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#e6d9b8] bg-[#fffdf9] px-4 py-2 text-[12.5px] font-semibold text-[#0f2352] transition hover:border-[#c8952f] hover:bg-[#fff6e2]`}
+        className={`${INTER} group mb-1 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#e6d9b8] bg-[#fffdf9] px-4 py-2 text-[12.5px] font-semibold text-[#082052] transition hover:border-[#c8952f] hover:bg-[#fff6e2]`}
       >
         {viewAllLabel}
         <ArrowRight className="size-3.5 text-[#b9852a] transition-transform group-hover:translate-x-0.5" />
@@ -165,7 +165,7 @@ function DateChip({ top, bottom, tone = 'cream' }: { top: string; bottom: string
       }`}
     >
       <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b9852a]">{top}</span>
-      <b className="mt-1 text-[20px] font-bold text-[#0f2352]">{bottom}</b>
+      <b className="mt-1 text-[20px] font-bold text-[#082052]">{bottom}</b>
     </div>
   );
 }
@@ -239,7 +239,7 @@ export function AnnouncementsEventsSection({
                             {am ? 'አዲስ' : 'New'}
                           </span>
                         )}
-                        <h3 className={`${INTER} line-clamp-2 text-[15px] font-semibold leading-snug text-[#0f2352]`}>
+                        <h3 className={`${INTER} line-clamp-2 text-[15px] font-semibold leading-snug text-[#082052]`}>
                           {am && a.titleAm ? a.titleAm : a.title}
                         </h3>
                         <p className={`${INTER} mt-1 line-clamp-2 text-[13px] leading-[1.5] text-[#6b7690]`}>
@@ -322,7 +322,7 @@ export function AnnouncementsEventsSection({
                       <DateChip top={p.weekday} bottom={p.day} />
 
                       <div className="min-w-0 flex-1">
-                        <h3 className={`${INTER} line-clamp-1 text-[15px] font-semibold text-[#0f2352]`}>
+                        <h3 className={`${INTER} line-clamp-1 text-[15px] font-semibold text-[#082052]`}>
                           {am && e.titleAm ? e.titleAm : e.title}
                         </h3>
                         <div className={`${INTER} mt-1 flex items-center gap-1.5 text-[12.5px] text-[#7b86a0]`}>

@@ -1,10 +1,10 @@
 /* Global Header & Footer Direction A Styles */
 :root {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --cream: #FBF7F0;
+  --cream: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --red: #B4232C;
@@ -444,12 +444,6 @@
 .site-ftr .ch svg {
   width: 16px;
   height: 16px;
-}
-.site-ftr .ch .cut {
-  fill: var(--navy);
-}
-.site-ftr .ch a:hover .cut {
-  fill: var(--gold);
 }
 .site-ftr .ch b {
   display: block;

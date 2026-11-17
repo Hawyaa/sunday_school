@@ -47,11 +47,11 @@ export function GalleryGrid({ albums }: Props) {
             </button>
 
             {/* Modal Header */}
-            <div className="p-6 sm:p-7 border-b border-[#E3EEF8] bg-[#FBF7F0]">
+            <div className="p-6 sm:p-7 border-b border-[#E3EEF8] bg-[#F8F0E5]">
               <span className="text-xs uppercase tracking-wider text-[#8A6414] font-bold">
                 {isAm ? activeModalAlbum.categoryAm : activeModalAlbum.category}
               </span>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-[#1E2A5E] mt-1">
+              <h3 className="text-xl sm:text-2xl font-extrabold text-[#082052] mt-1">
                 {isAm ? activeModalAlbum.titleAm : activeModalAlbum.title}
               </h3>
               <p className="text-xs text-[#44506B] mt-1">
@@ -75,7 +75,7 @@ export function GalleryGrid({ albums }: Props) {
               </p>
 
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E2A5E] mb-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#082052] mb-3">
                   {isAm ? 'የተመረጡ ፎቶዎች' : 'Preview Images'}
                 </h4>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
@@ -98,7 +98,7 @@ export function GalleryGrid({ albums }: Props) {
                 <button
                   type="button"
                   onClick={() => setActiveModalAlbum(null)}
-                  className="px-6 py-2.5 rounded-xl bg-[#1E2A5E] text-white text-xs font-bold hover:bg-[#2F5D9E] transition"
+                  className="px-6 py-2.5 rounded-xl bg-[#082052] text-white text-xs font-bold hover:bg-[#2F5D9E] transition"
                 >
                   {isAm ? 'ዝጋ' : 'Close Preview'}
                 </button>

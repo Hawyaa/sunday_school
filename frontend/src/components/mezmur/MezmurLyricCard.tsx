@@ -36,7 +36,7 @@ export function MezmurLyricCard({ item }: Props) {
 
       {/* Header */}
       <div className="relative mb-4 flex items-center justify-between border-b border-[#f0e6d0] pb-3 pl-6">
-        <div className="flex items-center gap-3 font-['Crimson_Text',serif] text-[16px] font-semibold text-[#0f2352]">
+        <div className="flex items-center gap-3 font-['Crimson_Text',serif] text-[16px] font-semibold text-[#082052]">
           <MusicIcon className="h-5 w-5 text-[#b9852a]" />
           {am ? 'የተመረጠ የመዝሙር ግጥም' : 'Featured Lyric Text'}
         </div>
@@ -51,7 +51,7 @@ export function MezmurLyricCard({ item }: Props) {
       </div>
 
       {/* Title */}
-      <h3 className="mz-enter-title font-['Noto_Serif_Ethiopic','Playfair_Display',serif] text-[26px] font-bold leading-[1.3] text-[#0f2352]">
+      <h3 className="mz-enter-title font-['Noto_Serif_Ethiopic','Playfair_Display',serif] text-[26px] font-bold leading-[1.3] text-[#082052]">
         {item.title}
       </h3>
       {!am && <p className="mt-1 font-['Crimson_Text',serif] text-[17px] text-[#35496b]">({item.titleEn})</p>}
@@ -60,7 +60,7 @@ export function MezmurLyricCard({ item }: Props) {
       {item.audioUrl ? (
         <div className="mz-enter-player mx-auto my-3 w-full max-w-[420px] rounded-xl bg-[#FAF4E6] border border-[#E9D9B2] p-3 shadow-xs text-left">
           <div className="flex items-center justify-between mb-1.5 px-1">
-            <span className="flex items-center gap-1.5 text-xs font-bold text-[#0F1B3E]">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-[#082052]">
               <span className="inline-block w-2 h-2 rounded-full bg-[#137333] animate-pulse"></span>
               {am ? 'የተቀዳ መዝሙር (ኦዲዮ)' : 'Mezmur Audio Recording'}
             </span>

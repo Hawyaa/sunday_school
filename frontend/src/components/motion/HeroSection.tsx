@@ -118,7 +118,7 @@ export function HeroSection({ slides = HERO_SLIDES, intervalMs = HERO_INTERVAL_M
         >
           <Link
             href="/teachings"
-            className="w-full sm:w-auto px-8 py-3 rounded-full bg-[#C99A3B] hover:bg-[#d8a846] text-[#0F1B3E] font-bold text-sm shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-center"
+            className="w-full sm:w-auto px-8 py-3 rounded-full bg-[#C99A3B] hover:bg-[#d8a846] text-[#082052] font-bold text-sm shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer text-center"
           >
             {isAm ? 'ትምህርቶችን ይመልከቱ' : 'Explore Our Content'}
           </Link>

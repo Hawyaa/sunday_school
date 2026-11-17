@@ -3,18 +3,18 @@
    ========================================================================== */
 
 .admin-layout {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --bg: #FBF7F0;
+  --bg: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --card: #fff;
   --line: #e7e0d2;
   --red: #b3262e;
   --ok: #2e7d4f;
-  --text: #1E2A5E;
+  --text: #082052;
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 14px;
@@ -53,7 +53,7 @@
 /* ── Aside / Sidebar ─────────────────────────────────────────────────── */
 .admin-layout aside {
   width: 252px;
-  background: #1E2A5E;
+  background: #082052;
   color: #cfd6ee;
   padding: 16px 10px;
   position: sticky;
@@ -88,7 +88,7 @@
   background: var(--gold);
   display: grid;
   place-items: center;
-  color: #1E2A5E;
+  color: #082052;
   font-family: 'Noto Serif Ethiopic', serif;
   flex-shrink: 0;
   font-size: 18px;
@@ -123,7 +123,7 @@
 
 .admin-layout.super .badge {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
   box-shadow: 0 2px 10px rgba(201, 154, 59, 0.35);
 }
 
@@ -179,7 +179,7 @@
   font-style: normal;
   font-size: 11px;
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
   border-radius: 9px;
   padding: 1px 7px;
   font-weight: 700;
@@ -279,7 +279,7 @@
 
 .admin-layout .hdr-role-badge.super {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
   box-shadow: 0 2px 8px rgba(201, 154, 59, 0.35);
 }
 
@@ -403,7 +403,7 @@
 
 .admin-layout .btn.g {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .admin-layout .btn.g:hover {
@@ -605,7 +605,7 @@
 .admin-layout .tag.pub { background: #dff1e6; color: #1f6b40; }
 .admin-layout .tag.dr  { background: #fbeccb; color: #8A6414; }
 .admin-layout .tag.un  { background: #e6e8ef; color: #44506B; }
-.admin-layout .tag.bl  { background: #dbe8f7; color: #1E2A5E; }
+.admin-layout .tag.bl  { background: #dbe8f7; color: #082052; }
 .admin-layout .tag.rd  { background: #f8dcdc; color: #a02028; }
 .admin-layout .tag.fe  { background: var(--navy); color: #fff; }
 

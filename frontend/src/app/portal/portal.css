@@ -3,18 +3,18 @@
    ========================================================================== */
 
 .portal-root {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --bg: #FBF7F0;
+  --bg: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --card: #fff;
   --line: #eadfc8;
   --red: #b3262e;
   --ok: #2e7d4f;
-  --text: #1E2A5E;
+  --text: #082052;
 
   font: 15px/1.5 Inter, system-ui, -apple-system, sans-serif;
   background: var(--bg);
@@ -158,7 +158,7 @@
   font: 600 11px Inter, sans-serif;
   font-style: normal;
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
   border-radius: 10px;
   padding: 1px 8px;
 }
@@ -209,7 +209,7 @@
   align-items: center;
   gap: 8px;
   background: linear-gradient(180deg, #d3a03c, #b9852a);
-  color: #1E2A5E;
+  color: #082052;
   text-decoration: none;
   font: 600 13px Inter, sans-serif;
   padding: 9px 16px 9px 12px;
@@ -516,7 +516,7 @@
 
 .portal-root .bl {
   background: #dbe8f7;
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .portal-root .rd2 {
@@ -544,7 +544,7 @@
 
 .portal-root .btn.g {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .portal-root .btn.g:hover {
@@ -794,7 +794,7 @@
   bottom: 12px;
   right: 12px;
   background: #C99A3B;
-  color: #1E2A5E;
+  color: #082052;
   border-radius: 14px;
   padding: 8px 12px;
   font: 600 11px Inter, sans-serif;
@@ -814,7 +814,7 @@
   border: 0;
   font: 600 11px Inter, sans-serif;
   background: #fff;
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .portal-root .pv label {
@@ -822,7 +822,7 @@
   font: 600 11px Inter, sans-serif;
   letter-spacing: 0;
   text-transform: none;
-  color: #1E2A5E;
+  color: #082052;
   display: flex;
   gap: 5px;
   align-items: center;

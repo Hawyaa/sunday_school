@@ -77,14 +77,14 @@ export function MezmurHero() {
             />
 
             <nav aria-label="Breadcrumb" className="mz-crumb mb-1.5 flex items-center gap-2 text-[13px] font-medium text-[#1c2740]">
-              <Link href="/" className="hover:text-[#0f2352]">
+              <Link href="/" className="hover:text-[#082052]">
                 {am ? 'ዋና ገጽ' : 'Home'}
               </Link>
-              <span className="font-semibold text-[#0f2352]">›</span>
-              <span className="font-semibold text-[#0f2352]">{am ? 'መዝሙር' : 'Mezmur'}</span>
+              <span className="font-semibold text-[#082052]">›</span>
+              <span className="font-semibold text-[#082052]">{am ? 'መዝሙር' : 'Mezmur'}</span>
             </nav>
 
-            <h1 className="mb-1 font-['Playfair_Display',serif] text-[40px] font-bold leading-[1.1] text-[#0f2352] sm:text-[54px]">
+            <h1 className="mb-1 font-['Playfair_Display',serif] text-[40px] font-bold leading-[1.1] text-[#082052] sm:text-[54px]">
               <span className="sr-only">{title}</span>
               <span aria-hidden="true">
                 <SplitText text={title} />

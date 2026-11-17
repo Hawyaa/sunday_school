@@ -32,7 +32,7 @@ export function MezmurCategoriesCard({ active, onSelect }: Props) {
     <div className="relative rounded-xl border border-[#ecdcb8] bg-[#fffdf9] px-6 pb-9 pt-5 shadow-[0_3px_14px_rgba(15,35,82,0.05)]">
       <Corners size={40} inset={4} />
 
-      <h2 className="mb-3 flex items-center justify-center gap-3 font-['Playfair_Display',serif] text-[21px] font-bold text-[#0f2352]">
+      <h2 className="mb-3 flex items-center justify-center gap-3 font-['Playfair_Display',serif] text-[21px] font-bold text-[#082052]">
         <MusicIcon className="h-6 w-6 text-[#b9852a]" />
         {am ? 'የመዝሙር ምድቦች' : 'Mezmur Categories'}
       </h2>

@@ -1,8 +1,9 @@
 'use client';
 
 /**
- * AboutHero.tsx — Editorial hero on deep forest navy with glance stats card.
- * Exact layout from Tewahedo HTML design.
+ * AboutHero.tsx — Split two-column photo hero:
+ * LEFT: Church building photograph (~50% width)
+ * RIGHT: Breadcrumb, heading "About Us", tagline, and glance stats (~50% width)
  */
 
 import React, { useRef } from 'react';
@@ -17,29 +18,28 @@ export function AboutHero() {
   useHeroMotion(root, locale);
 
   return (
-    <div ref={root}>
+    <div ref={root} className="about-hero-wrapper">
       <style>{`
 /* Title entrance: pure CSS, ends visible no matter what (fill-mode both). */
 @keyframes hero-title-in {
-  from { opacity: 0; transform: translateY(26px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.hero-title-in { animation: hero-title-in 0.9s 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.hero-title-in { animation: hero-title-in 0.85s 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
 @media (prefers-reduced-motion: reduce) { .hero-title-in { animation: none; } }
 `}</style>
       <section className="about-hero">
-        <div className="c">
-          <svg className="pat" data-parallax viewBox="0 0 640 520" aria-hidden="true">
-            <rect width="640" height="520" fill="url(#lat)" />
-          </svg>
-          <div className="hero-text">
-            <nav aria-label="Breadcrumb" className="crumbs" data-a="crumbs">
-              <Link href="/" className="hover:underline">
+        <div className="c about-hero-split-container">
+          {/* LEFT SIDE: About Us content */}
+          <div className="about-hero-details">
+            <nav aria-label="Breadcrumb" className="crumbs-left" data-a="crumbs">
+              <Link href="/">
                 {am ? 'መነሻ' : 'Home'}
               </Link>
-              <span>/</span>
-              <b>{am ? 'ስለ እኛ' : 'About'}</b>
+              <span className="crumb-sep">›</span>
+              <b>{am ? 'ስለ እኛ' : 'About Us'}</b>
             </nav>
+
             <h1 className="hero-title-in">
               {am ? (
                 <>
@@ -51,25 +51,39 @@ export function AboutHero() {
                 </>
               )}
             </h1>
-            <p data-a="sub">
+
+            <p className="hero-tagline" data-a="sub">
               {am
                 ? 'እምነታችን። ተልዕኳችን። ማኅበረሰባችን።'
                 : 'Our Faith. Our Mission. Our Community.'}
             </p>
+
+            <div className="glance-bar-clean" data-a="glance">
+              <div className="glance-item">
+                <span className="glance-lbl">{am ? 'የተቋቋመው' : 'Serving since'}</span>
+                <b className="glance-val">1998</b>
+              </div>
+              <div className="glance-divider" aria-hidden="true" />
+              <div className="glance-item">
+                <span className="glance-lbl">{am ? 'የሰንበት ት/ቤት ተማሪዎች' : 'Sunday School students'}</span>
+                <b className="glance-val">200+</b>
+              </div>
+              <div className="glance-divider" aria-hidden="true" />
+              <div className="glance-item">
+                <span className="glance-lbl">{am ? 'ንቁ አገልግሎቶች' : 'Active ministries'}</span>
+                <b className="glance-val">4</b>
+              </div>
+            </div>
           </div>
-          <div className="glance" data-a="glance">
-            <h4>{am ? 'በጨረፍታ' : 'At a glance'}</h4>
-            <div className="row">
-              <span>{am ? 'የተቋቋመው' : 'Serving since'}</span>
-              <b>1998</b>
-            </div>
-            <div className="row">
-              <span>{am ? 'የሰንበት ት/ቤት ተማሪዎች' : 'Sunday School students'}</span>
-              <b>200+</b>
-            </div>
-            <div className="row">
-              <span>{am ? 'ንቁ አገልግሎቶች' : 'Active ministries'}</span>
-              <b>4</b>
+
+          {/* RIGHT SIDE: Church building photograph */}
+          <div className="about-hero-media">
+            <div className="about-hero-img-frame">
+              <img
+                src="/images/about-church.jpg"
+                alt={am ? 'የደብረ ዲዮስቆሮስ ቤተክርስቲያን' : 'Debre Dioskoros Church'}
+                className="about-hero-photo"
+              />
             </div>
           </div>
         </div>

@@ -68,7 +68,7 @@ export function ReportCard({ report, onView, index = 0 }: Props) {
           <h3
             data-rm="fade"
             style={rmDelay(d + 220)}
-            className="font-['Crimson_Text',serif] text-[19px] font-semibold leading-[1.2] text-[#0f2352]"
+            className="font-['Crimson_Text',serif] text-[19px] font-semibold leading-[1.2] text-[#082052]"
           >
             {title}
           </h3>

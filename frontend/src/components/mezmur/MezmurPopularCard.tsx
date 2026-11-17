@@ -22,8 +22,8 @@ export function MezmurPopularCard({ items, activeId, onSelect }: Props) {
 
   return (
     <div className="rounded-xl border border-[#dbe6f3] bg-[linear-gradient(#edf3fa,#e6eef8)] px-5 pb-3 pt-4 shadow-[0_3px_14px_rgba(15,35,82,0.05)]">
-      <h2 className="mb-2 flex items-center gap-3 px-1 font-['Crimson_Text',serif] text-[17px] font-bold text-[#0f2352]">
-        <FlameIcon className="h-5 w-5 text-[#0f2352]" />
+      <h2 className="mb-2 flex items-center gap-3 px-1 font-['Crimson_Text',serif] text-[17px] font-bold text-[#082052]">
+        <FlameIcon className="h-5 w-5 text-[#082052]" />
         {am ? 'ተወዳጅ መዝሙራት' : 'Popular Mezmurs'}
       </h2>
 
@@ -42,10 +42,10 @@ export function MezmurPopularCard({ items, activeId, onSelect }: Props) {
                   tabIndex={0}
                   onClick={() => onSelect(m.id)}
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(m.id)}
-                  className="flex cursor-pointer items-center gap-3 px-1 py-2.5 font-['Crimson_Text',serif] text-[14px] text-[#35609a] transition hover:text-[#0f2352]"
+                  className="flex cursor-pointer items-center gap-3 px-1 py-2.5 font-['Crimson_Text',serif] text-[14px] text-[#35609a] transition hover:text-[#082052]"
                 >
                   <span className="w-4 shrink-0 text-[#35496b]">{i + 1}.</span>
-                  <span className={`min-w-0 flex-1 truncate ${isActive ? 'font-semibold text-[#0f2352]' : ''}`}>
+                  <span className={`min-w-0 flex-1 truncate ${isActive ? 'font-semibold text-[#082052]' : ''}`}>
                     <span className="truncate">{m.title}</span>
                     {m.audioUrl && (
                       <span className="ml-1 text-[11px] text-[#137333] font-bold" title="Audio recording available">

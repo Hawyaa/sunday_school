@@ -34,7 +34,7 @@ export function EventModal({ event, onClose }: Props) {
           className="relative h-44 bg-cover bg-center"
           style={{ backgroundImage: `url("${event.img}")` }}
         >
-          <div className="absolute inset-0 bg-linear-to-t from-[#0f2352]/90 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#082052]/90 to-transparent" />
           <button
             type="button"
             onClick={onClose}
@@ -51,7 +51,7 @@ export function EventModal({ event, onClose }: Props) {
         {/* Content Body */}
         <div className="p-6">
           <h2
-            className="text-2xl font-bold text-[#0f2352] mb-3 leading-snug"
+            className="text-2xl font-bold text-[#082052] mb-3 leading-snug"
             style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
           >
             {event.title}
@@ -81,7 +81,7 @@ export function EventModal({ event, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-lg border border-[#ece5d8] text-sm font-semibold text-[#0f2352] hover:bg-[#f6f1e8] transition cursor-pointer"
+              className="px-5 py-2.5 rounded-lg border border-[#ece5d8] text-sm font-semibold text-[#082052] hover:bg-[#f6f1e8] transition cursor-pointer"
             >
               Close
             </button>

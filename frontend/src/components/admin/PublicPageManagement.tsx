@@ -692,13 +692,13 @@ const INITIAL_PAGES: Record<string, PageDef> = {
 };
 
 const GALLERY_PALETTES = [
-  '#C99A3B,#1E2A5E',
+  '#C99A3B,#082052',
   '#8A6414,#2F5D9E',
-  '#1E2A5E,#C99A3B',
+  '#082052,#C99A3B',
   '#2F5D9E,#E3EEF8',
-  '#b3262e,#1E2A5E',
+  '#b3262e,#082052',
   '#C99A3B,#8A6414',
-  '#1E2A5E,#2F5D9E',
+  '#082052,#2F5D9E',
   '#C99A3B,#2F5D9E',
 ];
 
@@ -1287,7 +1287,7 @@ export function PublicPageManagement({ isSuper = false }: { isSuper?: boolean })
       {/* ── Top Simulator Toolbar ───────────────────────────────────────── */}
       <div className="ppm-pv">
         <b>DESIGN PREVIEW &amp; STUDIO</b>
-        <label style={{ margin: 0, font: '600 12px Inter', textTransform: 'none', color: '#1E2A5E' }}>
+        <label style={{ margin: 0, font: '600 12px Inter', textTransform: 'none', color: '#082052' }}>
           Signed in as{' '}
           <select
             value={activeRole}
@@ -1303,7 +1303,7 @@ export function PublicPageManagement({ isSuper = false }: { isSuper?: boolean })
             <option value="a">Admin (Content Editor)</option>
           </select>
         </label>
-        <span style={{ fontWeight: 500, color: '#1E2A5E' }}>
+        <span style={{ fontWeight: 500, color: '#082052' }}>
           {activeRole === 'a'
             ? 'Admin sees only the pages the Super Admin granted. Reports is view-only here.'
             : 'Super Admin has full access to chrome, permissions, and all modules.'}

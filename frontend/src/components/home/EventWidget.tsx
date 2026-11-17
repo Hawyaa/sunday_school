@@ -115,7 +115,7 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
           <span className="text-[11px] font-bold uppercase tracking-widest text-[#C99A3B] block mb-1">
             {isAm ? "መርሐ ግብር" : "MARK YOUR CALENDAR"}
           </span>
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#0F1B3E]">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#082052]">
             {isAm ? "የሚመጡ መርሐ ግብሮች" : "Upcoming Events"}
           </h2>
         </div>
@@ -144,7 +144,7 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
             <div className="bg-[#FAF9F5] p-3.5 rounded-xl border border-[#EAE6DF] mb-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 {/* Deep Navy Date Badge */}
-                <div className="w-12 h-12 rounded-xl bg-[#0F1B3E] text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-[#082052] text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
                   <span className="text-[9px] font-bold text-[#C99A3B] leading-none uppercase">
                     {featured.badgeMonth}
                   </span>
@@ -153,7 +153,7 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-xs sm:text-[13.5px] font-bold text-[#0F1B3E] truncate">
+                  <h3 className="text-xs sm:text-[13.5px] font-bold text-[#082052] truncate">
                     {isAm && featured.titleAm
                       ? featured.titleAm
                       : featured.title}
@@ -187,14 +187,14 @@ export function EventWidget({ events, event, isLoading = false }: Props) {
                     <span className="text-[9px] font-bold text-[#A27B2C] leading-none uppercase">
                       {r.dayOfWeek || r.badgeMonth}
                     </span>
-                    <span className="text-xs font-bold text-[#0F1B3E] leading-none mt-0.5">
+                    <span className="text-xs font-bold text-[#082052] leading-none mt-0.5">
                       {r.badgeDay}
                     </span>
                   </div>
 
                   {/* Title & Place */}
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs sm:text-[13px] font-bold text-[#0F1B3E] truncate group-hover:text-[#C99A3B] transition-colors">
+                    <h4 className="text-xs sm:text-[13px] font-bold text-[#082052] truncate group-hover:text-[#C99A3B] transition-colors">
                       {isAm && r.titleAm ? r.titleAm : r.title}
                     </h4>
                     <p className="text-[11px] text-[#7C88A8] truncate">

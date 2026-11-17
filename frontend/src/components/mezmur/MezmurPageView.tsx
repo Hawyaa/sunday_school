@@ -128,7 +128,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                     <MusicIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="mz-card-h font-['Playfair_Display',serif] text-xl font-bold text-[#0f2352]">
+                    <h2 className="mz-card-h font-['Playfair_Display',serif] text-xl font-bold text-[#082052]">
                       {currentCatLabel}
                     </h2>
                     <p className="mz-card-desc text-xs text-[#7C88A8]">
@@ -150,7 +150,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                   <div className="w-12 h-12 rounded-full bg-[#FAF4E6] border border-[#E9D9B2] flex items-center justify-center mx-auto mb-3 text-[#b9852a]">
                     <MusicIcon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-serif text-lg font-bold text-[#0f2352] mb-1">
+                  <h3 className="font-serif text-lg font-bold text-[#082052] mb-1">
                     {am ? 'ምንም መዝሙር አልተገኘም' : 'No Mezmurs Found'}
                   </h3>
                   <p className="text-xs text-[#7C88A8] mb-4">
@@ -164,7 +164,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                       setCategory('all');
                       setSearch('');
                     }}
-                    className="px-4 py-1.5 rounded-lg bg-[#0f2352] text-white text-xs font-semibold hover:bg-[#19377d] transition-colors"
+                    className="px-4 py-1.5 rounded-lg bg-[#082052] text-white text-xs font-semibold hover:bg-[#19377d] transition-colors"
                   >
                     {am ? 'ሁሉንም አሳይ' : 'Reset Category & Filters'}
                   </button>
@@ -191,7 +191,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                         {/* Title & Subtitle */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="mz-row-title font-bold text-[#0F1B3E] text-base group-hover:text-[#b9852a] transition-colors truncate">
+                            <span className="mz-row-title font-bold text-[#082052] text-base group-hover:text-[#b9852a] transition-colors truncate">
                               {m.title}
                             </span>
                             {m.audioUrl && (
@@ -233,7 +233,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
               <button
                 type="button"
                 onClick={() => setSelectedMezmurId(null)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0f2352] text-white text-xs font-bold hover:bg-[#19377d] transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#082052] text-white text-xs font-bold hover:bg-[#19377d] transition-all cursor-pointer shadow-xs"
               >
                 <span>←</span>
                 <span>{am ? 'ወደ መዝሙራት ዝርዝር ተመለስ' : 'Back to Mezmur List'}</span>
@@ -245,7 +245,7 @@ export function MezmurPageView({ items: initialItems, initialSelectedId }: Props
                     {categories.find((c) => c.key === activeMezmur.category)?.en || activeMezmur.category}
                   </span>
                   <span>/</span>
-                  <span className="font-bold text-[#0f2352] truncate max-w-[200px]">
+                  <span className="font-bold text-[#082052] truncate max-w-[200px]">
                     {activeMezmur.title}
                   </span>
                 </div>

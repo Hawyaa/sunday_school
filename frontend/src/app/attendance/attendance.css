@@ -3,18 +3,18 @@
    ========================================================================== */
 
 .att-root {
-  --navy: #1E2A5E;
+  --navy: #082052;
   --blue: #2F5D9E;
   --gold: #C99A3B;
   --ochre: #8A6414;
-  --bg: #FBF7F0;
+  --bg: #F8F0E5;
   --sky: #E3EEF8;
   --slate: #44506B;
   --card: #fff;
   --line: #e7e0d2;
   --red: #b3262e;
   --ok: #2e7d4f;
-  --text: #1E2A5E;
+  --text: #082052;
   --okbg: #dff1e6;
   --rdbg: #f8dcdc;
 
@@ -67,7 +67,7 @@
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
 .att-root aside {
   width: 240px;
-  background: #1E2A5E;
+  background: #082052;
   color: #cfd6ee;
   padding: 18px 12px;
   position: sticky;
@@ -97,7 +97,7 @@
   background: var(--gold);
   display: grid;
   place-items: center;
-  color: #1E2A5E;
+  color: #082052;
   font-family: 'Noto Serif Ethiopic', serif;
   font-size: 18px;
   font-weight: 700;
@@ -192,7 +192,7 @@
   align-items: center;
   gap: 7px;
   background: linear-gradient(180deg, #d3a03c, #b9852a);
-  color: #1E2A5E;
+  color: #082052;
   text-decoration: none;
   font: 600 12.5px Inter, sans-serif;
   padding: 7px 14px 7px 10px;
@@ -354,7 +354,7 @@
 
 .att-root .btn.g {
   background: var(--gold);
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .att-root .btn.g:hover:not(:disabled) {
@@ -413,7 +413,7 @@
 
 .att-root .bl {
   background: #dbe8f7;
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .att-root .note {
@@ -782,7 +782,7 @@
   top: 60px;
   right: 12px;
   background: #C99A3B;
-  color: #1E2A5E;
+  color: #082052;
   border-radius: 12px;
   padding: 6px 12px;
   font: 600 11px Inter, sans-serif;
@@ -800,14 +800,14 @@
   border-radius: 6px;
   font: 600 11px Inter, sans-serif;
   background: #fff;
-  color: #1E2A5E;
+  color: #082052;
 }
 
 .att-root .pv label {
   margin: 0;
   text-transform: none;
   letter-spacing: 0;
-  color: #1E2A5E;
+  color: #082052;
   font-size: 11px;
   display: flex;
   gap: 5px;

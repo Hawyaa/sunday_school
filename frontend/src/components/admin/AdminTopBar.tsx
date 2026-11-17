@@ -68,11 +68,11 @@ export function AdminTopBar({
         <div className="flex items-center gap-2 text-xs font-medium text-[#7C88A8] mb-1">
           <span>Admin</span>
           <span>/</span>
-          <span className="text-[#0F1B3E] font-semibold capitalize">
+          <span className="text-[#082052] font-semibold capitalize">
             {activeSection === 'users' ? 'Users & Admins' : activeSection}
           </span>
         </div>
-        <h1 className="font-serif text-2xl font-bold text-[#0F1B3E] tracking-tight">
+        <h1 className="font-serif text-2xl font-bold text-[#082052] tracking-tight">
           {current.title}
         </h1>
         <p className="text-xs text-[#6B7897] mt-0.5">
@@ -92,7 +92,7 @@ export function AdminTopBar({
         {activeSection !== 'dashboard' && activeSection !== 'users' && onAddNew && (
           <button
             onClick={onAddNew}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0F1B3E] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#082052] hover:bg-[#1A2D66] text-white text-xs font-semibold shadow-sm transition-colors"
           >
             <IconPlus className="w-3.5 h-3.5" />
             <span>Add New</span>
@@ -100,7 +100,7 @@ export function AdminTopBar({
         )}
 
         {/* User Avatar */}
-        <div className="w-8 h-8 rounded-full bg-[#0F1B3E] text-white text-xs font-bold flex items-center justify-center ring-2 ring-[#C8952F]/40 shadow-xs">
+        <div className="w-8 h-8 rounded-full bg-[#082052] text-white text-xs font-bold flex items-center justify-center ring-2 ring-[#C8952F]/40 shadow-xs">
           {currentUser.name
             .split(' ')
             .map((n) => n[0])

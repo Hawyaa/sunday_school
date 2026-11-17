@@ -59,10 +59,10 @@ export function ContactInfoGrid() {
             <div className="w-12 h-12 rounded-xl bg-[#E3EEF8] border border-[#C99A3B]/40 flex items-center justify-center text-2xl mb-4">
               {card.icon}
             </div>
-            <h3 className="text-base font-extrabold text-[#1E2A5E] mb-2">
+            <h3 className="text-base font-extrabold text-[#082052] mb-2">
               {isAm ? card.titleAm : card.titleEn}
             </h3>
-            <p className="text-sm font-semibold text-[#1E2A5E] leading-relaxed">
+            <p className="text-sm font-semibold text-[#082052] leading-relaxed">
               {card.detail1}
             </p>
             <p className="text-sm text-[#44506B] leading-relaxed">

@@ -120,11 +120,11 @@ function TeachingDetailContent() {
   if (!teaching) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <h2 className="font-serif text-2xl font-bold text-[#0f2352]">Teaching Material Not Found</h2>
+        <h2 className="font-serif text-2xl font-bold text-[#082052]">Teaching Material Not Found</h2>
         <p className="mt-2 text-sm text-[#35609a]">The requested lesson or study material could not be located.</p>
         <button
           onClick={() => router.push('/teachings')}
-          className="mt-6 rounded-full bg-[#0f2352] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#b9852a] transition-colors"
+          className="mt-6 rounded-full bg-[#082052] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#b9852a] transition-colors"
         >
           ← Return to All Teachings
         </button>
@@ -148,11 +148,11 @@ function TeachingDetailContent() {
           </Link>
 
           <div className="flex items-center gap-2 text-xs text-[#6B7897]">
-            <Link href="/" className="hover:text-[#0f2352]">Home</Link>
+            <Link href="/" className="hover:text-[#082052]">Home</Link>
             <span>/</span>
-            <Link href="/teachings" className="hover:text-[#0f2352]">Teachings</Link>
+            <Link href="/teachings" className="hover:text-[#082052]">Teachings</Link>
             <span>/</span>
-            <span className="font-semibold text-[#0f2352] truncate max-w-[200px] sm:max-w-xs">{teaching.title}</span>
+            <span className="font-semibold text-[#082052] truncate max-w-[200px] sm:max-w-xs">{teaching.title}</span>
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@ function TeachingDetailContent() {
 
           {/* Badges & Meta */}
           <div className="flex flex-wrap items-center gap-2.5 mb-3">
-            <span className="rounded-full bg-[#0f2352] px-3 py-1 font-serif text-xs font-semibold text-white tracking-wide">
+            <span className="rounded-full bg-[#082052] px-3 py-1 font-serif text-xs font-semibold text-white tracking-wide">
               {teaching.category || 'General'}
             </span>
 
@@ -200,7 +200,7 @@ function TeachingDetailContent() {
           </div>
 
           {/* Titles */}
-          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#0f2352] sm:text-4xl">
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#082052] sm:text-4xl">
             {teaching.title}
           </h1>
           {teaching.titleAm && (
@@ -215,7 +215,7 @@ function TeachingDetailContent() {
               <span className="grid h-7 w-7 place-items-center rounded-full bg-[#b9852a]/20 text-[#b9852a]">
                 <TIcon name="user" solid className="h-3.5 w-3.5" />
               </span>
-              <span className="font-semibold text-[#0f2352]">{teaching.author || 'Abune Media Teacher'}</span>
+              <span className="font-semibold text-[#082052]">{teaching.author || 'Abune Media Teacher'}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -240,7 +240,7 @@ function TeachingDetailContent() {
                 <span className="text-xs font-bold uppercase tracking-wider text-[#b9852a]">
                   Interactive Multi-Format Material
                 </span>
-                <h3 className="font-serif text-lg font-bold text-[#0f2352]">
+                <h3 className="font-serif text-lg font-bold text-[#082052]">
                   This teaching includes both Video Lecture and Companion Study Book
                 </h3>
               </div>
@@ -252,8 +252,8 @@ function TeachingDetailContent() {
                   onClick={() => setActiveMediaTab('dual')}
                   className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                     activeMediaTab === 'dual'
-                      ? 'bg-[#0f2352] text-white shadow-xs'
-                      : 'text-[#4b5563] hover:text-[#0f2352]'
+                      ? 'bg-[#082052] text-white shadow-xs'
+                      : 'text-[#4b5563] hover:text-[#082052]'
                   }`}
                 >
                   ⚡ Dual View (Video + Book)
@@ -263,8 +263,8 @@ function TeachingDetailContent() {
                   onClick={() => setActiveMediaTab('video')}
                   className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                     activeMediaTab === 'video'
-                      ? 'bg-[#0f2352] text-white shadow-xs'
-                      : 'text-[#4b5563] hover:text-[#0f2352]'
+                      ? 'bg-[#082052] text-white shadow-xs'
+                      : 'text-[#4b5563] hover:text-[#082052]'
                   }`}
                 >
                   🎥 Video Only
@@ -274,8 +274,8 @@ function TeachingDetailContent() {
                   onClick={() => setActiveMediaTab('book')}
                   className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
                     activeMediaTab === 'book'
-                      ? 'bg-[#0f2352] text-white shadow-xs'
-                      : 'text-[#4b5563] hover:text-[#0f2352]'
+                      ? 'bg-[#082052] text-white shadow-xs'
+                      : 'text-[#4b5563] hover:text-[#082052]'
                   }`}
                 >
                   📖 PDF Book Only
@@ -290,14 +290,14 @@ function TeachingDetailContent() {
               {/* Left Column: Video Lecture */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 font-serif font-bold text-[#0f2352]">
+                  <span className="flex items-center gap-2 font-serif font-bold text-[#082052]">
                     <span className="grid h-6 w-6 place-items-center rounded-full bg-[#DC2626]/10 text-[#DC2626]">🎥</span>
                     Video Lecture
                   </span>
                   <span className="text-xs text-[#6B7897]">HD Player</span>
                 </div>
 
-                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-md border border-[#0f2352]/20">
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-md border border-[#082052]/20">
                   {youtubeEmbedUrl ? (
                     <iframe
                       src={youtubeEmbedUrl}
@@ -328,7 +328,7 @@ function TeachingDetailContent() {
               {/* Right Column: PDF Book Reader */}
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 font-serif font-bold text-[#0f2352]">
+                  <span className="flex items-center gap-2 font-serif font-bold text-[#082052]">
                     <span className="grid h-6 w-6 place-items-center rounded-full bg-[#b9852a]/15 text-[#b9852a]">📖</span>
                     Companion Study Book (PDF)
                   </span>
@@ -356,7 +356,7 @@ function TeachingDetailContent() {
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
                       <span className="text-4xl">📄</span>
-                      <p className="mt-2 text-sm font-semibold text-[#0f2352]">Companion Book Attached</p>
+                      <p className="mt-2 text-sm font-semibold text-[#082052]">Companion Book Attached</p>
                       <p className="text-xs text-[#6B7897]">PDF reader preview is ready for download.</p>
                     </div>
                   )}
@@ -374,14 +374,14 @@ function TeachingDetailContent() {
           {(activeMediaTab === 'video' || (!isBoth && hasVideo)) && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 font-serif font-bold text-[#0f2352]">
+                <span className="flex items-center gap-2 font-serif font-bold text-[#082052]">
                   <span className="grid h-6 w-6 place-items-center rounded-full bg-[#DC2626]/10 text-[#DC2626]">🎥</span>
                   Recorded Video Lecture
                 </span>
                 <span className="text-xs text-[#6B7897]">Full Screen Supported</span>
               </div>
 
-              <div className="relative aspect-video max-h-[580px] w-full overflow-hidden rounded-2xl bg-black shadow-lg border border-[#0f2352]/20">
+              <div className="relative aspect-video max-h-[580px] w-full overflow-hidden rounded-2xl bg-black shadow-lg border border-[#082052]/20">
                 {youtubeEmbedUrl ? (
                   <iframe
                     src={youtubeEmbedUrl}
@@ -415,7 +415,7 @@ function TeachingDetailContent() {
                     📄
                   </span>
                   <div>
-                    <h4 className="font-serif font-bold text-[#0f2352] text-base">
+                    <h4 className="font-serif font-bold text-[#082052] text-base">
                       {teaching.pdfFileName || `${teaching.title}.pdf`}
                     </h4>
                     <p className="text-xs text-[#6B7897]">
@@ -439,7 +439,7 @@ function TeachingDetailContent() {
                       <a
                         href={teaching.pdfUrl}
                         download={teaching.pdfFileName || 'teaching-book.pdf'}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#0f2352] hover:bg-[#b9852a] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#082052] hover:bg-[#b9852a] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
                       >
                         <span>📥</span>
                         <span>Download PDF Book</span>
@@ -460,7 +460,7 @@ function TeachingDetailContent() {
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
                     <span className="text-5xl">📖</span>
-                    <h4 className="mt-3 font-serif text-lg font-bold text-[#0f2352]">
+                    <h4 className="mt-3 font-serif text-lg font-bold text-[#082052]">
                       Document Preview
                     </h4>
                     <p className="text-xs text-[#6B7897] max-w-sm mt-1">
@@ -489,7 +489,7 @@ function TeachingDetailContent() {
                   type="button"
                   onClick={toggleAudio}
                   aria-label={isPlaying ? 'Pause sermon' : 'Play sermon'}
-                  className="group relative flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-[#0f2352] hover:bg-[#b9852a] text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+                  className="group relative flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-[#082052] hover:bg-[#b9852a] text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
                 >
                   {isPlaying ? (
                     <span className="text-2xl font-bold">⏸</span>
@@ -508,7 +508,7 @@ function TeachingDetailContent() {
                       <span className="text-[11px] font-bold uppercase tracking-wider text-[#b9852a]">
                         Audio Sermon & Sacred Lecture
                       </span>
-                      <h4 className="font-serif text-lg font-bold text-[#0f2352]">
+                      <h4 className="font-serif text-lg font-bold text-[#082052]">
                         {teaching.audioFileName || `${teaching.title} — Lecture Audio`}
                       </h4>
                     </div>
@@ -538,7 +538,7 @@ function TeachingDetailContent() {
                       <a
                         href={teaching.audioUrl}
                         download={teaching.audioFileName || 'sermon.mp3'}
-                        className="inline-flex items-center gap-1 hover:text-[#0f2352] font-medium"
+                        className="inline-flex items-center gap-1 hover:text-[#082052] font-medium"
                       >
                         <span>📥 Download Audio (MP3)</span>
                       </a>
@@ -554,7 +554,7 @@ function TeachingDetailContent() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start mb-12">
           {/* Main Article & Notes */}
           <article className="rounded-2xl border border-[#ece5d8] bg-[#fffdf9] p-6 sm:p-8 shadow-[0_2px_12px_rgba(15,35,82,0.04)] font-['Crimson_Text',serif]">
-            <h3 className="font-serif text-2xl font-bold text-[#0f2352] border-b border-[#ece5d8] pb-3 mb-5">
+            <h3 className="font-serif text-2xl font-bold text-[#082052] border-b border-[#ece5d8] pb-3 mb-5">
               Study Overview & Scriptural Reflections
             </h3>
 
@@ -566,7 +566,7 @@ function TeachingDetailContent() {
             {/* If Outline is provided */}
             {teaching.outline && teaching.outline.length > 0 && (
               <div className="mt-8 rounded-xl bg-[#fffbf1] p-5 border border-[#dcc08a]">
-                <h4 className="font-serif text-lg font-bold text-[#0f2352] mb-3 flex items-center gap-2">
+                <h4 className="font-serif text-lg font-bold text-[#082052] mb-3 flex items-center gap-2">
                   <span className="text-[#b9852a]">✦</span> Key Study Topics & Outline
                 </h4>
                 <ul className="space-y-2 text-sm text-[#34476b]">
@@ -586,7 +586,7 @@ function TeachingDetailContent() {
           {/* Sidebar: Related Teachings & Resource Links */}
           <aside className="space-y-6">
             <div className="rounded-2xl border border-[#ece5d8] bg-[#fffdf9] p-5 shadow-[0_2px_12px_rgba(15,35,82,0.04)]">
-              <h4 className="font-serif text-base font-bold text-[#0f2352] border-b border-[#ece5d8] pb-2 mb-4">
+              <h4 className="font-serif text-base font-bold text-[#082052] border-b border-[#ece5d8] pb-2 mb-4">
                 More in {teaching.category || 'Teachings'}
               </h4>
 
@@ -605,7 +605,7 @@ function TeachingDetailContent() {
                         className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
                       />
                       <div className="min-w-0 flex-1">
-                        <h5 className="font-serif text-sm font-semibold text-[#0f2352] group-hover:text-[#b9852a] line-clamp-1 transition-colors">
+                        <h5 className="font-serif text-sm font-semibold text-[#082052] group-hover:text-[#b9852a] line-clamp-1 transition-colors">
                           {rel.title}
                         </h5>
                         <p className="text-xs text-[#6B7897] truncate">{rel.author || 'Abune Media'}</p>
@@ -628,7 +628,7 @@ function TeachingDetailContent() {
 
             {/* Quick Sunday School Support Notice */}
             <div className="rounded-2xl border border-[#dcc08a] bg-[#fffdf9] p-5">
-              <h5 className="font-serif font-bold text-sm text-[#0f2352] mb-1">
+              <h5 className="font-serif font-bold text-sm text-[#082052] mb-1">
                 Sunday School Curriculum
               </h5>
               <p className="text-xs text-[#6B7897] leading-relaxed">

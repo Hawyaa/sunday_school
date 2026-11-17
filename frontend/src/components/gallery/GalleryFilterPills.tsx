@@ -38,8 +38,8 @@ export function GalleryFilterPills({ activeCategory, onSelect }: Props) {
             onClick={() => onSelect(cat.key)}
             className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all border ${
               isActive
-                ? 'bg-[#1E2A5E] text-white border-[#C99A3B] shadow-sm'
-                : 'bg-white text-[#1E2A5E] border-[#E3EEF8] hover:border-[#C99A3B] hover:bg-[#E3EEF8]'
+                ? 'bg-[#082052] text-white border-[#C99A3B] shadow-sm'
+                : 'bg-white text-[#082052] border-[#E3EEF8] hover:border-[#C99A3B] hover:bg-[#E3EEF8]'
             }`}
           >
             {isAm ? cat.labelAm : cat.labelEn}

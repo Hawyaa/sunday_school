@@ -66,7 +66,7 @@ export function AnnouncementsCard({ items, isLoading = false }: Props) {
           <span className="text-[11px] font-bold uppercase tracking-widest text-[#C99A3B] block mb-1">
             {isAm ? 'ወቅታዊ መረጃ' : 'STAY INFORMED'}
           </span>
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#0F1B3E]">
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#082052]">
             {isAm ? 'የቅርብ ጊዜ ማስታወቂያዎች' : 'Latest Announcements'}
           </h2>
         </div>
@@ -116,14 +116,14 @@ export function AnnouncementsCard({ items, isLoading = false }: Props) {
                     <span className="text-[9px] font-bold text-[#A27B2C] leading-none uppercase">
                       {monthStr}
                     </span>
-                    <span className="text-sm font-bold text-[#0F1B3E] leading-none mt-0.5">
+                    <span className="text-sm font-bold text-[#082052] leading-none mt-0.5">
                       {dayStr}
                     </span>
                   </div>
 
                   {/* Content */}
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-xs sm:text-[13px] font-bold text-[#0F1B3E] truncate group-hover:text-[#C99A3B] transition-colors">
+                    <h3 className="text-xs sm:text-[13px] font-bold text-[#082052] truncate group-hover:text-[#C99A3B] transition-colors">
                       {a.title}
                     </h3>
                     <p className="text-[11px] text-[#7C88A8] truncate mt-0.5">

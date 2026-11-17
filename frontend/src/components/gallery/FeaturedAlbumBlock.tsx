@@ -28,10 +28,10 @@ export function FeaturedAlbumBlock({ album }: Props) {
             alt={album.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1E2A5E]/80 via-transparent to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#082052]/80 via-transparent to-black/20" />
 
           {/* Top Badge */}
-          <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#1E2A5E]/90 text-[#C99A3B] border border-[#C99A3B] text-xs font-bold shadow-md">
+          <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#082052]/90 text-[#C99A3B] border border-[#C99A3B] text-xs font-bold shadow-md">
             <span>✨</span>
             <span>{isAm ? 'ተለይቶ የቀረበ ማህደር' : 'Featured Album'}</span>
           </div>
@@ -48,11 +48,11 @@ export function FeaturedAlbumBlock({ album }: Props) {
         </div>
 
         {/* Right: Album Details & Preview Grid */}
-        <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-br from-white to-[#FBF7F0]">
+        <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-br from-white to-[#F8F0E5]">
           <div>
             <div className="flex items-center justify-between text-xs text-[#8A6414] font-semibold mb-3">
               <span>📅 {album.date}</span>
-              <span className="bg-[#E3EEF8] text-[#1E2A5E] px-2.5 py-1 rounded-md font-bold">
+              <span className="bg-[#E3EEF8] text-[#082052] px-2.5 py-1 rounded-md font-bold">
                 📷 {album.photoCount} {isAm ? 'ፎቶዎች' : 'Photos'}
               </span>
             </div>
@@ -74,7 +74,7 @@ export function FeaturedAlbumBlock({ album }: Props) {
                     className="w-full h-full object-cover transition-transform group-hover:scale-110"
                   />
                   {i === album.previewImages.length - 1 && (
-                    <div className="absolute inset-0 bg-[#1E2A5E]/80 flex items-center justify-center text-white text-xs font-extrabold">
+                    <div className="absolute inset-0 bg-[#082052]/80 flex items-center justify-center text-white text-xs font-extrabold">
                       +{album.photoCount - album.previewImages.length}
                     </div>
                   )}
@@ -86,7 +86,7 @@ export function FeaturedAlbumBlock({ album }: Props) {
           <div>
             <button
               type="button"
-              className="w-full py-3 px-5 rounded-xl bg-[#1E2A5E] hover:bg-[#2F5D9E] text-white border-2 border-[#C99A3B] text-xs font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 px-5 rounded-xl bg-[#082052] hover:bg-[#2F5D9E] text-white border-2 border-[#C99A3B] text-xs font-bold shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>🖼️</span>
               <span>

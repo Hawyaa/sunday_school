@@ -25,7 +25,7 @@ export function TeachingsQuoteBanner({
       <i aria-hidden className={`${corner} bottom-1.5 right-1.5 -scale-y-100`} />
 
       <Cross className="mx-auto mb-1.5 h-14" />
-      <h2 className="mb-3 text-[25px] font-bold leading-[1.25] text-[#0f2352]" style={{ fontFamily: '"Playfair Display", Georgia, serif' }}>{title}</h2>
+      <h2 className="mb-3 text-[25px] font-bold leading-[1.25] text-[#082052]" style={{ fontFamily: '"Playfair Display", Georgia, serif' }}>{title}</h2>
       <q className="block font-['Crimson_Text',serif] text-lg italic leading-[1.4] text-[#26385a] [quotes:none]">{quote}</q>
       <small className="mt-4 block font-['Crimson_Text',serif] text-sm italic text-[#5a6b8c]">{author}</small>
     </div>

@@ -33,8 +33,8 @@ export function TeachingsFormatTabs({ activeFormat, onSelect }: Props) {
             onClick={() => onSelect(f.key)}
             className={`py-2.5 px-4 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
               isActive
-                ? 'bg-[#1E2A5E] text-white border-[1.5px] border-[#C99A3B] shadow-[0_2px_6px_rgba(30,42,94,0.12)]'
-                : 'bg-transparent text-[#1E2A5E] hover:bg-white/60'
+                ? 'bg-[#082052] text-white border-[1.5px] border-[#C99A3B] shadow-[0_2px_6px_rgba(30,42,94,0.12)]'
+                : 'bg-transparent text-[#082052] hover:bg-white/60'
             }`}
           >
             <span>{f.icon}</span>

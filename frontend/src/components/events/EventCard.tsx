@@ -88,7 +88,7 @@ export function EventCard({ event, onClick }: Props) {
         />
 
         {/* Date Badge (navy calendar card) */}
-        <div className="absolute left-3.5 top-3.5 z-10 w-12 rounded-[7px] bg-[#0f2352] px-0 py-1.5 text-center leading-[1.1] text-white shadow-sm">
+        <div className="absolute left-3.5 top-3.5 z-10 w-12 rounded-[7px] bg-[#082052] px-0 py-1.5 text-center leading-[1.1] text-white shadow-sm">
           <small className="block text-[11px] font-normal uppercase tracking-wider">{monthStr}</small>
           <b className="my-0.5 block text-xl font-semibold">{dayStr}</b>
           <span className="block text-[10.5px] opacity-80">{yearStr}</span>
@@ -106,7 +106,7 @@ export function EventCard({ event, onClick }: Props) {
 
       {/* Title */}
       <h3
-        className="mt-3 line-clamp-2 text-[22px] font-bold leading-[1.25] text-[#0f2352] transition-colors group-hover:text-[#b9852a]"
+        className="mt-3 line-clamp-2 text-[22px] font-bold leading-[1.25] text-[#082052] transition-colors group-hover:text-[#b9852a]"
         style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
       >
         {event.title}

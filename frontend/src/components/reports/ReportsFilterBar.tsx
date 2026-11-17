@@ -62,7 +62,7 @@ export function ReportsFilterBar({
                 type="button"
                 onClick={() => onSearchChange('')}
                 aria-label="Clear search"
-                className="cursor-pointer text-[#5a6479] transition-colors hover:text-[#0f2352]"
+                className="cursor-pointer text-[#5a6479] transition-colors hover:text-[#082052]"
               >
                 ✕
               </button>
@@ -112,7 +112,7 @@ export function ReportsFilterBar({
             value={year}
             onChange={(e) => onYearChange(e.target.value)}
             aria-label={am ? 'ዓመት ይምረጡ' : 'Select year'}
-            className={`${box} cursor-pointer px-3 text-[#0f2352] outline-hidden focus:border-[#c8952f]`}
+            className={`${box} cursor-pointer px-3 text-[#082052] outline-hidden focus:border-[#c8952f]`}
           >
             <option value="All">{am ? 'ሁሉም ዓመታት' : 'All Years'}</option>
             <option value="2025">{am ? 'ዓመተ ምሕረት 2025' : 'Year 2025'}</option>
@@ -123,7 +123,7 @@ export function ReportsFilterBar({
             value={category}
             onChange={(e) => onCategoryChange(e.target.value)}
             aria-label={am ? 'ዓይነት ይምረጡ' : 'Select report type'}
-            className={`${box} cursor-pointer px-3 text-[#0f2352] outline-hidden focus:border-[#c8952f]`}
+            className={`${box} cursor-pointer px-3 text-[#082052] outline-hidden focus:border-[#c8952f]`}
           >
             <option value="All Types">{am ? 'ሁሉም ዓይነቶች' : 'All Types'}</option>
             <option value="Financial">{am ? 'ፋይናንስ' : 'Financial'}</option>

@@ -100,7 +100,7 @@ export function TeachingsSection({ items, isLoading = false }: Props) {
           <span className="text-[11px] font-bold uppercase tracking-widest text-[#C99A3B] block mb-1">
             {isAm ? 'የተመረጡ ትምህርቶች' : 'FEATURED TEACHINGS'}
           </span>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#0F1B3E]">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#082052]">
             {isAm ? 'ለሕይወትዎ ጥበብ' : 'Wisdom for Your Journey'}
           </h2>
         </div>
@@ -132,14 +132,14 @@ export function TeachingsSection({ items, isLoading = false }: Props) {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {/* Category Pill */}
-                    <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-[10px] font-extrabold text-[#0F1B3E] uppercase tracking-wider shadow-sm">
+                    <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-[10px] font-extrabold text-[#082052] uppercase tracking-wider shadow-sm">
                       {c.category}
                     </div>
                   </div>
 
                   {/* Content Bottom Half */}
                   <div className="p-4 flex flex-col flex-1">
-                    <h3 className="font-serif text-base font-bold text-[#0F1B3E] group-hover:text-[#C99A3B] transition-colors leading-snug mb-1.5">
+                    <h3 className="font-serif text-base font-bold text-[#082052] group-hover:text-[#C99A3B] transition-colors leading-snug mb-1.5">
                       {isAm && c.titleAm ? c.titleAm : c.title}
                     </h3>
                     <p className="text-xs text-[#505E7B] leading-relaxed line-clamp-2">

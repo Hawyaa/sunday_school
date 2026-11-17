@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useAppStore } from '@/lib/store';
+import { fetchGalleryPhotos, fetchGalleryAlbums } from '@/services/gallery';
 import './gallery.css';
 
 interface GalleryPhoto {
@@ -189,14 +190,52 @@ export default function GalleryPage() {
   const { locale } = useAppStore();
   const isAm = locale === 'am';
 
+  const [photos, setPhotos] = useState<GalleryPhoto[]>(GALLERY_PHOTOS);
   const [selectedAlbum, setSelectedAlbum] = useState<string>('');
   const [displayLimit, setDisplayLimit] = useState<number>(12);
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
+  useEffect(() => {
+    fetchGalleryPhotos()
+      .then((apiPhotos) => {
+        if (apiPhotos && apiPhotos.length > 0) {
+          const ratios = ['4/5', '1/1', '4/3', '3/4', '16/10'];
+          const mapped: GalleryPhoto[] = apiPhotos.map((p, idx) => {
+            const albTitle = p.album?.title || 'Worship';
+            let albumCat: 'Worship' | 'Celebrations' | 'Youth' | 'Community' = 'Worship';
+            if (albTitle.includes('Feast') || albTitle.includes('Celebration')) albumCat = 'Celebrations';
+            else if (albTitle.includes('Youth')) albumCat = 'Youth';
+            else if (albTitle.includes('Community') || albTitle.includes('Fellowship')) albumCat = 'Community';
+
+            const albAm =
+              albumCat === 'Worship'
+                ? 'አምልኮና ጸሎት'
+                : albumCat === 'Celebrations'
+                ? 'በዓላትና ዝክረ ቅዱሳን'
+                : albumCat === 'Youth'
+                ? 'የሰንበት ት/ቤት ወጣቶች'
+                : 'ማህበረሰብና አንድነት';
+
+            return {
+              id: p.id,
+              album: albumCat,
+              albumAm: albAm,
+              caption: p.title,
+              captionAm: p.caption || p.title,
+              aspectRatio: ratios[idx % ratios.length],
+              src: p.imageUrl,
+            };
+          });
+          setPhotos(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Filtered photos
   const filteredPhotos = useMemo(() => {
-    return GALLERY_PHOTOS.filter((p) => !selectedAlbum || p.album === selectedAlbum);
-  }, [selectedAlbum]);
+    return photos.filter((p) => !selectedAlbum || p.album === selectedAlbum);
+  }, [photos, selectedAlbum]);
 
   const visiblePhotos = useMemo(() => {
     return filteredPhotos.slice(0, displayLimit);
@@ -278,7 +317,7 @@ export default function GalleryPage() {
 
               {/* Triptych Showcase */}
               <div className="tri" id="tri">
-                {GALLERY_PHOTOS.slice(0, 3).map((photo, i) => (
+                {photos.slice(0, 3).map((photo, i) => (
                   <button
                     key={photo.id}
                     type="button"
@@ -315,11 +354,11 @@ export default function GalleryPage() {
                 onClick={() => handleSelectAlbum('')}
               >
                 {isAm ? 'ሁሉም' : 'All'}
-                <i>{GALLERY_PHOTOS.length}</i>
+                <i>{photos.length}</i>
               </button>
 
               {ALBUMS.map((alb) => {
-                const count = GALLERY_PHOTOS.filter((p) => p.album === alb).length;
+                const count = photos.filter((p) => p.album === alb).length;
                 const albumLabelAm =
                   alb === 'Worship'
                     ? 'አምልኮ'

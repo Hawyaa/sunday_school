@@ -33,7 +33,7 @@ export function IconBadge({ name, dark = false, solid = false }: { name: string;
     <span
       className={`grid ${dark ? '' : 'size-11'} place-items-center rounded-full ${
         dark
-          ? 'size-12 bg-[#0f2352] text-white shadow-[0_0_0_4px_#f8ecd3,0_0_0_5.5px_#e6bd6c]'
+          ? 'size-12 bg-[#082052] text-white shadow-[0_0_0_4px_#f8ecd3,0_0_0_5.5px_#e6bd6c]'
           : 'border border-[#f1dcae] bg-gradient-to-b from-[#fcefd6] to-[#f6e3bf] text-[#bf7d17] shadow-[0_0_0_3px_rgba(246,233,207,.6)]'
       }`}
     >
@@ -55,7 +55,7 @@ export function Eyebrow({ children, className }: { children: React.ReactNode; cl
 /** Outline gold pill button (link) */
 export function GoldButton({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a href={href} className="inline-flex items-center gap-2.5 rounded-full border-[1.5px] border-[#c8952f] px-6 py-[9px] text-[13px] font-medium text-[#0f2352] transition hover:bg-[#c8952f] hover:text-white">
+    <a href={href} className="inline-flex items-center gap-2.5 rounded-full border-[1.5px] border-[#c8952f] px-6 py-[9px] text-[13px] font-medium text-[#082052] transition hover:bg-[#c8952f] hover:text-white">
       {children}
       <Icon name="arrow" />
     </a>

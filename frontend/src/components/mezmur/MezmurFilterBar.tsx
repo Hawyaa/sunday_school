@@ -149,7 +149,7 @@ function Dropdown({ value, options, onChange, ariaLabel, icon, buttonLabel, clas
       >
         {icon}
         <span className="pointer-events-none min-w-0 flex-1 truncate font-medium">{buttonLabel}</span>
-        <ChevronDown className="mz-dd-chevron pointer-events-none h-3.5 w-3.5 shrink-0 text-[#0f2352]" />
+        <ChevronDown className="mz-dd-chevron pointer-events-none h-3.5 w-3.5 shrink-0 text-[#082052]" />
       </button>
 
       <ul
@@ -218,7 +218,7 @@ export function MezmurFilterBar({
     <div data-mz-reveal="section" className="mz-filter grid grid-cols-1 gap-3.5 sm:grid-cols-[1fr_210px_150px]">
       {/* Search */}
       <label className={`mz-search ${box} ${goldFocus} gap-3 px-4`}>
-        <SearchIcon className="mz-search-icon h-5 w-5 shrink-0 text-[#0f2352]" />
+        <SearchIcon className="mz-search-icon h-5 w-5 shrink-0 text-[#082052]" />
         <input
           type="text"
           value={search}
@@ -232,7 +232,7 @@ export function MezmurFilterBar({
             type="button"
             onClick={() => onSearchChange('')}
             aria-label="Clear search"
-            className="cursor-pointer text-[#5a6479] hover:text-[#0f2352]"
+            className="cursor-pointer text-[#5a6479] hover:text-[#082052]"
           >
             ✕
           </button>
@@ -258,7 +258,7 @@ export function MezmurFilterBar({
         options={sortOptions}
         onChange={(v) => onSortChange(v as MezmurSort)}
         ariaLabel={am ? 'ደርድር' : 'Sort'}
-        icon={<SortIcon className="h-[18px] w-[18px] shrink-0 text-[#0f2352]" />}
+        icon={<SortIcon className="h-[18px] w-[18px] shrink-0 text-[#082052]" />}
         buttonLabel={sort === 'newest' ? (am ? 'አዲስ' : 'Latest') : am ? 'የቆየ' : 'Oldest'}
       />
     </div>

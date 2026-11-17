@@ -28,8 +28,8 @@ function getPageList(current: number, total: number): (number | '…')[] {
 const base =
   'min-w-10 h-10 px-3 rounded-[10px] text-sm font-semibold flex items-center justify-center transition-colors';
 const idle =
-  'bg-[#fffdf9] text-[#0f2352] border border-[#ece5d8] cursor-pointer hover:border-[#c8952f]';
-const active = 'bg-[#0f2352] text-white border border-[#0f2352]';
+  'bg-[#fffdf9] text-[#082052] border border-[#ece5d8] cursor-pointer hover:border-[#c8952f]';
+const active = 'bg-[#082052] text-white border border-[#082052]';
 
 function Chevron({ dir }: { dir: 'left' | 'right' }) {
   return (
