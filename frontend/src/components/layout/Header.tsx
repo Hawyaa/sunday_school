@@ -22,7 +22,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { SiteLogo } from '@/components/layout/SiteLogo';
-import { getSession, saveSession, clearSession, loginAdmin, loginMember, getLoginRedirectUrl, type Session } from '@/lib/auth';
+import { getSession, clearSession, logout, type Session } from '@/lib/auth';
 import './header.css';
 
 interface HeaderProps {
@@ -44,29 +44,6 @@ export function Header({ transparent = false }: HeaderProps) {
 
   // Authentication & session state
   const [currentUser, setCurrentUser] = useState<Session['user'] | null>(null);
-
-  // Auth modal states
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authTab, setAuthTab] = useState<'l' | 'r'>('l');
-  const [authSuccess, setAuthSuccess] = useState(false);
-  const [successTitle, setSuccessTitle] = useState('Welcome.');
-  const [successMessage, setSuccessMessage] = useState('You are now logged in.');
-
-  // Form states
-  const [loginId, setLoginId] = useState('');
-  const [loginPass, setLoginPass] = useState('');
-  const [showLoginPass, setShowLoginPass] = useState(false);
-  const [loginError, setLoginError] = useState('');
-
-  const [regName, setRegName] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPass, setRegPass] = useState('');
-  const [regConfirm, setRegConfirm] = useState('');
-  const [showRegPass, setShowRegPass] = useState(false);
-  const [regTerms, setRegTerms] = useState(false);
-  const [regError, setRegError] = useState('');
-
-  const [loading, setLoading] = useState(false);
 
   // Sync session on mount & storage event
   const syncSession = () => {
@@ -109,11 +86,10 @@ export function Header({ transparent = false }: HeaderProps) {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Keyboard navigation (ESC closes modals/menus)
+  // Keyboard navigation (ESC closes menus)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setAuthModalOpen(false);
         setMobileMenuOpen(false);
         setUpdatesOpen(false);
         setMediaOpen(false);
@@ -124,24 +100,13 @@ export function Header({ transparent = false }: HeaderProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Open auth modal
-  const openAuth = (tab: 'l' | 'r') => {
-    setAuthTab(tab);
-    setAuthSuccess(false);
-    setLoginError('');
-    setRegError('');
-    setAuthModalOpen(true);
-    setMobileMenuOpen(false);
-  };
-
-  const closeAuth = () => {
-    setAuthModalOpen(false);
-    setAuthSuccess(false);
-  };
-
   // Sign out handler
-  const handleSignOut = () => {
-    clearSession();
+  const handleSignOut = async () => {
+    try {
+      await logout();
+    } catch {
+      clearSession();
+    }
     setCurrentUser(null);
     setUserMenuOpen(false);
     router.refresh();
@@ -158,195 +123,6 @@ export function Header({ transparent = false }: HeaderProps) {
     currentUser?.backendRole === 'EDITOR' ||
     (currentUser?.email && currentUser.email.toLowerCase().startsWith('admin'))
   );
-
-  // Handle Login submission
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
-
-    if (!loginId.trim()) {
-      setLoginError(isAm ? 'እባክዎ ኢሜይል ወይም ስልክ ያስገቡ' : 'Please enter your email or phone.');
-      return;
-    }
-    if (!loginPass.trim()) {
-      setLoginError(isAm ? 'እባክዎ የይለፍ ቃል ያስገቡ' : 'Please enter your password.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Check if user is logging in as admin or member via backend API
-      if (loginId.includes('@')) {
-        try {
-          const session = await loginAdmin(loginId.trim(), loginPass);
-          const role = session.user.backendRole;
-          const superUser = role === 'SUPER_ADMIN' || loginId.toLowerCase().includes('super');
-          setCurrentUser(session.user);
-          setSuccessTitle(isAm ? 'እንኳን ደህና መጡ' : 'Welcome back.');
-          setSuccessMessage(
-            superUser
-              ? (isAm ? 'እንደ ዋና አስተዳዳሪ (Super Admin) ገብተዋል።' : 'You are logged in as Super Administrator.')
-              : (isAm ? 'እንደ አስተዳዳሪ (Admin) ገብተዋል።' : 'You are logged in as Administrator.')
-          );
-          setAuthSuccess(true);
-          return;
-        } catch {
-          // If backend fails, check for demo credentials fallback
-          if (loginId.toLowerCase().includes('super')) {
-            const demoSession: Session = {
-              role: 'admin',
-              accessToken: 'demo-super-token',
-              user: { name: 'Super Admin', email: loginId.trim(), backendRole: 'SUPER_ADMIN' },
-            };
-            saveSession(demoSession);
-            setCurrentUser(demoSession.user);
-            setSuccessTitle('Welcome back, Super Admin.');
-            setSuccessMessage('You have full platform access to system and administration modules.');
-            setAuthSuccess(true);
-            return;
-          } else if (loginId.toLowerCase().includes('admin')) {
-            const demoSession: Session = {
-              role: 'admin',
-              accessToken: 'demo-admin-token',
-              user: { name: 'Admin', email: loginId.trim(), backendRole: 'ADMIN' },
-            };
-            saveSession(demoSession);
-            setCurrentUser(demoSession.user);
-            setSuccessTitle('Welcome back, Admin.');
-            setSuccessMessage('You are logged in with content and member administration access.');
-            setAuthSuccess(true);
-            return;
-          }
-          throw new Error('Invalid credentials. Please verify your email and password.');
-        }
-      } else {
-        // Member login
-        try {
-          const session = await loginMember(loginId.trim(), loginPass);
-          setCurrentUser(session.user);
-          setSuccessTitle('Welcome, ' + session.user.name + '.');
-          setSuccessMessage('You are logged into your Sunday School student portal.');
-          setAuthSuccess(true);
-        } catch {
-          const demoSession: Session = {
-            role: 'member',
-            accessToken: 'demo-member-token',
-            user: { name: loginId.trim(), division: 'Intermediate' },
-          };
-          saveSession(demoSession);
-          setCurrentUser(demoSession.user);
-          setSuccessTitle('Welcome, ' + loginId.trim() + '.');
-          setSuccessMessage('You are logged into your student portal.');
-          setAuthSuccess(true);
-        }
-      }
-    } catch (err: any) {
-      setLoginError(err.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle Registration submission
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRegError('');
-
-    if (!regName.trim()) {
-      setRegError(isAm ? 'እባክዎ ሙሉ ስምዎን ያስገቡ' : 'Please enter your full name.');
-      return;
-    }
-    if (!regEmail.trim() || !regEmail.includes('@')) {
-      setRegError(isAm ? 'እባክዎ ትክክለኛ ኢሜይል ያስገቡ' : 'Please enter a valid email.');
-      return;
-    }
-    if (regPass.length < 8) {
-      setRegError(isAm ? 'የይለፍ ቃል ቢያንስ 8 ፊደላት መሆን አለበት' : 'Use at least 8 characters.');
-      return;
-    }
-    if (regPass !== regConfirm) {
-      setRegError(isAm ? 'የይለፍ ቃሎች አይመሳሰሉም' : 'Passwords do not match.');
-      return;
-    }
-    if (!regTerms) {
-      setRegError(isAm ? 'እባክዎ ደንቦቹን ይቀበሉ' : 'Please agree to the terms and privacy policy.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Create user session
-      const newSession: Session = {
-        role: 'member',
-        accessToken: 'new-account-token',
-        user: { name: regName.trim(), email: regEmail.trim(), status: 'PENDING' },
-      };
-      saveSession(newSession);
-      setCurrentUser(newSession.user);
-      setSuccessTitle('Welcome, ' + regName.trim().split(' ')[0] + '.');
-      setSuccessMessage('Your account registration has been submitted successfully.');
-      setAuthSuccess(true);
-    } catch (err: any) {
-      setRegError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Quick Demo Login Handler
-  const quickDemoLogin = (roleType: 'super' | 'admin' | 'teacher' | 'member') => {
-    let demoSession: Session;
-    if (roleType === 'super') {
-      demoSession = {
-        role: 'admin',
-        accessToken: 'demo-super-admin-token',
-        user: { name: 'Hawi', email: 'hawi@abunemedia.org', backendRole: 'SUPER_ADMIN' },
-      };
-      setSuccessTitle('Welcome back, Hawi (Super Admin).');
-      setSuccessMessage('Logged in with Super Admin privileges. You can manage platform settings, administrators, and all content.');
-    } else if (roleType === 'admin') {
-      demoSession = {
-        role: 'admin',
-        accessToken: 'demo-admin-token',
-        user: { name: 'Selam K.', email: 'selam@abunemedia.org', backendRole: 'ADMIN' },
-      };
-      setSuccessTitle('Welcome back, Selam (Admin).');
-      setSuccessMessage('Logged in with Admin privileges. You have access to content, registrations, and member directories.');
-    } else if (roleType === 'teacher') {
-      demoSession = {
-        role: 'teacher',
-        accessToken: 'demo-teacher-token',
-        user: {
-          name: 'Kidist Mengistu',
-          email: 'kidist@abunemedia.org',
-          backendRole: 'TEACHER',
-          canTakeAttendance: true,
-          assignedClasses: ['Grade 3', 'Grade 7'],
-        },
-      };
-      setSuccessTitle('Welcome, Kidist (Authorized Teacher).');
-      setSuccessMessage('Authorized to take student attendance for assigned classes (Grade 3 & Grade 7).');
-    } else {
-      demoSession = {
-        role: 'member',
-        accessToken: 'demo-member-token',
-        user: { name: 'Meron Tesfaye', registrationNumber: 'ABN-2026-0142', division: 'Intermediate' },
-      };
-      setSuccessTitle('Welcome, Meron.');
-      setSuccessMessage('Logged into your Sunday School student portal.');
-    }
-    saveSession(demoSession);
-    setCurrentUser(demoSession.user);
-    setAuthSuccess(true);
-  };
-
-  const handleContinueAfterAuth = () => {
-    closeAuth();
-    const s = getSession();
-    router.push(getLoginRedirectUrl(s));
-  };
 
   return (
     <div className="site-hdr-root">
@@ -484,7 +260,7 @@ export function Header({ transparent = false }: HeaderProps) {
           <div className="acct" id="acct">
             {!currentUser ? (
               <>
-                <button type="button" className="lnk" onClick={() => openAuth('l')}>
+                <Link href="/login" className="lnk">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -497,10 +273,10 @@ export function Header({ transparent = false }: HeaderProps) {
                     <path d="M4 21c1-4 4-6 8-6s7 2 8 6" />
                   </svg>
                   {isAm ? 'ግባ' : 'Log in'}
-                </button>
-                <button type="button" className="btn" onClick={() => openAuth('r')}>
+                </Link>
+                <Link href="/register" className="btn">
                   {isAm ? 'ተመዝገብ' : 'Register'}
-                </button>
+                </Link>
               </>
             ) : (
               <div className={`um ${userMenuOpen ? 'open' : ''}`}>
@@ -659,12 +435,20 @@ export function Header({ transparent = false }: HeaderProps) {
         <div className="bt" id="mbt">
           {!currentUser ? (
             <>
-              <button type="button" className="btn" onClick={() => openAuth('l')}>
+              <Link
+                href="/login"
+                className="btn"
+                onClick={() => setMobileMenuOpen(false)}
+              >
                 {isAm ? 'ግባ' : 'Log in'}
-              </button>
-              <button type="button" className="btn" onClick={() => openAuth('r')}>
+              </Link>
+              <Link
+                href="/register"
+                className="btn"
+                onClick={() => setMobileMenuOpen(false)}
+              >
                 {isAm ? 'ተመዝገብ' : 'Register'}
-              </button>
+              </Link>
             </>
           ) : (
             <>
@@ -707,230 +491,6 @@ export function Header({ transparent = false }: HeaderProps) {
           >
             አማ
           </button>
-        </div>
-      </div>
-
-      {/* ── Two-Column Decorative Authentication Modal ─────────────────── */}
-      <div className={`ov ${authModalOpen ? 'on' : ''}`} id="ov">
-        <div className="md" role="dialog" aria-modal="true" aria-labelledby="mt">
-          {/* Left Decorative Parchment Panel */}
-          <div className="sd">
-            <span className="x">✛</span>
-            <div>
-              <h2>
-                Learn the faith,<br />
-                live the faith.
-              </h2>
-              <p>
-                Join the Abune Media community to manage spiritual content, follow Sunday school
-                schedules, or explore church heritage.
-              </p>
-            </div>
-            <span className="am" style={{ color: 'var(--gold)', fontSize: 20, fontWeight: 700 }}>
-              አቡነ ሚዲያ
-            </span>
-          </div>
-
-          {/* Right Form Container */}
-          <div className={`fm ${authSuccess ? 'done' : ''}`} id="fm">
-            <button className="cl" id="cl" type="button" aria-label="Close" onClick={closeAuth}>
-              ✕
-            </button>
-
-            {/* Tab Selector */}
-            <div className="tb" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                id="t-l"
-                aria-selected={authTab === 'l'}
-                onClick={() => {
-                  setAuthTab('l');
-                  setLoginError('');
-                }}
-              >
-                Log in
-              </button>
-              <button
-                type="button"
-                role="tab"
-                id="t-r"
-                aria-selected={authTab === 'r'}
-                onClick={() => {
-                  setAuthTab('r');
-                  setRegError('');
-                }}
-              >
-                Register
-              </button>
-            </div>
-
-            {/* Log in Form */}
-            {authTab === 'l' && (
-              <form id="f-l" onSubmit={handleLoginSubmit} noValidate>
-                <div className={`fl ${loginError ? 'err' : ''}`}>
-                  <label htmlFor="le">Email or phone</label>
-                  <input
-                    id="le"
-                    autoComplete="username"
-                    value={loginId}
-                    onChange={(e) => setLoginId(e.target.value)}
-                    placeholder="name@example.org"
-                  />
-                  {loginError && <span className="er">{loginError}</span>}
-                </div>
-
-                <div className={`fl ${loginError ? 'err' : ''}`}>
-                  <label htmlFor="lp">Password</label>
-                  <input
-                    id="lp"
-                    type={showLoginPass ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    value={loginPass}
-                    onChange={(e) => setLoginPass(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="eye"
-                    onClick={() => setShowLoginPass(!showLoginPass)}
-                  >
-                    {showLoginPass ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-
-                <div className="row">
-                  <span />
-                  <Link href="/contact" onClick={closeAuth}>
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <button className="btn" type="submit" disabled={loading}>
-                  {loading ? 'Logging in…' : 'Log in →'}
-                </button>
-
-                <p className="alt">
-                  New here?{' '}
-                  <button type="button" onClick={() => setAuthTab('r')}>
-                    Create an account
-                  </button>
-                </p>
-
-                {/* Quick Demo Shortcuts */}
-                <div className="demo-pills">
-                  <small>Quick test login:</small>
-                  <button type="button" onClick={() => quickDemoLogin('super')}>
-                    ⚡ Super Admin
-                  </button>
-                  <button type="button" onClick={() => quickDemoLogin('admin')}>
-                    ⚡ Admin
-                  </button>
-                  <button type="button" onClick={() => quickDemoLogin('teacher')}>
-                    ⚡ Teacher / Attendance
-                  </button>
-                  <button type="button" onClick={() => quickDemoLogin('member')}>
-                    ⚡ Student
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Register Form */}
-            {authTab === 'r' && (
-              <form id="f-r" onSubmit={handleRegisterSubmit} noValidate>
-                <div className={`fl ${regError ? 'err' : ''}`}>
-                  <label htmlFor="rn">Full name</label>
-                  <input
-                    id="rn"
-                    autoComplete="name"
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
-                    placeholder="e.g. Meron Tesfaye"
-                  />
-                </div>
-
-                <div className={`fl ${regError ? 'err' : ''}`}>
-                  <label htmlFor="re">Email</label>
-                  <input
-                    id="re"
-                    type="email"
-                    autoComplete="email"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="name@example.org"
-                  />
-                </div>
-
-                <div className={`fl ${regError ? 'err' : ''}`}>
-                  <label htmlFor="rp">Password</label>
-                  <input
-                    id="rp"
-                    type={showRegPass ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    value={regPass}
-                    onChange={(e) => setRegPass(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="eye"
-                    onClick={() => setShowRegPass(!showRegPass)}
-                  >
-                    {showRegPass ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-
-                <div className={`fl ${regError ? 'err' : ''}`}>
-                  <label htmlFor="rc">Confirm password</label>
-                  <input
-                    id="rc"
-                    type={showRegPass ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    value={regConfirm}
-                    onChange={(e) => setRegConfirm(e.target.value)}
-                  />
-                  {regError && <span className="er">{regError}</span>}
-                </div>
-
-                <label className="chk">
-                  <input
-                    type="checkbox"
-                    id="rt"
-                    checked={regTerms}
-                    onChange={(e) => setRegTerms(e.target.checked)}
-                  />
-                  <span>I agree to the terms and privacy policy.</span>
-                </label>
-
-                <button className="btn" type="submit" disabled={loading}>
-                  {loading ? 'Creating account…' : 'Create account →'}
-                </button>
-
-                <p className="alt">
-                  Already registered?{' '}
-                  <button type="button" onClick={() => setAuthTab('l')}>
-                    Log in
-                  </button>
-                </p>
-              </form>
-            )}
-
-            {/* Success Message Confirmation */}
-            <div className="ok" role="status">
-              <span className="x">✛</span>
-              <h3 id="okh">{successTitle}</h3>
-              <p id="okp" style={{ color: 'var(--slate)', maxWidth: 360, margin: '0 auto' }}>
-                {successMessage}
-              </p>
-              <button
-                type="button"
-                className="btn"
-                style={{ marginTop: 22 }}
-                onClick={handleContinueAfterAuth}
-              >
-                {isAdmin ? 'Open Admin Studio →' : 'Continue to Portal →'}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

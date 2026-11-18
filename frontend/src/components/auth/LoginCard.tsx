@@ -45,41 +45,7 @@ export function LoginCard() {
     try {
       let session: Session;
       if (role === 'admin') {
-        try {
-          session = await loginAdmin(id.trim(), password);
-        } catch (apiErr) {
-          // Demo fallback for teacher / admin / super admin
-          if (id.toLowerCase().includes('teacher')) {
-            session = {
-              role: 'teacher',
-              accessToken: 'demo-teacher-token',
-              user: {
-                name: 'Kidist Mengistu',
-                email: id.trim(),
-                backendRole: 'TEACHER',
-                canTakeAttendance: true,
-                assignedClasses: ['Grade 3', 'Grade 7'],
-              },
-            };
-            saveSession(session);
-          } else if (id.toLowerCase().includes('super')) {
-            session = {
-              role: 'admin',
-              accessToken: 'demo-super-token',
-              user: { name: 'Super Admin', email: id.trim(), backendRole: 'SUPER_ADMIN' },
-            };
-            saveSession(session);
-          } else if (id.toLowerCase().includes('admin')) {
-            session = {
-              role: 'admin',
-              accessToken: 'demo-admin-token',
-              user: { name: 'Admin', email: id.trim(), backendRole: 'ADMIN' },
-            };
-            saveSession(session);
-          } else {
-            throw apiErr;
-          }
-        }
+        session = await loginAdmin(id.trim(), password);
       } else {
         session = await loginMember(id.trim(), password);
       }

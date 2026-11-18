@@ -112,11 +112,18 @@ export async function loginAdmin(email: string, password: string): Promise<Sessi
   const json = await post('/api/auth/login', { email, password });
   const d = json.data ?? {};
   const admin = d.admin ?? {};
+  const isAttendanceTaker = (admin.role === 'EDITOR' || admin.role === 'TEACHER') && admin.canTakeAttendance;
   const session: Session = {
-    role: 'admin',
+    role: isAttendanceTaker ? 'teacher' : 'admin',
     accessToken: d.accessToken,
     refreshToken: d.refreshToken,
-    user: { name: admin.name ?? email, email: admin.email ?? email, backendRole: admin.role },
+    user: {
+      name: admin.name ?? email,
+      email: admin.email ?? email,
+      backendRole: admin.role,
+      canTakeAttendance: admin.canTakeAttendance,
+      assignedClasses: admin.assignedClasses,
+    },
   };
   saveSession(session);
   return session;

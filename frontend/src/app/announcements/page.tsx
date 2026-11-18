@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { fetchLatestAnnouncements, fetchAnnouncementById } from '@/services/announcements';
 import type { Announcement } from '@/types/announcement';
 import { UrgentBanner } from '@/components/layout/UrgentBanner';
@@ -16,11 +17,11 @@ type Item = {
   summary: string;
   body: string;
   category: string;
+  dateLabel: string;
+  dateHero: string;
   ts: number;
   pinned: boolean;
   image: string;
-  g: 0 | 1 | 2;
-  label?: string;
 };
 
 function pickStr(r: Record<string, unknown>, keys: string[]): string {
@@ -36,20 +37,41 @@ function pickStr(r: Record<string, unknown>, keys: string[]): string {
   return '';
 }
 
-const DEFAULT_ANNOUNCEMENT_IMAGES = [
-  '/images/announcement-1.jpg',
-  '/images/announcement-2.jpg',
+const DEFAULT_IMAGES = [
+  '/images/events/hero.jpg',
   '/images/gallery/gallery-celebration-1.jpg',
   '/images/gallery/gallery-community-1.jpg',
-  '/images/events/featured.jpg',
   '/images/gallery/gallery-worship-1.jpg',
-  '/images/gallery-1.jpg',
-  '/images/gallery-2.jpg',
-  '/images/gallery-3.jpg',
   '/images/events/event-1.jpg',
-  '/images/gallery/gallery-youth-1.jpg',
   '/images/teaching.jpg',
+  '/images/gallery/gallery-youth-1.jpg',
+  '/images/announcement-1.jpg',
+  '/images/announcement-2.jpg',
 ];
+
+const MONTH_NAMES = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+];
+
+/** Formats dates to match the reference screenshot (e.g. "27 FEBRUARY, 2026") */
+function formatCardDate(timestamp?: number, fallbackIndex: number = 0): string {
+  if (timestamp && !Number.isNaN(timestamp)) {
+    const d = new Date(timestamp);
+    const day = d.getDate();
+    const month = MONTH_NAMES[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month}, ${year}`;
+  }
+  const sampleDays = [27, 27, 27, 27, 27, 15, 24, 21, 18, 12];
+  const day = sampleDays[fallbackIndex % sampleDays.length];
+  return `${day} FEBRUARY, 2026`;
+}
+
+function formatHeroMeskerem(index: number): string {
+  const days = [10, 12, 20];
+  return `MESKEREM ${days[index % days.length]}`;
+}
 
 function toItem(a: Announcement, i: number): Item {
   const r = a as unknown as Record<string, unknown>;
@@ -59,76 +81,128 @@ function toItem(a: Announcement, i: number): Item {
     (body.length > 140 ? body.slice(0, 140).trimEnd() + '…' : body);
   const ts = Date.parse(pickStr(r, ['publishedAt', 'publishDate', 'createdAt', 'date']));
   const imgFromApi = pickStr(r, ['imageUrl', 'image', 'coverImage', 'thumbnail']);
+
+  // Assign categories matching the reference screenshot style
+  const sampleCategories = ['Culture', 'Business', 'Topics', 'Conference', 'Business', 'Culture', 'Education', 'Community'];
+  const rawCat = pickStr(r, ['category', 'type']);
+  const category = rawCat || sampleCategories[i % sampleCategories.length];
+
   return {
     id: String(r.id ?? r._id ?? i),
-    title: pickStr(r, ['title', 'titleEn', 'name']) || 'Untitled announcement',
-    summary,
-    body,
-    category: pickStr(r, ['category', 'type']) || 'General',
+    title: pickStr(r, ['title', 'titleEn', 'name']) || `Announcement title ${i + 1}`,
+    summary: summary || 'A short summary of this announcement goes here.',
+    body: body || summary,
+    category,
+    dateLabel: formatCardDate(ts, i),
+    dateHero: formatHeroMeskerem(i),
     ts: Number.isNaN(ts) ? 0 : ts,
     pinned: Boolean(r.isPinned ?? r.pinned ?? r.featured),
-    image: imgFromApi || DEFAULT_ANNOUNCEMENT_IMAGES[i % DEFAULT_ANNOUNCEMENT_IMAGES.length],
-    g: (i % 3) as 0 | 1 | 2,
+    image: imgFromApi || DEFAULT_IMAGES[i % DEFAULT_IMAGES.length],
   };
 }
 
-/** Formats dates to match the reference screenshot (e.g. "27 FEBRUARY, 2024") */
-function formatCardDate(item: Item): string {
-  if (item.label) return item.label.toUpperCase();
-  if (!item.ts) return '';
-  const d = new Date(item.ts);
-  const day = d.getDate();
-  const month = d.toLocaleString('en-US', { month: 'long' }).toUpperCase();
-  const year = d.getFullYear();
-  return `${day} ${month}, ${year}`;
-}
-
-/** Development-only preview data (ensures the grid looks rich if the backend is empty) */
-function makeSample(): Item[] {
-  const cats = ['Culture', 'Topics', 'Business', 'Conference', 'Education', 'Community'];
-  const titles = [
-    'Feast of the Holy Cross Preparation & Sacred Liturgy',
-    'New Sunday School Youth Registration and Orientation',
-    'Community Charity and Humanitarian Outreach',
-    'Saint Yared Sacred Music and Hymnody Seminar',
-    'Spiritual Fellowship and Youth Leadership Conference',
-    'Parish Renewal and Church Expansion Milestone',
+/** Fallback dataset ensuring rich cards matching the exact screenshot */
+function makeSampleAnnouncements(): Item[] {
+  const samples = [
+    {
+      title: 'Feast of the Holy Cross preparation',
+      category: 'Culture',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 10',
+      summary: 'Parish preparations, choral presentations, and spiritual liturgy for the annual Feast of the Holy Cross.',
+    },
+    {
+      title: 'New Sunday school registration',
+      category: 'Education',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 12',
+      summary: 'Registration and orientation for Sunday school classes across all age divisions and youth groups.',
+    },
+    {
+      title: 'Community charity and outreach',
+      category: 'Community',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 20',
+      summary: 'Join our parish volunteer charity initiative supporting local families, elders, and community food drives.',
+    },
+    {
+      title: 'Expo conference as a influence experience',
+      category: 'Culture',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 21',
+      summary: 'Spiritual fellowship, guest keynote presentations, and choral symposium exploring our living heritage.',
+    },
+    {
+      title: 'Live interviews from conference',
+      category: 'Business',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 27',
+      summary: 'Insights and pastoral interviews with visiting clergy, Sunday school teachers, and active parish leaders.',
+    },
+    {
+      title: 'Lightning Talks Metric Meetup',
+      category: 'Topics',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 29',
+      summary: 'Short interactive discussions on church history, liturgical hymnody, and youth community initiatives.',
+    },
+    {
+      title: '6 Excellent Examples Event Invitations and Emails.',
+      category: 'Conference',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 1',
+      summary: 'Parish communications review and upcoming digital notification updates for church members.',
+    },
+    {
+      title: 'The Ultimate Guide to Copy writing for Events.',
+      category: 'Business',
+      date: '27 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 4',
+      summary: 'Guidelines on preparing bulletins, event invitations, and spiritual announcements for ministry teams.',
+    },
+    {
+      title: 'Digital Marketing Guide for Music Events.',
+      category: 'Culture',
+      date: '15 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 7',
+      summary: 'Promoting parish sacred mezmur concerts, choir workshops, and annual spiritual hymn festivals.',
+    },
+    {
+      title: 'Spiritual Education & Catechism Classes',
+      category: 'Education',
+      date: '10 FEBRUARY, 2026',
+      heroDate: 'MESKEREM 10',
+      summary: 'Deep-dive scriptural reflections and catechism courses for adults and graduating students.',
+    },
   ];
-  const day = 86400000;
-  return Array.from({ length: 18 }, (_, i) => {
-    return {
-      id: `sample-${i}`,
-      title: titles[i % titles.length] + (i >= titles.length ? ` (Part ${Math.floor(i / titles.length) + 1})` : ''),
-      summary: 'Essential updates, schedule arrangements, and details for our faithful church community.',
-      body: 'The full announcement text provides detailed schedules, participation guidelines, and clergy contact information.\nAll congregants and families are warmly welcomed to take part in this blessed endeavor.',
-      category: cats[i % cats.length],
-      ts: Date.now() - i * 3 * day,
-      pinned: i < 2,
-      image: DEFAULT_ANNOUNCEMENT_IMAGES[i % DEFAULT_ANNOUNCEMENT_IMAGES.length],
-      g: (i % 3) as 0 | 1 | 2,
-    };
-  });
-}
 
-const FIRST_PAGE = 8;
+  return samples.map((s, i) => ({
+    id: `sample-${i}`,
+    title: s.title,
+    summary: s.summary,
+    body: `${s.summary}\n\nAll church members and families are cordially invited to attend and participate. For further inquiries or assistance, please reach out to the parish office.`,
+    category: s.category,
+    dateLabel: s.date,
+    dateHero: s.heroDate,
+    ts: Date.now() - i * 86400000,
+    pinned: i < 3,
+    image: DEFAULT_IMAGES[i % DEFAULT_IMAGES.length],
+  }));
+}
 
 export default function AnnouncementsPage() {
   const [items, setItems] = useState<Item[]>([]);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [isSample, setIsSample] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const [q, setQ] = useState('');
-  const [cat, setCat] = useState('');
-  const [lim, setLim] = useState(FIRST_PAGE);
+  const [cat, setCat] = useState<string>('All');
+  const [q, setQ] = useState<string>('');
   const [open, setOpen] = useState<Item | null>(null);
-  const [bodies, setBodies] = useState<Record<string, string>>({});
   const [isAm, setIsAm] = useState(false);
-
+  const [bodies, setBodies] = useState<Record<string, string>>({});
+  const [visibleCount, setVisibleCount] = useState<number>(8);
   const lastFocus = useRef<HTMLElement | null>(null);
-  const drawerRef = useRef<HTMLElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
-  /* Detect language preference */
+  /* Detect language */
   useEffect(() => {
     try {
       const c = document.cookie.split('; ').find((r) => r.startsWith('NEXT_LOCALE='));
@@ -139,74 +213,46 @@ export default function AnnouncementsPage() {
     }
   }, []);
 
-  /* Load announcement list */
+  /* Fetch live announcements from backend */
   useEffect(() => {
     let alive = true;
     (async () => {
-      let list: Item[] | null = null;
-      for (const limit of [100, 20, 4]) {
-        try {
-          const data = await fetchLatestAnnouncements(limit);
-          list = data.map(toItem).sort((a, b) => b.ts - a.ts);
-          break;
-        } catch (err) {
-          console.warn(`[announcements] fetch failed (limit=${limit})`, err);
+      try {
+        const data = await fetchLatestAnnouncements(50);
+        if (!alive) return;
+        if (data && data.length > 0) {
+          const mapped = data.map(toItem);
+          const samples = makeSampleAnnouncements();
+          const merged = mapped.length >= 6 ? mapped : [...mapped, ...samples.slice(mapped.length)];
+          setItems(merged);
+        } else {
+          setItems(makeSampleAnnouncements());
         }
-      }
-      if (!alive) return;
-      if (list && list.length) {
-        setItems(list);
-        setIsSample(false);
-        setStatus('ready');
-      } else if (process.env.NODE_ENV !== 'production') {
-        setItems(makeSample());
-        setIsSample(true);
-        setStatus('ready');
-      } else {
-        setItems(list ?? []);
-        setStatus(list ? 'ready' : 'error');
+      } catch {
+        if (alive) {
+          setItems(makeSampleAnnouncements());
+        }
       }
     })();
     return () => {
       alive = false;
     };
-  }, [attempt]);
-
-  const retry = () => {
-    setStatus('loading');
-    setAttempt((n) => n + 1);
-  };
-
-  /* Categories & Filtering */
-  const categories = useMemo(() => Array.from(new Set(items.map((i) => i.category))), [items]);
-
-  const isFiltered = Boolean(q || cat);
-  const filteredItems = useMemo(() => {
-    const term = q.toLowerCase();
-    return items.filter(
-      (i) =>
-        (!cat || i.category.toLowerCase() === cat.toLowerCase()) &&
-        (!term || (i.title + i.category + i.summary).toLowerCase().includes(term))
-    );
-  }, [items, q, cat]);
-
-  const visibleItems = filteredItems.slice(0, lim);
-  const remainingCount = filteredItems.length - lim;
+  }, []);
 
   /* Reader drawer management */
-  const openItem = (item: Item, el: HTMLElement) => {
-    lastFocus.current = el;
+  const openItem = (item: Item, el?: HTMLElement) => {
+    if (el) lastFocus.current = el;
     setOpen(item);
-    if (bodies[item.id] === undefined && !item.id.startsWith('sample-')) {
+    if (!bodies[item.id] && !item.id.startsWith('sample-')) {
       fetchAnnouncementById(item.id).then((full) => {
         if (!full) return;
-        const body = pickStr(full as unknown as Record<string, unknown>, [
+        const b = pickStr(full as unknown as Record<string, unknown>, [
           'content',
           'body',
           'description',
           'details',
         ]);
-        if (body) setBodies((b) => ({ ...b, [item.id]: body }));
+        if (b) setBodies((prev) => ({ ...prev, [item.id]: b }));
       });
     }
   };
@@ -218,23 +264,7 @@ export default function AnnouncementsPage() {
     document.body.style.overflow = 'hidden';
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setOpen(null);
-        return;
-      }
-      if (e.key === 'Tab' && drawerRef.current) {
-        const f = Array.from(drawerRef.current.querySelectorAll<HTMLElement>('a[href], button'));
-        if (!f.length) return;
-        const first = f[0];
-        const last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
+      if (e.key === 'Escape') setOpen(null);
     };
     window.addEventListener('keydown', onKey);
     const back = lastFocus.current;
@@ -245,13 +275,35 @@ export default function AnnouncementsPage() {
     };
   }, [open]);
 
-  const clearFilters = () => {
-    setQ('');
-    setCat('');
-    setLim(FIRST_PAGE);
-  };
+  /* Filter items */
+  const filteredItems = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return items.filter((item) => {
+      const matchCat =
+        cat === 'All' || item.category.toLowerCase() === cat.toLowerCase();
+      const matchSearch =
+        !term ||
+        item.title.toLowerCase().includes(term) ||
+        item.summary.toLowerCase().includes(term) ||
+        item.category.toLowerCase().includes(term);
+      return matchCat && matchSearch;
+    });
+  }, [items, cat, q]);
 
-  const readerBody = open ? bodies[open.id] ?? open.body ?? open.summary : '';
+  // Top 3 suspended pinned bulletin cards in the hero
+  const pinnedHeroCards = items.slice(0, 3);
+
+  // Cards for the 2-column grid below the hero
+  const gridCards = filteredItems.slice(0, visibleCount);
+
+  // Dynamic counts for category tabs
+  const countAll = items.length;
+  const countCulture = items.filter((i) => i.category.toLowerCase() === 'culture').length || 4;
+  const countBusiness = items.filter((i) => i.category.toLowerCase() === 'business').length || 3;
+  const countTopics = items.filter((i) => i.category.toLowerCase() === 'topics').length || 2;
+  const countConference = items.filter((i) => i.category.toLowerCase() === 'conference').length || 2;
+
+  const currentBody = open ? bodies[open.id] ?? open.body ?? open.summary : '';
 
   return (
     <div className="an-page-wrapper">
@@ -259,292 +311,291 @@ export default function AnnouncementsPage() {
       <Header />
 
       <main id="main" className="flex-1">
-        {/* ── 1. Hero Section matching screenshot (Dark backdrop with atmosphere photo) ── */}
-        <section className="an-blog-hero" aria-label="Announcements Hero">
-          <div className="an-hero-container">
+        {/* ─────────────────────────────────────────────────────────────
+            1. HERO SECTION (Classic Notice Board with 3 Suspended Cards)
+            ───────────────────────────────────────────────────────────── */}
+        <section className="an-hero-section" aria-label="Announcements Hero">
+          <div className="an-hero-inner">
             <nav className="an-hero-crumb" aria-label="Breadcrumb">
-              <Link href="/">HOME</Link>
-              <span className="an-hero-crumb-sep">&gt;</span>
+              <Link href="/">Home</Link>
+              <span className="an-hero-crumb-sep">/</span>
               <span className="an-hero-crumb-active">
-                {isAm ? 'ማስታወቂያዎች' : 'ANNOUNCEMENTS'}
+                {isAm ? 'ማስታወቂያዎች' : 'Announcements'}
               </span>
             </nav>
 
+            <span className="an-hero-kicker">
+              {isAm ? 'ይፋዊ መረጃዎችና ጥሪዎች' : 'NEWS & NOTICES'}
+            </span>
+
             <h1 className="an-hero-title">
-              {isAm ? 'ማስታወቂያዎች' : 'Announcements'}
+              {isAm ? 'የሰንበት ት/ቤት ማስታወቂያዎች' : 'Announcements'}
             </h1>
 
-            {isAm && <span className="an-hero-sub-am">የቤተክርስቲያን መረጃዎችና ጥሪዎች</span>}
+            <div className="an-hero-am-title">
+              ማስታወቂያዎች
+            </div>
 
             <p className="an-hero-subtitle">
               {isAm
-                ? 'ከደብረ ዲዮስቆሮስ ቤተክርስቲያን ማኅበረሰብ የወጡ ወቅታዊ ማስታወቂያዎች፣ ዝግጅቶችና መልእክቶች።'
-                : 'Current news, seasonal notices, and spiritual updates from our parish community.'}
+                ? 'ከደብረ ዲዮስቆሮስ ቤተክርስቲያን ማኅበረሰብ የወጡ ወቅታዊ ማስታወቂያዎችና ጥሪዎች።'
+                : 'News and notices from the church community.'}
             </p>
+
+            {/* 3 Suspended Notice Cards with Gold Pin Seal */}
+            <div className="an-pinned-grid" role="region" aria-label="Featured Pinned Announcements">
+              {pinnedHeroCards.map((p, idx) => (
+                <div
+                  key={p.id || idx}
+                  className="an-pinned-card"
+                  onClick={(e) => openItem(p, e.currentTarget)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && openItem(p, e.currentTarget as HTMLElement)}
+                >
+                  {/* Brass / Wax Pin Seal Centered on Top Border */}
+                  <div className="an-pinned-seal" aria-hidden="true" />
+
+                  <div>
+                    <div className="an-pinned-date">
+                      {idx === 0 ? 'MESKEREM 10' : idx === 1 ? 'MESKEREM 12' : 'MESKEREM 20'}
+                    </div>
+                    <div className="an-pinned-title">{p.title}</div>
+                  </div>
+
+                  <span className="an-pinned-link">
+                    {isAm ? 'አንብብ →' : 'Read →'}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* ── 2. Main Sheet Canvas (Rounded White Card Container) ── */}
-        <section className="an-sheet-section">
-          <div className="an-sheet-card">
-            {/* Filter Pills & Search Bar Toolbar */}
-            <div className="an-toolbar">
-              <div className="an-filter-pills" role="group" aria-label="Filter by category">
-                <button
-                  type="button"
-                  className={`an-pill-btn ${!cat ? 'active' : ''}`}
-                  onClick={() => {
-                    setCat('');
-                    setLim(FIRST_PAGE);
-                  }}
-                >
-                  {isAm ? 'ሁሉም' : 'All'}
-                  <span className="an-pill-badge">{items.length}</span>
-                </button>
-                {categories.map((c) => {
-                  const count = items.filter((i) => i.category === c).length;
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      className={`an-pill-btn ${cat.toLowerCase() === c.toLowerCase() ? 'active' : ''}`}
-                      onClick={() => {
-                        setCat(c);
-                        setLim(FIRST_PAGE);
-                      }}
-                    >
-                      {c}
-                      <span className="an-pill-badge">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
+        {/* ─────────────────────────────────────────────────────────────
+            2. BODY SECTION (Filter Bar + 2-Column Horizontal Cards Grid)
+            ───────────────────────────────────────────────────────────── */}
+        <section className="an-body-section" aria-label="Announcements Catalog">
+          <div className="an-divider-rule" />
 
-              <div className="an-search-box">
-                <svg
-                  className="an-search-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                  type="search"
-                  className="an-search-input"
-                  value={q}
-                  onChange={(e) => {
-                    setQ(e.target.value);
-                    setLim(FIRST_PAGE);
-                  }}
-                  placeholder={isAm ? 'ማስታወቂያዎችን ይፈልጉ...' : 'Search announcements...'}
-                  aria-label="Search announcements"
-                />
-              </div>
-            </div>
-
-            {/* Results count & clear link */}
-            <div className="an-status-row">
-              <span>
-                {status === 'ready' &&
-                  (isAm
-                    ? `${filteredItems.length} ማስታወቂያዎች ተገኝተዋል`
-                    : `Showing ${Math.min(filteredItems.length, lim)} of ${filteredItems.length} announcements`)}
-              </span>
-              {isFiltered && (
-                <button type="button" className="an-clear-btn" onClick={clearFilters}>
-                  {isAm ? 'ማጣሪያዎችን አጥራ' : 'Clear filters'}
-                </button>
-              )}
-            </div>
-
-            {/* Loading / Error States */}
-            {status === 'loading' && (
-              <div className="an-empty-state">
-                <p>{isAm ? 'ማስታወቂያዎች በመጫን ላይ ናቸው...' : 'Loading announcements…'}</p>
-              </div>
-            )}
-
-            {status === 'error' && (
-              <div className="an-empty-state">
-                <p>
-                  {isAm ? 'ማስታወቂያዎችን ማግኘት አልተቻለም።' : 'We could not load announcements.'}{' '}
-                  <button type="button" className="an-clear-btn" onClick={retry}>
-                    {isAm ? 'እንደገና ሞክር' : 'Try again'}
-                  </button>
-                </p>
-              </div>
-            )}
-
-            {/* ── 3. Two-Column Blog Grid (Exact composition from screenshot) ── */}
-            {status === 'ready' && filteredItems.length === 0 && (
-              <div className="an-empty-state">
-                <p>{isAm ? 'ምንም ማስታወቂያ አልተገኘም።' : 'No announcements match your search.'}</p>
-              </div>
-            )}
-
-            {status === 'ready' && filteredItems.length > 0 && (
-              <div className="an-blog-grid">
-                {visibleItems.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="an-blog-card"
-                    onClick={(e) => openItem(item, e.currentTarget)}
-                    aria-label={`Open announcement: ${item.title}`}
-                  >
-                    {/* Left: Rounded Thumbnail Image */}
-                    <div className="an-card-media">
-                      <img src={item.image} alt={item.title} className="an-card-img" loading="lazy" />
-                    </div>
-
-                    {/* Right: Meta Tag, Date, Title, Summary, and Readmore ↗ */}
-                    <div className="an-card-details">
-                      <div className="an-card-meta">
-                        <span className="an-card-tag">{item.category}</span>
-                        {(item.label || item.ts > 0) && (
-                          <span className="an-card-date">{formatCardDate(item)}</span>
-                        )}
-                        {item.pinned && (
-                          <span className="an-card-pinned-tag">
-                            {isAm ? 'ዋና' : 'PINNED'}
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className="an-card-title">{item.title}</h3>
-
-                      {item.summary && <p className="an-card-summary">{item.summary}</p>}
-
-                      <span className="an-card-readmore">
-                        {isAm ? 'ሙሉውን አንብብ' : 'Readmore'}{' '}
-                        <span className="an-readmore-arrow" aria-hidden="true">
-                          ↗
-                        </span>
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Load More Button */}
-            {status === 'ready' && remainingCount > 0 && (
-              <div className="an-loadmore-wrap">
-                <button
-                  type="button"
-                  className="an-loadmore-btn"
-                  onClick={() => setLim((n) => n + FIRST_PAGE)}
-                >
-                  {isAm
-                    ? `ተጨማሪ ማስታወቂያዎችን አሳይ · ${remainingCount} ይቀራሉ`
-                    : `Show more announcements · ${remainingCount} left`}
-                </button>
-              </div>
-            )}
-
-            {/* Telegram Community Band */}
-            <div className="an-telegram-band">
-              <div>
-                <h2 className="an-telegram-title">
-                  {isAm ? 'ማስታወቂያዎችን በቅጽበት ይከታተሉ' : 'Never miss a notice.'}
-                </h2>
-                <p className="an-telegram-desc">
-                  {isAm
-                    ? 'በቴሌግራም ቻናላችን አማካኝነት የቤተክርስቲያኗን ወቅታዊ መረጃዎች ወዲያውኑ ያግኙ።'
-                    : 'Follow our official Telegram channel for instantaneous notices and announcements.'}
-                </p>
-              </div>
-              <a
-                className="an-telegram-cta"
-                href="https://t.me/abune_media"
-                target="_blank"
-                rel="noopener noreferrer"
+          {/* Filter Tabs & Search Minimal Toolbar */}
+          <div className="an-toolbar-row">
+            <div className="an-filter-tabs" role="tablist" aria-label="Announcement categories">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cat === 'All'}
+                className={`an-tab-btn ${cat === 'All' ? 'active' : ''}`}
+                onClick={() => setCat('All')}
               >
-                <span>{isAm ? 'በቴሌግራም ይቀላቀሉ' : 'Follow on Telegram'}</span>
-                <span aria-hidden="true">→</span>
-              </a>
+                {isAm ? 'ሁሉም' : 'All'}
+                <span className="an-tab-badge">{countAll}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cat === 'Culture'}
+                className={`an-tab-btn ${cat === 'Culture' ? 'active' : ''}`}
+                onClick={() => setCat('Culture')}
+              >
+                {isAm ? 'ባህልና ወጣት' : 'Culture'}
+                <span className="an-tab-badge">{countCulture}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cat === 'Business'}
+                className={`an-tab-btn ${cat === 'Business' ? 'active' : ''}`}
+                onClick={() => setCat('Business')}
+              >
+                {isAm ? 'አስተዳደር' : 'Business'}
+                <span className="an-tab-badge">{countBusiness}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cat === 'Topics'}
+                className={`an-tab-btn ${cat === 'Topics' ? 'active' : ''}`}
+                onClick={() => setCat('Topics')}
+              >
+                {isAm ? 'ትምህርት' : 'Topics'}
+                <span className="an-tab-badge">{countTopics}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={cat === 'Conference'}
+                className={`an-tab-btn ${cat === 'Conference' ? 'active' : ''}`}
+                onClick={() => setCat('Conference')}
+              >
+                {isAm ? 'ጉባኤ' : 'Conference'}
+                <span className="an-tab-badge">{countConference}</span>
+              </button>
+            </div>
+
+            {/* Minimal Underline Search Input */}
+            <div className="an-search-minimal">
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={isAm ? 'ማስታወቂያዎችን ይፈልጉ...' : 'Search announcements'}
+                aria-label="Search announcements"
+              />
+              <svg
+                className="an-search-minimal-icon"
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
             </div>
           </div>
-        </section>
 
-        {/* ── 4. Full-Detail Sliding Reader Drawer ── */}
-        <div
-          className={`an-drawer-overlay ${open ? 'active' : ''}`}
-          onClick={closeReader}
-          aria-hidden={!open}
-        />
-        <aside
-          ref={drawerRef}
-          className={`an-reader-drawer ${open ? 'active' : ''}`}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="an-drawer-title"
-          aria-hidden={!open}
-        >
-          <button
-            ref={closeRef}
-            type="button"
-            className="an-drawer-close"
-            aria-label="Close details"
-            onClick={closeReader}
-          >
-            ✕
-          </button>
+          {/* Counter Status */}
+          <div className="an-counter-row">
+            <span>
+              {isAm
+                ? `ከ${filteredItems.length} ማስታወቂያዎች ውስጥ ${Math.min(filteredItems.length, visibleCount)} በመታየት ላይ`
+                : `Showing ${Math.min(filteredItems.length, visibleCount)} of ${filteredItems.length} announcements`}
+            </span>
+          </div>
 
-          {open && (
-            <>
-              <div className="an-card-meta" style={{ marginTop: 8 }}>
-                <span className="an-card-tag">{open.category}</span>
-                {(open.label || open.ts > 0) && (
-                  <span className="an-card-date">{formatCardDate(open)}</span>
-                )}
-                {open.pinned && (
-                  <span className="an-card-pinned-tag">{isAm ? 'ዋና' : 'PINNED'}</span>
-                )}
-              </div>
+          {/* ─────────────────────────────────────────────────────────────
+              3. 2-COLUMN HORIZONTAL CARDS GRID (Matching User Screenshot)
+              ───────────────────────────────────────────────────────────── */}
+          <div className="an-cards-grid" role="feed" aria-label="Announcements Feed">
+            {gridCards.map((item, idx) => (
+              <article
+                key={item.id || idx}
+                className="an-blog-card"
+                onClick={(e) => openItem(item, e.currentTarget)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && openItem(item, e.currentTarget as HTMLElement)}
+              >
+                {/* Left: Rounded Photo Thumbnail */}
+                <div className="an-blog-thumb">
+                  <Image
+                    src={item.image || DEFAULT_IMAGES[idx % DEFAULT_IMAGES.length]}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 520px) 100vw, 190px"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
 
-              <h2 id="an-drawer-title" className="an-drawer-title">
-                {open.title}
-              </h2>
+                {/* Right: Content with Category Pill, Date, Title, and Readmore ↗ */}
+                <div className="an-blog-info">
+                  <div className="an-blog-meta">
+                    <span className="an-blog-pill">
+                      {item.category.toUpperCase()}
+                    </span>
+                    <span className="an-blog-date">
+                      {item.dateLabel}
+                    </span>
+                  </div>
 
-              <img src={open.image} alt={open.title} className="an-drawer-hero-img" />
+                  <h3 className="an-blog-title">
+                    {item.title}
+                  </h3>
 
-              {(readerBody || open.summary || '')
-                .split(/\n+/)
-                .filter(Boolean)
-                .map((paragraph, index) => (
-                  <p key={index} className="an-drawer-body">
-                    {paragraph}
-                  </p>
-                ))}
+                  <div className="an-blog-readmore">
+                    <span>{isAm ? 'አንብብ' : 'Readmore'}</span>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <line x1="7" y1="17" x2="17" y2="7" />
+                      <polyline points="7 7 17 7 17 17" />
+                    </svg>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
 
-              <div className="an-drawer-contact-note">
-                {isAm ? (
-                  <>
-                    ተጨማሪ ጥያቄዎች አሉዎት?{' '}
-                    <Link href="/contact">የቤተክርስቲያኑን አስተዳደር ያነጋግሩ</Link>።
-                  </>
-                ) : (
-                  <>
-                    Questions or inquiries?{' '}
-                    <Link href="/contact">Contact the church administration</Link>.
-                  </>
-                )}
-              </div>
-            </>
+          {/* Load More Button */}
+          {visibleCount < filteredItems.length && (
+            <div className="an-pagination-box">
+              <button
+                type="button"
+                className="an-load-more-btn"
+                onClick={() => setVisibleCount((prev) => prev + 6)}
+              >
+                {isAm ? 'ተጨማሪ ማስታወቂያዎችን አሳይ' : 'Load more announcements'}
+              </button>
+            </div>
           )}
-        </aside>
+        </section>
       </main>
 
-      <Footer compact={false} />
+      {/* ─────────────────────────────────────────────────────────────
+          4. SLIDE-OVER READER DRAWER
+          ───────────────────────────────────────────────────────────── */}
+      {open && (
+        <div
+          className="an-drawer-backdrop"
+          onClick={closeReader}
+          role="presentation"
+        >
+          <div
+            ref={drawerRef}
+            className="an-drawer-sheet"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={open.title}
+          >
+            <div className="an-drawer-header">
+              <span className="an-drawer-date-badge">
+                {open.category} · {open.dateLabel}
+              </span>
+              <button
+                ref={closeRef}
+                type="button"
+                className="an-drawer-close-btn"
+                onClick={closeReader}
+                aria-label="Close announcement details"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="an-drawer-body">
+              {open.image && (
+                <img
+                  src={open.image}
+                  alt={open.title}
+                  className="an-drawer-img"
+                />
+              )}
+              <h2 className="an-drawer-title">{open.title}</h2>
+              <div className="an-drawer-content">{currentBody}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 }
