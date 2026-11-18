@@ -75,6 +75,8 @@ export async function login(req: Request, res: Response): Promise<void> {
         email: admin.email,
         name: admin.name,
         role: admin.role,
+        canTakeAttendance: admin.canTakeAttendance,
+        assignedClasses: admin.assignedClasses,
       },
     },
     'Login successful'

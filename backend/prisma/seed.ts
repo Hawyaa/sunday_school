@@ -9,34 +9,69 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('--- Starting Comprehensive Sunday School Database Seeding ---');
 
-  // 1. Initial Administrator
-  const email = (process.env.ADMIN_INITIAL_EMAIL || 'admin@abunemedia.org').toLowerCase().trim();
-  const password = process.env.ADMIN_INITIAL_PASSWORD || 'SecureAdminPassword123!';
-  const name = process.env.ADMIN_INITIAL_NAME || 'System Administrator';
-  const roleInput = process.env.ADMIN_INITIAL_ROLE || 'SUPER_ADMIN';
-  const role = roleInput in AdminRole ? (roleInput as AdminRole) : AdminRole.SUPER_ADMIN;
+  // 1. Initial Administrators & Staff
+  let admin: any;
+  const adminUsers = [
+    {
+      email: (process.env.SUPERADMIN_INITIAL_EMAIL || 'superadmin@abunemedia.org').toLowerCase().trim(),
+      password: process.env.SUPERADMIN_INITIAL_PASSWORD || 'SecureSuperAdmin123!',
+      name: process.env.SUPERADMIN_INITIAL_NAME || 'Super Administrator',
+      role: AdminRole.SUPER_ADMIN,
+      canTakeAttendance: true,
+      assignedClasses: 'All Divisions & Classes',
+    },
+    {
+      email: (process.env.ADMIN_INITIAL_EMAIL || 'admin@abunemedia.org').toLowerCase().trim(),
+      password: process.env.ADMIN_INITIAL_PASSWORD || 'SecureAdminPassword123!',
+      name: process.env.ADMIN_INITIAL_NAME || 'Church Administrator',
+      role: AdminRole.ADMIN,
+      canTakeAttendance: true,
+      assignedClasses: 'Grade 3, Grade 7, Mezmur A',
+    },
+    {
+      email: (process.env.TEACHER_INITIAL_EMAIL || 'teacher@abunemedia.org').toLowerCase().trim(),
+      password: process.env.TEACHER_INITIAL_PASSWORD || 'SecureTeacher123!',
+      name: 'Kidist Mengistu',
+      role: AdminRole.EDITOR,
+      canTakeAttendance: true,
+      assignedClasses: 'Grade 3, Grade 7',
+    },
+  ];
 
-  let admin = await prisma.admin.findUnique({ where: { email } });
-  if (!admin) {
-    const passwordHash = await hashPassword(password);
-    admin = await prisma.admin.create({
-      data: {
-        email,
-        passwordHash,
-        name,
-        role,
-        isActive: true,
-        canTakeAttendance: true,
-        assignedClasses: 'Grade 3, Grade 7, Mezmur A',
-      },
-    });
-    console.log(`[Seed] Administrator created: ${admin.email}`);
-  } else {
-    admin = await prisma.admin.update({
-      where: { id: admin.id },
-      data: { canTakeAttendance: true, assignedClasses: 'Grade 3, Grade 7, Mezmur A' },
-    });
-    console.log(`[Seed] Administrator updated with attendance permissions: ${admin.email}`);
+  for (const u of adminUsers) {
+    const existing = await prisma.admin.findUnique({ where: { email: u.email } });
+    const passwordHash = await hashPassword(u.password);
+    let currentAdmin: any;
+    if (!existing) {
+      currentAdmin = await prisma.admin.create({
+        data: {
+          email: u.email,
+          passwordHash,
+          name: u.name,
+          role: u.role,
+          isActive: true,
+          canTakeAttendance: u.canTakeAttendance,
+          assignedClasses: u.assignedClasses,
+        },
+      });
+      console.log(`[Seed] Created ${u.role}: ${u.email}`);
+    } else {
+      currentAdmin = await prisma.admin.update({
+        where: { id: existing.id },
+        data: {
+          name: u.name,
+          role: u.role,
+          passwordHash,
+          isActive: true,
+          canTakeAttendance: u.canTakeAttendance,
+          assignedClasses: u.assignedClasses,
+        },
+      });
+      console.log(`[Seed] Updated ${u.role}: ${u.email}`);
+    }
+    if (!admin || u.role === AdminRole.SUPER_ADMIN) {
+      admin = currentAdmin;
+    }
   }
 
   // 2. Announcements
